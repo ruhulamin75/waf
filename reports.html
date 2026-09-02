@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>রিপোর্টস - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Loader --- */
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
+
+        /* --- Sidebar --- */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+
+        /* --- Report Selector Area --- */
+        .report-controls { background: #fff; padding: 25px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; border-left: 4px solid var(--primary-blue); display: flex; flex-direction: column; gap: 15px; }
+        .report-controls label { font-size: 16px; font-weight: 700; color: var(--primary-blue); margin-bottom: -5px; }
+        .report-select { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; background: #fafafa; font-family: 'Hind Siliguri', sans-serif; cursor: pointer; transition: 0.3s; width: 100%; max-width: 400px; }
+        .report-select:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
+        
+        #memberSelectContainer { display: none; animation: fadeIn 0.3s; }
+
+        .btn-generate { background: var(--primary-green); color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; width: fit-content; transition: 0.3s; }
+        .btn-generate:hover { background: #68b32e; }
+
+        /* --- Report View Area (Printable) --- */
+        .report-container { display: none; background: #fff; padding: 30px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; animation: fadeInUp 0.5s; position: relative; }
+        .report-container.active { display: block; }
+        
+        .btn-print { position: absolute; top: 20px; right: 20px; background: var(--primary-blue); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-print:hover { background: #06236b; }
+
+        /* Report Header */
+        .report-header { text-align: center; border-bottom: 2px solid var(--primary-blue); padding-bottom: 15px; margin-bottom: 25px; }
+        .report-header i { font-size: 40px; color: var(--primary-blue); margin-bottom: 10px; }
+        .report-header h1 { font-size: 24px; color: var(--primary-blue); margin-bottom: 5px; font-weight: 700; }
+        .report-header h3 { font-size: 18px; color: var(--text-dark); margin-bottom: 5px; }
+        .report-header p { font-size: 14px; color: #666; }
+
+        /* Table */
+        .table-responsive { overflow-x: auto; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #ddd; }
+        th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
+        tbody tr:nth-child(even) { background: #fafafa; }
+        .total-row { background: rgba(124, 208, 58, 0.1) !important; font-weight: 700; color: var(--primary-green); }
+        .total-row td { border-top: 2px solid var(--primary-green); }
+
+        .report-footer { text-align: center; font-size: 12px; color: #999; margin-top: 30px; border-top: 1px dashed #ddd; padding-top: 15px; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .overlay.active { display: block; opacity: 1; }
+            .btn-print { position: relative; top: 0; right: 0; width: 100%; justify-content: center; margin-bottom: 20px; }
+        }
+
+        /* --- Print CSS --- */
+        @media print {
+            body * { visibility: hidden; }
+            .report-container, .report-container * { visibility: visible; }
+            .report-container { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; box-shadow: none; border-radius: 0; }
+            .btn-print { display: none !important; }
+            /* Force table borders for print */
+            table, th, td { border: 1px solid #333 !important; }
+            th { background: #eee !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+            .total-row { background: #f0f0f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+            .report-header img { display: block !important; margin: 0 auto 10px auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loader -->
+    <div id="pageLoader">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3>
+    </div>
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
+            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
+            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
+            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item active"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
+        </nav>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h2>রিপোর্টস ও প্রিন্ট</h2>
+            <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
+        </div>
+
+        <!-- Controls Area -->
+        <div class="report-controls">
+            <label>রিপোর্টের ধরণ নির্বাচন করুন:</label>
+            <select class="report-select" id="reportType">
+                <option value="">-- রিপোর্ট নির্বাচন করুন --</option>
+                <option value="monthlyDep">মাসিক জমার রিপোর্ট</option>
+                <option value="loanRep">ঋণের রিপোর্ট</option>
+                <option value="singleMemberDep">সদস্যদের ব্যক্তিগত জমার রিপোর্ট</option>
+                <option value="totalMemberDep">সদস্যদের সর্বমোট জমার রিপোর্ট</option>
+                <option value="productRep">পণ্য ক্রয়-বিক্রয়ের রিপোর্ট</option>
+            </select>
+
+            <div id="memberSelectContainer">
+                <label style="margin-top: 10px; display: block;">সদস্য নির্বাচন করুন:</label>
+                <select class="report-select" id="memberList">
+                    <option value="">-- সদস্য নির্বাচন করুন --</option>
+                    <option value="WAF-01">মো. রহিম মিয়া (WAF-01)</option>
+                    <option value="WAF-02">করিম উল্লাহ (WAF-02)</option>
+                    <option value="WAF-03">আব্দুর রহমান (WAF-03)</option>
+                </select>
+            </div>
+
+            <button class="btn-generate" onclick="generateReport()">
+                <i class="fas fa-cogs"></i> রিপোর্ট তৈরি করুন
+            </button>
+        </div>
+
+        <!-- Report Display Area (Printable) -->
+        <div class="report-container" id="printableReport">
+            <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> প্রিন্ট / PDF সেভ</button>
+            
+            <div class="report-header">
+                <!-- <img src="logo.png" alt="Logo" style="height: 60px; display: none;"> -->
+                <i class="fas fa-handshake"></i>
+                <h1>বন্ধু কল্যাণ সংস্থা</h1>
+                <h3 id="printTitle">রিপোর্টের নাম</h3>
+                <p id="printDate">রিপোর্টের তারিখ: 03 Sep, 2026</p>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead id="reportThead">
+                        <!-- JS injected -->
+                    </thead>
+                    <tbody id="reportTbody">
+                        <!-- JS injected -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="report-footer">
+                <p>এটি একটি কম্পিউটার জেনারেটেড রিপোর্ট।</p>
+                <p>&copy; বন্ধু কল্যাণ সংস্থা | মুদ্রিত হয়েছে: <span id="printTimestamp"></span></p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Init
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500);
+            
+            // Set Print Timestamp
+            const options = { timeZone: "Asia/Dhaka", year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' };
+            document.getElementById('printTimestamp').innerText = new Date().toLocaleString("en-US", options);
+        });
+
+        // Sidebar
+        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+
+        // Show/Hide Member Dropdown
+        document.getElementById('reportType').addEventListener('change', function() {
+            const memberDiv = document.getElementById('memberSelectContainer');
+            if (this.value === 'singleMemberDep') {
+                memberDiv.style.display = 'block';
+            } else {
+                memberDiv.style.display = 'none';
+                document.getElementById('memberList').value = '';
+            }
+        });
+
+        // Generate Report Logic
+        function generateReport() {
+            const type = document.getElementById('reportType').value;
+            if(!type) return alert('দয়া করে রিপোর্টের ধরণ নির্বাচন করুন!');
+
+            const thead = document.getElementById('reportThead');
+            const tbody = document.getElementById('reportTbody');
+            const title = document.getElementById('printTitle');
+            const reportDiv = document.getElementById('printableReport');
+
+            // Set Date
+            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('printDate').innerText = 'রিপোর্টের তারিখ: ' + today;
+
+            // Clear previous data
+            thead.innerHTML = ''; tbody.innerHTML = '';
+
+            if (type === 'monthlyDep') {
+                title.innerText = 'মাসিক জমার রিপোর্ট (সেপ্টেম্বর ২০২৬)';
+                thead.innerHTML = `<tr><th>তারিখ</th><th>সদস্যের নাম ও আইডি</th><th>ভর্তি ফি (৳)</th><th>মাসিক জমা (৳)</th><th>অন্যান্য (৳)</th><th>মোট (৳)</th></tr>`;
+                tbody.innerHTML = `
+                    <tr><td>01 Sep, 2026</td><td>মো. রহিম মিয়া (WAF-01)</td><td>0</td><td>1000</td><td>500</td><td>1500</td></tr>
+                    <tr><td>03 Sep, 2026</td><td>করিম উল্লাহ (WAF-02)</td><td>2000</td><td>1000</td><td>0</td><td>3000</td></tr>
+                    <tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট:</td><td>2000</td><td>2000</td><td>500</td><td>4500</td></tr>
+                `;
+            } 
+            
+            else if (type === 'loanRep') {
+                title.innerText = 'ঋণ গ্রহীতাদের বিস্তারিত রিপোর্ট';
+                thead.innerHTML = `<tr><th>তারিখ</th><th>গ্রহীতার নাম ও আইডি</th><th>ঋণের পরিমাণ (৳)</th><th>পরিশোধিত (৳)</th><th>বকেয়া ঋণ (৳)</th></tr>`;
+                tbody.innerHTML = `
+                    <tr><td>15 Aug, 2026</td><td>করিম উল্লাহ (WAF-02)</td><td>10000</td><td>2000</td><td>8000</td></tr>
+                    <tr><td>20 Aug, 2026</td><td>আব্দুর রহমান (WAF-03)</td><td>5000</td><td>5000</td><td>0</td></tr>
+                    <tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট:</td><td>15000</td><td>7000</td><td>8000</td></tr>
+                `;
+            } 
+            
+            else if (type === 'singleMemberDep') {
+                const member = document.getElementById('memberList');
+                if(!member.value) return alert('দয়া করে সদস্য নির্বাচন করুন!');
+                
+                const memberName = member.options[member.selectedIndex].text;
+                title.innerText = `ব্যক্তিগত জমার রিপোর্ট: ${memberName}`;
+                thead.innerHTML = `<tr><th>তারিখ</th><th>বিবরণ (খাত)</th><th>জমার পরিমাণ (৳)</th></tr>`;
+                tbody.innerHTML = `
+                    <tr><td>01 Jan, 2026</td><td>ভর্তি ফি, মাসিক জমা</td><td>3000</td></tr>
+                    <tr><td>05 Feb, 2026</td><td>মাসিক জমা</td><td>1000</td></tr>
+                    <tr><td>10 Mar, 2026</td><td>মাসিক জমা, ডোনেশন</td><td>1500</td></tr>
+                    <tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট জমা:</td><td>5500</td></tr>
+                `;
+            } 
+            
+            else if (type === 'totalMemberDep') {
+                title.innerText = 'সকল সদস্যের সর্বমোট জমার রিপোর্ট';
+                thead.innerHTML = `<tr><th>ক্রমিক</th><th>সদস্যের নাম ও আইডি</th><th>যোগদানের তারিখ</th><th>সর্বমোট জমা (৳)</th></tr>`;
+                tbody.innerHTML = `
+                    <tr><td>১</td><td>মো. রহিম মিয়া (WAF-01)</td><td>01 Jan, 2026</td><td>15500</td></tr>
+                    <tr><td>২</td><td>করিম উল্লাহ (WAF-02)</td><td>15 Feb, 2026</td><td>12000</td></tr>
+                    <tr><td>৩</td><td>আব্দুর রহমান (WAF-03)</td><td>10 Mar, 2026</td><td>9500</td></tr>
+                    <tr class="total-row"><td colspan="3" style="text-align:right;">সংস্থার সর্বমোট ফান্ড জমা:</td><td>37000</td></tr>
+                `;
+            } 
+            
+            else if (type === 'productRep') {
+                title.innerText = 'পণ্য ক্রয়-বিক্রয়ের মাসিক রিপোর্ট';
+                thead.innerHTML = `<tr><th>তারিখ</th><th>বিবরণ</th><th>পণ্য</th><th>পরিমাণ</th><th>মোট মূল্য (৳)</th></tr>`;
+                tbody.innerHTML = `
+                    <tr><td>01 Sep, 2026</td><td style="color:#e74c3c; font-weight:600;">পণ্য ক্রয়</td><td>A4 Paper</td><td>50 Packet</td><td>15000</td></tr>
+                    <tr><td>02 Sep, 2026</td><td style="color:#7CD03A; font-weight:600;">পণ্য বিক্রয়</td><td>A4 Paper</td><td>5 Packet</td><td>1750</td></tr>
+                    <tr><td>03 Sep, 2026</td><td style="color:#e74c3c; font-weight:600;">পণ্য ক্রয়</td><td>Rice (Miniket)</td><td>100 Kg</td><td>6500</td></tr>
+                    <tr class="total-row"><td colspan="4" style="text-align:right;">মোট ক্রয়:</td><td>21500</td></tr>
+                    <tr class="total-row"><td colspan="4" style="text-align:right; color:#0A369D;">মোট বিক্রয়:</td><td style="color:#0A369D;">1750</td></tr>
+                `;
+            }
+
+            // Show the report block
+            reportDiv.classList.add('active');
+        }
+
+    </script>
+</body>
+</html>

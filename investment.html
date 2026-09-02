@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বিনিয়োগ ও মুনাফা - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --primary-red: #e74c3c;
+            --primary-orange: #f39c12;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Loader --- */
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
+
+        /* --- Sidebar --- */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+
+        /* --- Summary Widgets --- */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 15px; border-left: 4px solid var(--primary-blue); transition: 0.3s; }
+        .summary-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .summary-card i { font-size: 35px; color: var(--primary-blue); opacity: 0.8; }
+        .summary-card .info h4 { font-size: 14px; color: #777; margin-bottom: 5px; }
+        .summary-card .info h2 { font-size: 24px; color: var(--text-dark); font-weight: 700; }
+        .card-green { border-left-color: var(--primary-green); } .card-green i { color: var(--primary-green); }
+
+        /* --- Form Section --- */
+        .form-section { background: #fff; padding: 30px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; border-top: 4px solid var(--primary-blue); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 15px; font-weight: 600; color: #555; }
+        .input-group input, .input-group select, .input-group textarea { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fafafa; transition: 0.3s; }
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
+        
+        .action-select { padding: 12px; border: 2px solid var(--primary-blue); border-radius: 8px; font-size: 16px; font-weight: 700; color: var(--primary-blue); cursor: pointer; background: rgba(10,54,157,0.05); }
+
+        .btn-group { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-submit { flex: 1; background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
+        .btn-cancel { flex: 1; background: #ffeaea; color: var(--primary-red); padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; display: none; }
+        .btn-cancel:hover { background: var(--primary-red); color: #fff; }
+
+        /* --- Tables --- */
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); margin-top: 30px; display: flex; align-items: center; gap: 10px; }
+        .table-responsive { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        
+        /* Table Theme Colors */
+        .tbl-inv th { background: rgba(10,54,157,0.05); color: var(--primary-blue); }
+        .tbl-prof th { background: rgba(124,208,58,0.05); color: var(--primary-green); }
+        .tbl-ret th { background: rgba(243,156,18,0.05); color: var(--primary-orange); }
+        
+        tbody tr:hover { background: #fafafa; }
+        
+        .actions-group { display: flex; gap: 8px; justify-content: center;}
+        .btn-action { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); color: #fff; }
+        .btn-view { background: #3498db; } .btn-view:hover { background: #2980b9; transform: translateY(-2px);}
+        .btn-edit { background: var(--primary-green); } .btn-edit:hover { background: #68b32e; transform: translateY(-2px);}
+        .btn-delete { background: var(--primary-red); } .btn-delete:hover { background: #c0392b; transform: translateY(-2px);}
+
+        /* --- Receipt Modal --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); overflow-y: auto; padding: 20px;}
+        .modal.active { display: flex; opacity: 1; }
+        .receipt-wrapper { background: #fff; width: 100%; max-width: 600px; border-radius: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; transform: scale(0.9); transition: var(--transition); }
+        .modal.active .receipt-wrapper { transform: scale(1); }
+        
+        .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.1); border: none; font-size: 20px; color: #555; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; transition: 0.2s; z-index: 10;}
+        .close-modal:hover { background: var(--primary-red); color: #fff; }
+
+        .receipt-print-area { padding: 40px; position: relative; z-index: 1; background: #fff; }
+        
+        .r-header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 20px; margin-bottom: 25px; }
+        .r-header i { font-size: 40px; margin-bottom: 10px; }
+        .r-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+        .r-title { display: inline-block; padding: 6px 20px; border-radius: 20px; font-size: 16px; font-weight: 700; margin-top: 10px; color: #fff; }
+        
+        /* Dynamic Receipt Colors */
+        .r-inv .r-header i, .r-inv .r-header h2 { color: var(--primary-blue); }
+        .r-inv .r-title { background: var(--primary-blue); }
+        .r-prof .r-header i, .r-prof .r-header h2 { color: var(--primary-green); }
+        .r-prof .r-title { background: var(--primary-green); }
+        .r-ret .r-header i, .r-ret .r-header h2 { color: var(--primary-orange); }
+        .r-ret .r-title { background: var(--primary-orange); }
+
+        .r-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: #555; }
+        
+        .r-details p { margin-bottom: 8px; font-size: 15px; }
+        .r-details strong { display: inline-block; width: 130px; color: #555; }
+
+        .r-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
+        .r-table th, .r-table td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        .r-table th { background: #fafafa; color: #333; }
+        
+        .r-total { display: flex; justify-content: flex-end; align-items: center; gap: 20px; font-size: 18px; font-weight: 700; padding-top: 15px; border-top: 2px solid #ddd; }
+        .r-words { text-align: right; font-size: 14px; color: #777; font-style: italic; margin-top: 5px; }
+        
+        .r-signatures { display: flex; justify-content: space-between; margin-top: 50px; }
+        .sig-line { border-top: 1px solid #333; width: 140px; text-align: center; font-size: 14px; padding-top: 5px; font-weight: 600; color: #555; }
+
+        .print-btn-wrap { background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee; }
+        .btn-print { background: var(--text-dark); color: #fff; border: none; padding: 12px 30px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-print:hover { background: #000; transform: translateY(-2px); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .overlay.active { display: block; opacity: 1; }
+        }
+
+        /* --- Print CSS --- */
+        @media print {
+            body * { visibility: hidden; }
+            #receiptModal, #receiptModal * { visibility: visible; }
+            #receiptModal { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 0; }
+            .receipt-wrapper { box-shadow: none; max-width: 100%; border-radius: 0; transform: none !important; }
+            .receipt-print-area { padding: 0; }
+            .close-modal, .print-btn-wrap { display: none !important; }
+            .r-table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            .r-title { color: #fff !important; -webkit-print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
+            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
+            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
+            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item active"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
+        </nav>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h2>বিনিয়োগ ও মুনাফা</h2>
+            <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <i class="fas fa-chart-pie"></i>
+                <div class="info"><h4>বর্তমান মোট বিনিয়োগ</h4><h2 id="currentInvestmentText">৳ 0</h2></div>
+            </div>
+            <div class="summary-card card-green">
+                <i class="fas fa-hand-holding-dollar"></i>
+                <div class="info"><h4>সর্বমোট অর্জিত মুনাফা</h4><h2 id="totalProfitText" style="color: var(--primary-green);">৳ 0</h2></div>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="input-group" style="max-width: 300px; margin-bottom: 25px;">
+                <label>এন্ট্রির ধরণ নির্বাচন করুন</label>
+                <select class="action-select" id="entryType" onchange="toggleFormType()">
+                    <option value="investment">১. নতুন বিনিয়োগ (Investment)</option>
+                    <option value="profit">২. মুনাফা প্রাপ্তি (Profit)</option>
+                    <option value="return">৩. বিনিয়োগ ফেরত (Return Inv.)</option>
+                </select>
+            </div>
+
+            <form id="invProfForm">
+                <input type="hidden" id="editId" value="">
+                
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>তারিখ</label>
+                        <input type="date" id="entryDate" required>
+                    </div>
+
+                    <!-- Investment Fields -->
+                    <div class="input-group sec-inv">
+                        <label>প্রতিষ্ঠান / খাতের নাম</label>
+                        <input type="text" id="invName" placeholder="যেমন: সুপার শপ">
+                    </div>
+                    <div class="input-group sec-inv">
+                        <label>ঠিকানা (ঐচ্ছিক)</label>
+                        <input type="text" id="invAddress" placeholder="প্রতিষ্ঠানের ঠিকানা">
+                    </div>
+
+                    <!-- Profit/Return Source Field -->
+                    <div class="input-group sec-prof sec-ret" style="display: none;">
+                        <label>উৎস (কোথা থেকে এসেছে)</label>
+                        <select id="sourceSelect" onchange="checkOtherSource()">
+                            <option value="">খাত নির্বাচন করুন</option>
+                        </select>
+                        <input type="text" id="otherSourceText" placeholder="ম্যানুয়ালি খাতের নাম লিখুন" style="display: none; margin-top: 8px;">
+                    </div>
+                    
+                    <!-- Detail Field (Profit only) -->
+                    <div class="input-group sec-prof" style="display: none;">
+                        <label>বিবরণ</label>
+                        <input type="text" id="profDetails" placeholder="মুনাফার বিবরণ">
+                    </div>
+
+                    <!-- Common Amount -->
+                    <div class="input-group">
+                        <label>টাকার পরিমাণ (৳)</label>
+                        <input type="number" id="entryAmount" required min="1" placeholder="Amount">
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-cancel" id="cancelEditBtn" onclick="resetForm()"><i class="fas fa-times"></i> বাতিল করুন</button>
+                    <button type="submit" class="btn-submit" id="saveBtn"><i class="fas fa-save"></i> ডাটা সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 1. Investment Table -->
+        <h3 class="section-title"><i class="fas fa-chart-line" style="color:var(--primary-blue);"></i> মূল বিনিয়োগ তালিকা</h3>
+        <div class="table-responsive">
+            <table class="tbl-inv">
+                <thead><tr><th>তারিখ</th><th>খাত / প্রতিষ্ঠান</th><th>ঠিকানা</th><th>পরিমাণ (৳)</th><th style="text-align: center;">অ্যাকশন</th></tr></thead>
+                <tbody id="investmentTableBody"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- 2. Profit Table -->
+        <h3 class="section-title"><i class="fas fa-hand-holding-dollar" style="color:var(--primary-green);"></i> মুনাফা প্রাপ্তির তালিকা</h3>
+        <div class="table-responsive">
+            <table class="tbl-prof">
+                <thead><tr><th>তারিখ</th><th>উৎস (খাত)</th><th>বিবরণ</th><th>পরিমাণ (৳)</th><th style="text-align: center;">অ্যাকশন</th></tr></thead>
+                <tbody id="profitTableBody"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+        </div>
+
+        <!-- 3. Return Table -->
+        <h3 class="section-title"><i class="fas fa-undo" style="color:var(--primary-orange);"></i> বিনিয়োগ ফেরত তালিকা</h3>
+        <div class="table-responsive">
+            <table class="tbl-ret">
+                <thead><tr><th>তারিখ</th><th>উৎস (খাত)</th><th>পরিমাণ (৳)</th><th style="text-align: center;">অ্যাকশন</th></tr></thead>
+                <tbody id="returnTableBody"><tr><td colspan="4" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+            </table>
+        </div>
+
+    </main>
+    
+    <!-- Receipt Modal -->
+    <div class="modal" id="receiptModal">
+        <div class="receipt-wrapper" id="receiptWrapper">
+            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            
+            <div class="receipt-print-area">
+                <div class="r-header">
+                    <i class="fas fa-handshake"></i>
+                    <h2>বন্ধু কল্যাণ সংস্থা</h2>
+                    <p>ব্রাহ্মণপাড়া, কুমিল্লা</p>
+                    <div class="r-title" id="rTitleBadge">রিসিট</div>
+                </div>
+                
+                <div class="r-info">
+                    <span>রিসিট নং: <strong id="rId">#000</strong></span>
+                    <span>তারিখ: <strong id="rDate">DD/MM/YYYY</strong></span>
+                </div>
+                
+                <div class="r-details" id="rDetailsBox">
+                    <!-- Dynamic Details Injected Here -->
+                </div>
+                
+                <table class="r-table">
+                    <thead><tr><th style="text-align:center; width: 10%;">ক্রঃ</th><th>বিবরণ</th><th style="text-align:right;">টাকার পরিমাণ (৳)</th></tr></thead>
+                    <tbody id="rTableBody"></tbody>
+                </table>
+
+                <div class="r-total">
+                    <span>সর্বমোট:</span>
+                    <span id="rTotalAmt" style="font-size: 20px;">0</span>
+                </div>
+                <div class="r-words" id="rWords">কথায়: শূন্য টাকা মাত্র</div>
+                
+                <div class="r-signatures">
+                    <div class="sig-line" id="sigLeft">অ্যাডমিনের স্বাক্ষর</div>
+                    <div class="sig-line" id="sigRight">গ্রহীতার স্বাক্ষর</div>
+                </div>
+            </div>
+            
+            <div class="print-btn-wrap">
+                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> রিসিট প্রিন্ট করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Init & Basic UI Logic
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500);
+            document.getElementById('entryDate').value = new Date().toLocaleDateString('en-CA');
+        });
+        
+        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+
+        // Bangla Word Converter
+        const bWords = ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ", "বিশ", "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আঠাশ", "উনত্রিশ", "ত্রিশ", "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "উনচল্লিশ", "চল্লিশ", "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "উনপঞ্চাশ", "পঞ্চাশ", "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "উনষাট", "ষাট", "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "উনসত্তর", "সত্তর", "একাতর", "বাহাত্তর", "তিয়াত্তর", "চুয়াত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "উনআশি", "আশি", "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটশি", "উননব্বই", "নব্বই", "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"];
+        function numberToBanglaWords(num) {
+            if (num === 0) return bWords[0];
+            let str = "", koti = Math.floor(num / 10000000); num = num % 10000000;
+            let lakh = Math.floor(num / 100000); num = num % 100000;
+            let hajar = Math.floor(num / 1000); num = num % 1000;
+            let shotok = Math.floor(num / 100); num = num % 100;
+            if (koti > 0) str += numberToBanglaWords(koti) + " কোটি ";
+            if (lakh > 0) str += bWords[lakh] + " লাখ ";
+            if (hajar > 0) str += bWords[hajar] + " হাজার ";
+            if (shotok > 0) str += bWords[shotok] + " শত ";
+            if (num > 0) str += bWords[num] + " ";
+            return str.trim() + " টাকা";
+        }
+
+        // Form Toggling
+        function toggleFormType() {
+            const type = document.getElementById('entryType').value;
+            document.querySelectorAll('.sec-inv').forEach(el => el.style.display = type === 'investment' ? 'flex' : 'none');
+            document.querySelectorAll('.sec-prof').forEach(el => el.style.display = type === 'profit' ? 'flex' : 'none');
+            document.querySelectorAll('.sec-ret').forEach(el => el.style.display = type === 'return' ? 'flex' : 'none');
+            
+            document.getElementById('invName').required = type === 'investment';
+            document.getElementById('sourceSelect').required = type !== 'investment';
+        }
+
+        function checkOtherSource() {
+            const val = document.getElementById('sourceSelect').value;
+            document.getElementById('otherSourceText').style.display = val === 'other' ? 'block' : 'none';
+        }
+
+        function resetForm() {
+            document.getElementById('invProfForm').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('entryDate').value = new Date().toLocaleDateString('en-CA');
+            document.getElementById('entryType').disabled = false;
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('saveBtn').innerHTML = '<i class="fas fa-save"></i> ডাটা সংরক্ষণ করুন';
+            document.getElementById('otherSourceText').style.display = 'none';
+            toggleFormType();
+        }
+
+        function closeModal() { document.getElementById('receiptModal').classList.remove('active'); }
+    </script>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, remove, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        // Current Project Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let investments = [], profits = [], returns = [];
+
+        // Data Fetching
+        function loadData() {
+            // Fetch Investments
+            onValue(ref(db, 'investments'), (snapshot) => {
+                investments = [];
+                let html = '';
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => { investments.push({id: child.key, ...child.val()}); });
+                    investments.sort((a,b) => b.timestamp - a.timestamp).forEach(inv => {
+                        html += `<tr>
+                            <td>${new Date(inv.date).toLocaleDateString('en-GB')}</td>
+                            <td><strong>${inv.name}</strong></td>
+                            <td>${inv.address || '-'}</td>
+                            <td>${inv.amount.toFixed(2)}</td>
+                            <td>
+                                <div class="actions-group">
+                                    <button class="btn-action btn-view" onclick="window.showReceipt('${inv.id}', 'investment')"><i class="fas fa-receipt"></i></button>
+                                    <button class="btn-action btn-edit" onclick="window.editEntry('${inv.id}', 'investment')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-action btn-delete" onclick="window.deleteEntry('${inv.id}', 'investments')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                } else html = '<tr><td colspan="5" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                document.getElementById('investmentTableBody').innerHTML = html;
+                updateSummaries();
+            });
+
+            // Fetch Profits
+            onValue(ref(db, 'profits'), (snapshot) => {
+                profits = [];
+                let html = '';
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => { profits.push({id: child.key, ...child.val()}); });
+                    profits.sort((a,b) => b.timestamp - a.timestamp).forEach(prof => {
+                        html += `<tr>
+                            <td>${new Date(prof.date).toLocaleDateString('en-GB')}</td>
+                            <td><strong>${prof.sourceName}</strong></td>
+                            <td>${prof.details || '-'}</td>
+                            <td>${prof.amount.toFixed(2)}</td>
+                            <td>
+                                <div class="actions-group">
+                                    <button class="btn-action btn-view" onclick="window.showReceipt('${prof.id}', 'profit')"><i class="fas fa-receipt"></i></button>
+                                    <button class="btn-action btn-edit" onclick="window.editEntry('${prof.id}', 'profit')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-action btn-delete" onclick="window.deleteEntry('${prof.id}', 'profits')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                } else html = '<tr><td colspan="5" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                document.getElementById('profitTableBody').innerHTML = html;
+                updateSummaries();
+            });
+
+            // Fetch Returns
+            onValue(ref(db, 'returns'), (snapshot) => {
+                returns = [];
+                let html = '';
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => { returns.push({id: child.key, ...child.val()}); });
+                    returns.sort((a,b) => b.timestamp - a.timestamp).forEach(ret => {
+                        html += `<tr>
+                            <td>${new Date(ret.date).toLocaleDateString('en-GB')}</td>
+                            <td><strong>${ret.sourceName}</strong></td>
+                            <td>${ret.amount.toFixed(2)}</td>
+                            <td>
+                                <div class="actions-group">
+                                    <button class="btn-action btn-view" onclick="window.showReceipt('${ret.id}', 'return')"><i class="fas fa-receipt"></i></button>
+                                    <button class="btn-action btn-edit" onclick="window.editEntry('${ret.id}', 'return')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-action btn-delete" onclick="window.deleteEntry('${ret.id}', 'returns')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    });
+                } else html = '<tr><td colspan="4" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                document.getElementById('returnTableBody').innerHTML = html;
+                updateSummaries();
+            });
+        }
+
+        function updateSummaries() {
+            let totalInv = 0, totalProf = 0, totalRet = 0;
+            
+            const sourceSelect = document.getElementById('sourceSelect');
+            sourceSelect.innerHTML = '<option value="">খাত নির্বাচন করুন</option>';
+            
+            investments.forEach(i => {
+                totalInv += parseFloat(i.amount);
+                sourceSelect.appendChild(new Option(`${i.name} (৳${i.amount})`, i.id));
+            });
+            sourceSelect.appendChild(new Option("অন্যান্য (ম্যানুয়ালি লিখুন)", "other"));
+
+            profits.forEach(p => totalProf += parseFloat(p.amount));
+            returns.forEach(r => totalRet += parseFloat(r.amount));
+
+            document.getElementById('currentInvestmentText').innerText = "৳ " + (totalInv - totalRet).toFixed(2);
+            document.getElementById('totalProfitText').innerText = "৳ " + totalProf.toFixed(2);
+        }
+
+        // Form Submit
+        document.getElementById('invProfForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+            btn.disabled = true;
+
+            const type = document.getElementById('entryType').value;
+            const editId = document.getElementById('editId').value;
+            
+            let data = {
+                date: document.getElementById('entryDate').value,
+                amount: parseFloat(document.getElementById('entryAmount').value),
+                timestamp: Date.now()
+            };
+
+            try {
+                if(type === 'investment') {
+                    data.name = document.getElementById('invName').value;
+                    data.address = document.getElementById('invAddress').value;
+                    
+                    if(editId) await update(ref(db, `investments/${editId}`), data);
+                    else await set(push(ref(db, 'investments')), data);
+
+                } else if(type === 'profit' || type === 'return') {
+                    const sel = document.getElementById('sourceSelect');
+                    data.sourceId = sel.value;
+                    
+                    if(sel.value === 'other') data.sourceName = document.getElementById('otherSourceText').value;
+                    else data.sourceName = sel.options[sel.selectedIndex].text.split(' (')[0];
+                    
+                    if(type === 'profit') {
+                        data.details = document.getElementById('profDetails').value;
+                        if(editId) await update(ref(db, `profits/${editId}`), data);
+                        else await set(push(ref(db, 'profits')), data);
+                    } else {
+                        if(editId) await update(ref(db, `returns/${editId}`), data);
+                        else await set(push(ref(db, 'returns')), data);
+                    }
+                }
+                
+                alert('সফলভাবে সেভ হয়েছে!');
+                resetForm();
+            } catch(error) { 
+                alert('সেভ করতে সমস্যা হয়েছে!'); 
+                console.error(error);
+            } finally {
+                btn.innerHTML = '<i class="fas fa-save"></i> ডাটা সংরক্ষণ করুন';
+                btn.disabled = false;
+            }
+        });
+
+        // Global Window Functions for inline HTML calling
+        window.deleteEntry = async function(id, path) {
+            if(confirm("আপনি কি নিশ্চিত যে এটি ডিলিট করতে চান?")) {
+                await remove(ref(db, `${path}/${id}`));
+            }
+        }
+
+        window.editEntry = function(id, type) {
+            resetForm();
+            document.getElementById('entryType').value = type;
+            document.getElementById('entryType').disabled = true;
+            toggleFormType();
+            document.getElementById('editId').value = id;
+            
+            let dataObj;
+            if(type === 'investment') {
+                dataObj = investments.find(i => i.id === id);
+                document.getElementById('invName').value = dataObj.name;
+                document.getElementById('invAddress').value = dataObj.address;
+            } else {
+                dataObj = type === 'profit' ? profits.find(p => p.id === id) : returns.find(r => r.id === id);
+                
+                let sel = document.getElementById('sourceSelect');
+                if(dataObj.sourceId === 'other' || !Array.from(sel.options).some(o => o.value === dataObj.sourceId)) {
+                    sel.value = 'other';
+                    document.getElementById('otherSourceText').style.display = 'block';
+                    document.getElementById('otherSourceText').value = dataObj.sourceName;
+                } else sel.value = dataObj.sourceId;
+                
+                if(type === 'profit') document.getElementById('profDetails').value = dataObj.details || '';
+            }
+            
+            document.getElementById('entryDate').value = dataObj.date;
+            document.getElementById('entryAmount').value = dataObj.amount;
+
+            document.getElementById('saveBtn').innerHTML = '<i class="fas fa-pen"></i> আপডেট করুন';
+            document.getElementById('cancelEditBtn').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.showReceipt = function(id, type) {
+            const wrapper = document.getElementById('receiptWrapper');
+            const badge = document.getElementById('rTitleBadge');
+            let dataObj, title, desc, sigL, sigR;
+            
+            // Clean classes
+            wrapper.className = "receipt-wrapper";
+            
+            if(type === 'investment') {
+                dataObj = investments.find(i => i.id === id);
+                wrapper.classList.add('r-inv');
+                badge.innerText = "বিনিয়োগ রিসিট";
+                sigL = "ফাউন্ডেশনের স্বাক্ষর"; sigR = "গ্রহীতার স্বাক্ষর";
+                document.getElementById('rDetailsBox').innerHTML = `<p><strong>প্রতিষ্ঠান/খাত:</strong> ${dataObj.name}</p><p><strong>ঠিকানা:</strong> ${dataObj.address || 'N/A'}</p>`;
+                document.getElementById('rTableBody').innerHTML = `<tr><td style="text-align:center;">১</td><td>মূলধন বিনিয়োগ প্রদান</td><td style="text-align:right;">${dataObj.amount.toFixed(2)}</td></tr>`;
+                
+            } else if(type === 'profit') {
+                dataObj = profits.find(p => p.id === id);
+                wrapper.classList.add('r-prof');
+                badge.innerText = "মুনাফা রিসিট";
+                sigL = "প্রদানকারীর স্বাক্ষর"; sigR = "ফাউন্ডেশনের স্বাক্ষর";
+                document.getElementById('rDetailsBox').innerHTML = `<p><strong>উৎস (খাত):</strong> ${dataObj.sourceName}</p><p><strong>বিবরণ:</strong> ${dataObj.details || 'N/A'}</p>`;
+                document.getElementById('rTableBody').innerHTML = `<tr><td style="text-align:center;">১</td><td>মুনাফা বা লভ্যাংশ প্রাপ্তি</td><td style="text-align:right;">${dataObj.amount.toFixed(2)}</td></tr>`;
+                
+            } else {
+                dataObj = returns.find(r => r.id === id);
+                wrapper.classList.add('r-ret');
+                badge.innerText = "বিনিয়োগ ফেরত";
+                sigL = "প্রদানকারীর স্বাক্ষর"; sigR = "ফাউন্ডেশনের স্বাক্ষর";
+                document.getElementById('rDetailsBox').innerHTML = `<p><strong>উৎস (খাত):</strong> ${dataObj.sourceName}</p>`;
+                document.getElementById('rTableBody').innerHTML = `<tr><td style="text-align:center;">১</td><td>বিনিয়োগকৃত মূলধন ফেরত প্রাপ্তি</td><td style="text-align:right;">${dataObj.amount.toFixed(2)}</td></tr>`;
+            }
+
+            document.getElementById('rId').innerText = "#" + (dataObj.timestamp.toString().slice(-6));
+            document.getElementById('rDate').innerText = new Date(dataObj.date).toLocaleDateString('en-GB');
+            document.getElementById('rTotalAmt').innerText = dataObj.amount.toFixed(2);
+            document.getElementById('rWords').innerText = "কথায়: " + numberToBanglaWords(dataObj.amount) + " মাত্র";
+            document.getElementById('sigLeft').innerText = sigL;
+            document.getElementById('sigRight').innerText = sigR;
+
+            document.getElementById('receiptModal').classList.add('active');
+        }
+
+        // Start Fetching
+        loadData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সদস্য তালিকা - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Page Loader --- */
+        #pageLoader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid rgba(10,54,157,0.2);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
+
+        /* --- Sidebar & Overlay --- */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center;}
+        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-menu::-webkit-scrollbar { width: 5px; } .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+
+        /* --- Search Bar --- */
+        .search-container { background: #fff; padding: 20px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
+        .search-box { flex: 1; position: relative; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; font-size: 16px; }
+        .search-box input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; outline: none; transition: var(--transition); }
+        .search-box input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
+        .total-member-badge { background: rgba(124, 208, 58, 0.15); color: #5a9e26; padding: 10px 20px; border-radius: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+        /* --- Table Container (Mobile Scroll Ready) --- */
+        .table-container { background: #fff; border-radius: 15px; box-shadow: var(--card-shadow); overflow: hidden; }
+        .table-responsive { 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            width: 100%; 
+        }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; white-space: nowrap; }
+        th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
+        tbody tr { transition: var(--transition); }
+        tbody tr:hover { background: rgba(0,0,0,0.01); }
+
+        .pic-placeholder { width: 45px; height: 45px; border-radius: 50%; background: #f1f1f1; display: flex; align-items: center; justify-content: center; color: #999; border: 2px solid #ddd; }
+        .member-id-badge { background: #eee; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; color: #555; }
+        .member-name { font-weight: 700; color: var(--text-dark); display: block; font-size: 16px; margin-top: 3px; }
+
+        .actions-group { display: flex; gap: 8px; align-items: center; }
+        .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); color: #fff; }
+        .btn-move { background: #95a5a6; } .btn-move:hover { background: #7f8c8d; }
+        .btn-view { background: #3498db; } .btn-view:hover { background: #2980b9; }
+        .btn-edit { background: #f39c12; } .btn-edit:hover { background: #d68910; }
+        .btn-delete { background: #e74c3c; } .btn-delete:hover { background: #c0392b; }
+
+        /* --- Modal --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: #fff; width: 90%; max-width: 500px; border-radius: 15px; padding: 25px; position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: var(--transition); }
+        .modal.active .modal-content { transform: scale(1); }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; transition: 0.2s; }
+        .close-modal:hover { color: #e74c3c; }
+
+        /* Print Header (Hidden on Web) */
+        .print-header { display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-blue); padding-bottom: 10px; }
+        .print-header img { height: 60px; margin-bottom: 10px; }
+        .print-header h1 { color: var(--primary-blue); font-size: 24px; font-weight: 700; margin: 0; }
+        .print-header p { color: #555; font-size: 14px; margin: 5px 0 0 0; }
+
+        .view-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; }
+        .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f1f1; padding: 10px 0; }
+        .info-label { color: #777; font-weight: 600; font-size: 14px; }
+        .info-value { color: var(--text-dark); font-weight: 700; text-align: right; }
+        
+        .btn-print { background: var(--primary-green); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer; transition: var(--transition); }
+        .btn-print:hover { background: #68b32e; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; } .menu-toggle { display: block; }
+            .overlay.active { display: block; opacity: 1; }
+        }
+        @media (max-width: 600px) {
+            .search-container { flex-direction: column; } .total-member-badge { width: 100%; justify-content: center; }
+            .main-content { padding: 15px; }
+            /* Mobile warning for table scroll */
+            .table-container::before {
+                content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
+                font-size: 12px; color: #999; padding: 5px 0; background: #fafafa; border-bottom: 1px solid #eee;
+            }
+        }
+        
+        /* --- Print CSS --- */
+        @media print {
+            body * { visibility: hidden; }
+            .modal-content.printable, .modal-content.printable * { visibility: visible; }
+            .modal-content.printable { position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-shadow: none; border-radius: 0; }
+            .close-modal, .btn-print { display: none !important; }
+            
+            /* Show Print Header & Hide Web Header */
+            .print-header { display: block; }
+            .view-header { border-bottom: none; margin-bottom: 10px; }
+            
+            /* Hide Password Row strictly during Print */
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Page Loader Animation -->
+    <div id="pageLoader">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary-blue);">ডাটা লোড হচ্ছে...</h3>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Complete Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-handshake"></i>
+            <h2>বন্ধু কল্যাণ সংস্থা</h2>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
+            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
+            <a href="member-list.html" class="nav-item active"><i class="fas fa-users"></i> সদস্য তালিকা</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
+            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
+        </nav>
+
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h2>সদস্য তালিকা</h2>
+            <div class="user-profile">
+                <i class="fas fa-user-shield"></i>
+                <span>অ্যাডমিন</span>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="সদস্যের আইডি, নাম বা মোবাইল নম্বর দিয়ে খুঁজুন...">
+            </div>
+            <div class="total-member-badge">
+                <i class="fas fa-users"></i> মোট সদস্য: <span id="totalMembers">২</span> জন
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div class="table-responsive">
+                <table id="memberTable">
+                    <thead>
+                        <tr>
+                            <th>ছবি</th>
+                            <th>সদস্যের বিবরণ</th>
+                            <th>মোবাইল নম্বর</th>
+                            <th style="text-align: center;">অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="memberTableBody">
+                        <!-- ডেমো ডাটা ১ -->
+                        <tr>
+                            <td><div class="pic-placeholder"><i class="fas fa-user"></i></div></td>
+                            <td>
+                                <span class="member-id-badge">WAF-01</span>
+                                <span class="member-name">মো. রহিম মিয়া</span>
+                            </td>
+                            <td>০১৭xxxxxxx১</td>
+                            <td>
+                                <div class="actions-group" style="justify-content: center;">
+                                    <button class="btn-action btn-move" title="উপরে/নিচে নিন"><i class="fas fa-arrows-alt-v"></i></button>
+                                    <button class="btn-action btn-view" title="বিস্তারিত দেখুন" onclick="openViewModal('WAF-01')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- ডেমো ডাটা ২ -->
+                        <tr>
+                            <td><div class="pic-placeholder"><i class="fas fa-user"></i></div></td>
+                            <td>
+                                <span class="member-id-badge">WAF-02</span>
+                                <span class="member-name">করিম উল্লাহ</span>
+                            </td>
+                            <td>০১৯xxxxxxx২</td>
+                            <td>
+                                <div class="actions-group" style="justify-content: center;">
+                                    <button class="btn-action btn-move" title="উপরে/নিচে নিন"><i class="fas fa-arrows-alt-v"></i></button>
+                                    <button class="btn-action btn-view" title="বিস্তারিত দেখুন" onclick="openViewModal('WAF-02')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- View Profile Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content printable" id="printArea">
+            <button class="close-modal" onclick="closeModal('viewModal')"><i class="fas fa-times"></i></button>
+            
+            <!-- Print specific header (Hidden on Web) -->
+            <div class="print-header">
+                <img src="logo.png" alt="Logo">
+                <h1>বন্ধু কল্যাণ সংস্থা</h1>
+                <p>ডিজিটাল সদস্য প্রোফাইল</p>
+            </div>
+
+            <div class="view-header">
+                <div class="pic-placeholder" style="width:100px; height:100px; margin:0 auto 10px auto; border:3px solid #0A369D; font-size:40px;"><i class="fas fa-user"></i></div>
+                <h3 style="color:#0A369D; font-size:22px; margin-bottom:5px;">মো. রহিম মিয়া</h3>
+                <span class="member-id-badge">WAF-01</span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">মোবাইল নম্বর</span>
+                <span class="info-value">০১৭xxxxxxx১</span>
+            </div>
+            
+            <!-- Password Row: Web এ দেখাবে, Print এ লুকানো থাকবে (no-print) -->
+            <div class="info-row no-print">
+                <span class="info-label">পাসওয়ার্ড</span>
+                <span class="info-value" style="color: #e74c3c;">১২৩৪৫</span>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">ঠিকানা</span>
+                <span class="info-value">ব্রাহ্মণপাড়া, কুমিল্লা</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">যোগদানের তারিখ</span>
+                <span class="info-value">০৩ সেপ্টে, ২০২৬</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">স্ট্যাটাস</span>
+                <span class="info-value" style="color: #7CD03A;">অ্যাকটিভ</span>
+            </div>
+
+            <button class="btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> প্রোফাইল প্রিন্ট / PDF ডাউনলোড
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Page Loader Logic
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                document.getElementById('pageLoader').classList.add('hide-loader');
+            }, 600); // 600ms loader delay
+        });
+
+        // Sidebar Toggle
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const menuToggle = document.getElementById('menuToggle');
+
+        menuToggle.addEventListener('click', () => { sidebar.classList.add('active'); overlay.classList.add('active'); });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); });
+
+        // Search Filter (Dynamic)
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#memberTableBody tr');
+            rows.forEach(row => {
+                let text = row.cells[1].textContent.toLowerCase() + " " + row.cells[2].textContent.toLowerCase();
+                row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+            });
+        });
+
+        // View Modal Logic
+        function openViewModal(id) { document.getElementById('viewModal').classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+    </script>
+</body>
+</html>

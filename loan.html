@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>বর্তমান ঋণ - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --primary-red: #e74c3c;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Loader --- */
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
+
+        /* --- Sidebar --- */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+
+        /* --- Summary Widgets --- */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 15px; border-left: 4px solid var(--primary-blue); }
+        .summary-card i { font-size: 35px; color: var(--primary-blue); opacity: 0.8; }
+        .summary-card .info h4 { font-size: 14px; color: #777; margin-bottom: 5px; }
+        .summary-card .info h2 { font-size: 24px; color: var(--text-dark); font-weight: 700; }
+        
+        .card-green { border-left-color: var(--primary-green); } .card-green i { color: var(--primary-green); }
+        .card-red { border-left-color: var(--primary-red); } .card-red i { color: var(--primary-red); }
+
+        /* --- Table Section --- */
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 15px; }
+        .section-title { font-size: 18px; font-weight: 700; color: var(--text-dark); }
+        .search-box { position: relative; width: 100%; max-width: 300px; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
+        .search-box input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
+        .search-box input:focus { border-color: var(--primary-blue); }
+
+        .table-responsive { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
+        tbody tr:hover { background: #fafafa; }
+        
+        .member-info { display: flex; flex-direction: column; }
+        .member-info strong { font-size: 15px; color: var(--primary-blue); }
+        .member-info span { font-size: 13px; color: #777; }
+
+        .badge { padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+        .b-due { background: rgba(231, 76, 60, 0.1); color: var(--primary-red); }
+        .b-paid { background: rgba(124, 208, 58, 0.1); color: var(--primary-green); }
+
+        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn-pay:hover { background: #68b32e; }
+        .btn-pay.disabled { background: #ccc; cursor: not-allowed; }
+
+        /* --- Payment Modal --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; transform: scale(0.9); transition: var(--transition); position: relative; }
+        .modal.active .modal-content { transform: scale(1); }
+        
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; transition: 0.2s; }
+        .close-modal:hover { color: var(--primary-red); }
+
+        .modal-header { margin-bottom: 20px; border-bottom: 1px dashed #ddd; padding-bottom: 15px; }
+        .modal-header h3 { color: var(--primary-blue); font-size: 22px; margin-bottom: 5px; }
+        .modal-header p { color: #666; font-size: 14px; }
+
+        .input-group { display: flex; flex-direction: column; text-align: left; gap: 8px; margin-bottom: 15px; }
+        .input-group label { font-size: 14px; font-weight: 600; color: #555; }
+        .input-group input { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; background: #fafafa; }
+        .input-group input:focus { border-color: var(--primary-blue); background: #fff; }
+        .input-group input[readonly] { background: #eee; color: #333; font-weight: 700; cursor: not-allowed; }
+
+        .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .overlay.active { display: block; opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loader -->
+    <div id="pageLoader">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3>
+    </div>
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
+            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
+            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
+            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item active"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
+        </nav>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h2>বর্তমান ঋণ ব্যবস্থাপনা</h2>
+            <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
+        </div>
+
+        <!-- Summary Widgets -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <i class="fas fa-money-check-alt"></i>
+                <div class="info"><h4>মোট প্রদানকৃত ঋণ (৳)</h4><h2 id="totalLoanGiven">0.00</h2></div>
+            </div>
+            <div class="summary-card card-green">
+                <i class="fas fa-hand-holding-usd"></i>
+                <div class="info"><h4>মোট আদায়কৃত (৳)</h4><h2 id="totalLoanPaid">0.00</h2></div>
+            </div>
+            <div class="summary-card card-red">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <div class="info"><h4>বর্তমান মোট বকেয়া (৳)</h4><h2 id="totalLoanDue">0.00</h2></div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="section-header">
+            <h3 class="section-title">সদস্যদের ঋণের বিস্তারিত তালিকা</h3>
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="আইডি বা নাম দিয়ে খুঁজুন...">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>গ্রহীতার বিবরণ</th>
+                        <th>গ্রহণের তারিখ</th>
+                        <th>মোট ঋণ (৳)</th>
+                        <th>পরিশোধিত (৳)</th>
+                        <th>বর্তমান বকেয়া (৳)</th>
+                        <th style="text-align: center;">অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="loanTableBody">
+                    <!-- JS Injected Data -->
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- Payment Collection Modal -->
+    <div class="modal" id="loanPayModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            
+            <div class="modal-header">
+                <h3>ঋণ আদায় (জমা নিন)</h3>
+                <p id="payMemberName">সদস্য: Name (ID)</p>
+            </div>
+
+            <form id="loanPayForm">
+                <input type="hidden" id="payLoanId">
+                
+                <div class="input-group">
+                    <label>সর্বমোট বকেয়া আছে (৳)</label>
+                    <input type="text" id="payCurrentDue" readonly>
+                </div>
+                
+                <div class="input-group">
+                    <label>জমাকৃত টাকার পরিমাণ (৳) *</label>
+                    <input type="number" id="payAmountInput" min="1" required placeholder="উদাহরণ: 2000">
+                </div>
+                
+                <button type="submit" class="btn-submit"><i class="fas fa-check-circle"></i> অ্যাকাউন্টে জমা দিন</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // --- Init & UI Logic ---
+        window.addEventListener('load', () => setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500));
+        
+        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+
+        // Search Filter
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#loanTableBody tr');
+            rows.forEach(row => {
+                let text = row.cells[0].textContent.toLowerCase(); // member name & id
+                row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+            });
+        });
+
+        // --- Mock Data ---
+        // In reality, this data comes from Firebase
+        let loans = [
+            { id: 101, memberName: "করিম উল্লাহ", memberId: "WAF-02", date: "15 Aug, 2026", totalLoan: 15000, paid: 5000 },
+            { id: 102, memberName: "আব্দুর রহমান", memberId: "WAF-03", date: "20 Aug, 2026", totalLoan: 8000, paid: 8000 },
+            { id: 103, memberName: "মো. রহিম মিয়া", memberId: "WAF-01", date: "01 Sep, 2026", totalLoan: 5000, paid: 1000 }
+        ];
+
+        // --- Render Data to Table and Widgets ---
+        function renderLoanData() {
+            let tbody = document.getElementById('loanTableBody');
+            tbody.innerHTML = '';
+            
+            let totalGiven = 0, totalPaid = 0, totalDue = 0;
+
+            loans.forEach(loan => {
+                let due = loan.totalLoan - loan.paid;
+                totalGiven += loan.totalLoan;
+                totalPaid += loan.paid;
+                totalDue += due;
+
+                let dueBadge = due > 0 ? `<span class="badge b-due">${due.toFixed(2)}</span>` : `<span class="badge b-paid">পরিশোধিত</span>`;
+                
+                // If due is 0, disable the pay button
+                let btnHtml = due > 0 
+                    ? `<button class="btn-pay" onclick="openPayModal(${loan.id}, '${loan.memberName} (${loan.memberId})', ${due})"><i class="fas fa-hand-holding-usd"></i> জমা নিন</button>` 
+                    : `<button class="btn-pay disabled" disabled><i class="fas fa-check"></i> সম্পন্ন</button>`;
+
+                let tr = `
+                    <tr>
+                        <td>
+                            <div class="member-info">
+                                <strong>${loan.memberName}</strong>
+                                <span>${loan.memberId}</span>
+                            </div>
+                        </td>
+                        <td>${loan.date}</td>
+                        <td>${loan.totalLoan.toFixed(2)}</td>
+                        <td>${loan.paid.toFixed(2)}</td>
+                        <td>${dueBadge}</td>
+                        <td style="text-align: center;">${btnHtml}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', tr);
+            });
+
+            // Update Widgets
+            document.getElementById('totalLoanGiven').innerText = totalGiven.toFixed(2);
+            document.getElementById('totalLoanPaid').innerText = totalPaid.toFixed(2);
+            document.getElementById('totalLoanDue').innerText = totalDue.toFixed(2);
+        }
+
+        // --- Modal Logic ---
+        function openPayModal(id, memberStr, dueAmount) {
+            document.getElementById('payLoanId').value = id;
+            document.getElementById('payMemberName').innerText = "সদস্য: " + memberStr;
+            document.getElementById('payCurrentDue').value = dueAmount.toFixed(2);
+            
+            let input = document.getElementById('payAmountInput');
+            input.value = '';
+            input.max = dueAmount; // Cannot pay more than due
+            
+            document.getElementById('loanPayModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('loanPayModal').classList.remove('active');
+        }
+
+        // --- Process Payment ---
+        document.getElementById('loanPayForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let loanId = parseInt(document.getElementById('payLoanId').value);
+            let payAmount = parseFloat(document.getElementById('payAmountInput').value);
+            
+            // Find the loan object
+            let loanIndex = loans.findIndex(l => l.id === loanId);
+            if(loanIndex !== -1) {
+                let currentDue = loans[loanIndex].totalLoan - loans[loanIndex].paid;
+                
+                if (payAmount > currentDue) {
+                    alert("বকেয়ার চেয়ে বেশি টাকা জমা নেয়া যাবে না!");
+                    return;
+                }
+
+                // Update paid amount
+                loans[loanIndex].paid += payAmount;
+                
+                // In real app, you would save this transaction to Firebase here
+                
+                alert("ঋণের কিস্তি সফলভাবে জমা নেওয়া হয়েছে!");
+                closeModal();
+                renderLoanData(); // Refresh UI
+            }
+        });
+
+        // Initialize display
+        renderLoanData();
+
+    </script>
+</body>
+</html>

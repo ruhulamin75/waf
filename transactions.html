@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>জমা ও উত্তোলন - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Loader & Sidebar --- */
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
+
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+
+        /* --- Controls & Forms --- */
+        .controls-wrapper { display: flex; justify-content: center; margin-bottom: 25px; background: #fff; padding: 15px; border-radius: 12px; box-shadow: var(--card-shadow); }
+        .action-select { padding: 12px 25px; border: 2px solid var(--primary-blue); border-radius: 8px; font-size: 18px; font-weight: 700; color: var(--primary-blue); outline: none; cursor: pointer; background: rgba(10,54,157,0.05); width: 100%; max-width: 400px; text-align: center; }
+
+        .form-section { background: #fff; padding: 30px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; display: none; animation: fadeIn 0.4s; border-top: 4px solid var(--primary-blue); }
+        .form-section.active { display: block; }
+        .form-title { margin-bottom: 25px; color: var(--primary-blue); border-bottom: 2px solid #f1f1f1; padding-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-size: 15px; font-weight: 600; color: #555; }
+        .input-group input, .input-group select { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fafafa; transition: 0.3s; }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
+        
+        .checkbox-container { display: flex; flex-direction: column; gap: 15px; border: 1px solid #eee; padding: 20px; border-radius: 8px; background: #fafafa; }
+        .check-item { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .check-item label { font-size: 16px; font-weight: 600; cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px; color: #444; }
+        .check-amount-input, .other-text-input { display: none; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; outline: none; }
+        .check-amount-input.active, .other-text-input.active { display: block; animation: fadeIn 0.3s; border-color: var(--primary-blue); }
+        .check-amount-input { width: 150px; } .other-text-input { flex: 1; min-width: 150px; }
+
+        .total-box { margin-top: 25px; padding: 20px; background: rgba(124, 208, 58, 0.1); border-radius: 8px; border: 1px solid rgba(124, 208, 58, 0.3); text-align: right; }
+        .total-amount { font-size: 24px; font-weight: 700; color: var(--primary-green); margin-bottom: 5px; }
+        .amount-in-words { font-size: 16px; font-weight: 600; color: #555; font-style: italic; }
+
+        /* Dynamic Rows */
+        .dynamic-row { display: grid; grid-template-columns: 2fr 3fr 2fr auto; gap: 15px; align-items: center; margin-bottom: 15px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .btn-add-row { background: rgba(10,54,157,0.1); color: var(--primary-blue); border: 2px dashed var(--primary-blue); padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; margin-bottom: 20px; }
+        .btn-add-row:hover { background: var(--primary-blue); color: #fff; }
+        .btn-remove-row { background: #e74c3c; color: #fff; border: none; width: 35px; height: 35px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-top: 25px; }
+        
+        .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px 25px; border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
+        .btn-withdraw-submit { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+        /* --- Transaction Table --- */
+        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); margin-top: 30px; }
+        .table-responsive { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
+        tbody tr:hover { background: #fafafa; }
+        
+        .type-badge { padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+        .type-dep { background: rgba(124, 208, 58, 0.15); color: #5a9e26; }
+        .type-wd { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+
+        .actions-group { display: flex; gap: 8px; }
+        .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); color: #fff; }
+        .btn-view { background: #3498db; } .btn-view:hover { background: #2980b9; }
+        .btn-receipt { background: var(--primary-green); } .btn-receipt:hover { background: #68b32e; }
+        .btn-edit { background: #f39c12; } .btn-edit:hover { background: #d68910; }
+        .btn-delete { background: #e74c3c; } .btn-delete:hover { background: #c0392b; }
+
+        /* --- Receipt Modal --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: #fff; width: 90%; max-width: 500px; border-radius: 15px; padding: 25px; position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: var(--transition); }
+        .modal.active .modal-content { transform: scale(1); }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; transition: 0.2s; }
+        .close-modal:hover { color: #e74c3c; }
+
+        /* Receipt Formatting */
+        .receipt-header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 15px; margin-bottom: 20px; }
+        .receipt-header .r-logo { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .receipt-header .r-logo i { font-size: 35px; color: var(--primary-blue); }
+        .receipt-header h2 { color: var(--primary-blue); font-weight: 700; margin-bottom: 5px; font-size: 22px; }
+        .receipt-header p { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .r-title { background: #f1f1f1; display: inline-block; padding: 4px 15px; border-radius: 15px; font-weight: bold; color: var(--text-dark); font-size: 14px; border: 1px solid #ddd; }
+
+        .receipt-info { margin-bottom: 20px; }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
+        .info-row .label { color: #777; font-size: 14px; }
+        .info-row .val { font-weight: 700; color: var(--text-dark); }
+        
+        .receipt-total { background: rgba(10,54,157,0.05); padding: 15px; border-radius: 8px; text-align: right; margin-bottom: 20px; border: 1px dashed var(--primary-blue); }
+        .receipt-total h3 { color: var(--primary-blue); font-size: 20px; }
+        .receipt-total p { font-size: 13px; color: #666; font-style: italic; margin-top: 5px; }
+
+        .btn-print { background: var(--primary-blue); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; transition: var(--transition); }
+        .btn-print:hover { background: #06236b; }
+        .r-footer { text-align: center; font-size: 12px; color: #999; margin-top: 15px; }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .overlay.active { display: block; opacity: 1; }
+        }
+        @media (max-width: 768px) {
+            .dynamic-row { grid-template-columns: 1fr; gap: 10px; position: relative; padding-bottom: 50px; }
+            .btn-remove-row { position: absolute; bottom: 10px; right: 15px; width: auto; padding: 5px 15px; margin-top: 0; }
+            .check-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .check-amount-input { width: 100%; }
+        }
+
+        /* --- Print CSS --- */
+        @media print {
+            body * { visibility: hidden; }
+            .modal-content.printable, .modal-content.printable * { visibility: visible; }
+            .modal-content.printable { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; box-shadow: none; border-radius: 0; }
+            .close-modal, .btn-print { display: none !important; }
+            .receipt-header .r-logo img { display: block !important; margin: 0 auto 10px auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Loader -->
+    <div id="pageLoader">
+        <div class="spinner"></div>
+        <h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3>
+    </div>
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
+        <nav class="nav-menu">
+            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
+            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
+            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
+            <a href="transactions.html" class="nav-item active"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+        </nav>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <h2>জমা ও উত্তোলন</h2>
+            <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
+        </div>
+
+        <!-- Master Switch -->
+        <div class="controls-wrapper">
+            <select class="action-select" id="modeSelector">
+                <option value="deposit">১. ফান্ডে টাকা জমা করুন</option>
+                <option value="withdraw">২. ফান্ড থেকে টাকা উত্তোলন করুন</option>
+            </select>
+        </div>
+
+        <!-- SECTION 1: DEPOSIT (জমা) -->
+        <div class="form-section active" id="sec-deposit">
+            <h3 class="form-title"><i class="fas fa-hand-holding-usd"></i> টাকা জমার রসিদ তৈরি</h3>
+            <form id="depositForm">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>সদস্যের নাম ও আইডি</label>
+                        <select id="depMember" required>
+                            <option value="">সদস্য নির্বাচন করুন</option>
+                            <option value="WAF-01">মো. রহিম মিয়া (WAF-01)</option>
+                            <option value="WAF-02">করিম উল্লাহ (WAF-02)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>তারিখ</label>
+                        <input type="date" id="depDate" required>
+                    </div>
+                </div>
+
+                <h4 style="margin-bottom: 10px; color: #555;">জমার খাত নির্বাচন করুন:</h4>
+                <div class="checkbox-container">
+                    <div class="check-item">
+                        <label><input type="checkbox" onchange="toggleDepInput('chkAdm', 'amtAdm')" id="chkAdm"> ভর্তি ফি</label>
+                        <input type="number" id="amtAdm" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
+                    </div>
+                    <div class="check-item">
+                        <label><input type="checkbox" onchange="toggleDepInput('chkMon', 'amtMon')" id="chkMon"> মাসিক জমা</label>
+                        <input type="number" id="amtMon" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
+                    </div>
+                    <div class="check-item">
+                        <label><input type="checkbox" onchange="toggleDepInput('chkDon', 'amtDon')" id="chkDon"> ডোনেশন</label>
+                        <input type="number" id="amtDon" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
+                    </div>
+                    <div class="check-item">
+                        <label><input type="checkbox" onchange="toggleDepInput('chkOth', 'amtOth'); toggleOtherText('chkOth', 'txtOth')" id="chkOth"> অন্যান্য</label>
+                        <input type="text" id="txtOth" class="other-text-input" placeholder="খাতের নাম লিখুন">
+                        <input type="number" id="amtOth" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
+                    </div>
+                </div>
+
+                <div class="total-box">
+                    <div class="total-amount">সর্বমোট জমা: ৳ <span id="depTotalVal">0</span></div>
+                    <div class="amount-in-words">কথায়: <span id="depWordsVal">শূন্য টাকা মাত্র</span></div>
+                </div>
+
+                <button type="submit" class="btn-submit"><i class="fas fa-check-circle"></i> জমা নিশ্চিত করুন</button>
+            </form>
+        </div>
+
+        <!-- SECTION 2: WITHDRAWAL (উত্তোলন) -->
+        <div class="form-section" id="sec-withdraw" style="border-top-color: #e74c3c;">
+            <h3 class="form-title" style="color: #e74c3c;"><i class="fas fa-money-bill-wave"></i> ফান্ড উত্তোলন ফর্ম</h3>
+            <div class="input-group" style="margin-bottom: 25px; max-width: 300px;">
+                <label>উত্তোলনের ধরণ নির্বাচন করুন</label>
+                <select id="withdrawType" onchange="switchWithdrawMode()">
+                    <option value="loan">১. ঋণ প্রদান</option>
+                    <option value="expense">২. সাধারণ খরচ / অন্যান্য</option>
+                </select>
+            </div>
+
+            <form id="withdrawForm">
+                <div id="wd-loan-mode">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>সদস্যের নাম ও আইডি (ঋণগ্রহীতা)</label>
+                            <select id="wdLoanMember" required>
+                                <option value="">সদস্য নির্বাচন করুন</option>
+                                <option value="WAF-01">মো. রহিম মিয়া (WAF-01)</option>
+                                <option value="WAF-02">করিম উল্লাহ (WAF-02)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>তারিখ</label>
+                            <input type="date" id="wdLoanDate" required>
+                        </div>
+                        <div class="input-group">
+                            <label>ঋণের পরিমাণ (৳)</label>
+                            <input type="number" id="wdLoanAmount" required min="1" placeholder="Amount" oninput="calcLoanWords()">
+                        </div>
+                    </div>
+                    <p class="amount-in-words" style="text-align: right; margin-top: 10px;">কথায়: <span id="loanWordsVal">শূন্য টাকা মাত্র</span></p>
+                </div>
+
+                <div id="wd-expense-mode" style="display: none;">
+                    <div class="input-group" style="max-width: 250px; margin-bottom: 15px;">
+                        <label>তারিখ</label>
+                        <input type="date" id="wdExpDate" required>
+                    </div>
+                    
+                    <div id="expenseRowsContainer"></div>
+                    <button type="button" class="btn-add-row" onclick="addExpenseRow()"><i class="fas fa-plus"></i> নতুন খাত যুক্ত করুন</button>
+
+                    <div class="total-box" style="background: rgba(231, 76, 60, 0.1); border-color: rgba(231, 76, 60, 0.3);">
+                        <div class="total-amount" style="color: #e74c3c;">সর্বমোট খরচ: ৳ <span id="expTotalVal">0</span></div>
+                        <div class="amount-in-words">কথায়: <span id="expWordsVal">শূন্য টাকা মাত্র</span></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit btn-withdraw-submit" style="margin-top: 20px;"><i class="fas fa-file-invoice"></i> উত্তোলন সম্পন্ন করুন</button>
+            </form>
+        </div>
+
+        <!-- --- Transaction List Section --- -->
+        <h3 class="section-title">সকল লেনদেনের তালিকা</h3>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>তারিখ</th>
+                        <th>বিবরণ / খাত</th>
+                        <th>সদস্য / গ্রহীতা</th>
+                        <th>পরিমাণ (৳)</th>
+                        <th>ধরন</th>
+                        <th>অ্যাকশন</th>
+                    </tr>
+                </thead>
+                <tbody id="transactionList">
+                    <!-- Demo Row: Deposit -->
+                    <tr>
+                        <td>03 Sep, 2026</td>
+                        <td>মাসিক জমা, ডোনেশন</td>
+                        <td>মো. রহিম মিয়া (WAF-01)</td>
+                        <td>1,500.00</td>
+                        <td><span class="type-badge type-dep">জমা</span></td>
+                        <td>
+                            <div class="actions-group">
+                                <button class="btn-action btn-view" title="বিস্তারিত দেখুন"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action btn-receipt" title="রিসিট প্রিন্ট করুন" onclick="openReceiptModal('TRX-101', 'মো. রহিম মিয়া (WAF-01)', '03 Sep, 2026', 'মাসিক জমা: 1000<br>ডোনেশন: 500', 1500, 'deposit')"><i class="fas fa-file-invoice"></i></button>
+                                <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
+                                <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Demo Row: Withdraw (Loan) -->
+                    <tr>
+                        <td>01 Sep, 2026</td>
+                        <td>ঋণ প্রদান</td>
+                        <td>করিম উল্লাহ (WAF-02)</td>
+                        <td>10,000.00</td>
+                        <td><span class="type-badge type-wd">উত্তোলন</span></td>
+                        <td>
+                            <div class="actions-group">
+                                <button class="btn-action btn-view" title="বিস্তারিত দেখুন"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action btn-receipt" title="ভাউচার প্রিন্ট করুন" onclick="openReceiptModal('TRX-102', 'করিম উল্লাহ (WAF-02)', '01 Sep, 2026', 'ঋণ গ্রহণ', 10000, 'withdraw')"><i class="fas fa-file-invoice"></i></button>
+                                <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
+                                <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- --- Receipt Modal (Printable) --- -->
+    <div class="modal" id="receiptModal">
+        <div class="modal-content printable">
+            <button class="close-modal" onclick="closeModal('receiptModal')"><i class="fas fa-times"></i></button>
+            
+            <div class="receipt-header">
+                <div class="r-logo">
+                    <!-- Replace the icon with your logo image if you have one: <img src="logo.png" alt="Logo" style="height: 50px;"> -->
+                    <i class="fas fa-handshake"></i>
+                    <h2>বন্ধু কল্যাণ সংস্থা</h2>
+                </div>
+                <p>ব্রাহ্মণপাড়া, কুমিল্লা | স্থাপিত: ২০২০</p>
+                <div class="r-title" id="rTypeBadge">মানি রিসিট (জমা)</div>
+            </div>
+
+            <div class="receipt-info">
+                <div class="info-row">
+                    <span class="label">রিসিট/ভাউচার নং:</span>
+                    <span class="val" id="rId">TRX-000</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">তারিখ:</span>
+                    <span class="val" id="rDate">DD MMM, YYYY</span>
+                </div>
+                <div class="info-row">
+                    <span class="label" id="rMemberLabel">সদস্যের নাম:</span>
+                    <span class="val" id="rMember">Name (ID)</span>
+                </div>
+                
+                <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd;">
+                    <span class="label" style="display: block; margin-bottom: 5px;">বিবরণ / খাতের তালিকা:</span>
+                    <div class="val" id="rDetails" style="font-weight: normal; font-size: 15px;">
+                        <!-- Details injected via JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="receipt-total" id="rTotalBox">
+                <h3>সর্বমোট: ৳ <span id="rTotalAmount">0.00</span></h3>
+                <p>কথায়: <span id="rWords">শূন্য টাকা মাত্র</span></p>
+            </div>
+
+            <div class="r-footer">
+                <p>এটি একটি কম্পিউটার জেনারেটেড রিসিট।</p>
+                <p>&copy; বন্ধু কল্যাণ সংস্থা</p>
+            </div>
+
+            <button class="btn-print" onclick="window.print()" style="margin-top: 15px;">
+                <i class="fas fa-print"></i> রিসিট প্রিন্ট / PDF সেভ করুন
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- Init ---
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500);
+            const today = new Date().toLocaleDateString('en-CA');
+            document.getElementById('depDate').value = today;
+            document.getElementById('wdLoanDate').value = today;
+            document.getElementById('wdExpDate').value = today;
+            addExpenseRow();
+        });
+
+        // Sidebar
+        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+
+        // Mode Switch
+        document.getElementById('modeSelector').addEventListener('change', function() {
+            document.getElementById('sec-deposit').classList.remove('active');
+            document.getElementById('sec-withdraw').classList.remove('active');
+            document.getElementById(this.value === 'deposit' ? 'sec-deposit' : 'sec-withdraw').classList.add('active');
+        });
+
+        // Deposit Logic
+        function toggleDepInput(chkId, amtId) {
+            const chk = document.getElementById(chkId), amt = document.getElementById(amtId);
+            if (chk.checked) { amt.classList.add('active'); amt.required = true; } 
+            else { amt.classList.remove('active'); amt.required = false; amt.value = ''; }
+            calcDepositTotal();
+        }
+        function toggleOtherText(chkId, txtId) {
+            const chk = document.getElementById(chkId), txt = document.getElementById(txtId);
+            if(chk.checked) { txt.classList.add('active'); txt.required = true; } else { txt.classList.remove('active'); txt.required = false; txt.value = ''; }
+        }
+        function calcDepositTotal() {
+            let total = 0;
+            document.querySelectorAll('.dep-amt').forEach(input => { if (input.classList.contains('active') && input.value) total += parseFloat(input.value); });
+            document.getElementById('depTotalVal').innerText = total;
+            document.getElementById('depWordsVal').innerText = numberToBanglaWords(total) + " টাকা মাত্র";
+        }
+
+        // Withdraw Logic
+        function switchWithdrawMode() {
+            const isLoan = document.getElementById('withdrawType').value === 'loan';
+            document.getElementById('wd-loan-mode').style.display = isLoan ? 'block' : 'none';
+            document.getElementById('wd-expense-mode').style.display = isLoan ? 'none' : 'block';
+            document.getElementById('wdLoanMember').required = isLoan;
+            document.getElementById('wdLoanAmount').required = isLoan;
+            document.querySelectorAll('.exp-amt').forEach(el => el.required = !isLoan);
+        }
+
+        function calcLoanWords() {
+            const amt = parseFloat(document.getElementById('wdLoanAmount').value) || 0;
+            document.getElementById('loanWordsVal').innerText = numberToBanglaWords(amt) + " টাকা মাত্র";
+        }
+
+        let expCount = 0;
+        function addExpenseRow() {
+            expCount++;
+            const rowId = `exp-row-${expCount}`;
+            const html = `<div class="dynamic-row" id="${rowId}"><div class="input-group"><label>খাত</label><input type="text" required></div><div class="input-group"><label>বিবরণ</label><input type="text"></div><div class="input-group"><label>পরিমাণ (৳)</label><input type="number" class="exp-amt" required min="1" oninput="calcExpenseTotal()"></div><button type="button" class="btn-remove-row" onclick="removeExpenseRow('${rowId}')"><i class="fas fa-trash"></i></button></div>`;
+            document.getElementById('expenseRowsContainer').insertAdjacentHTML('beforeend', html);
+        }
+        function removeExpenseRow(id) { document.getElementById(id).remove(); calcExpenseTotal(); }
+        function calcExpenseTotal() {
+            let total = 0; document.querySelectorAll('.exp-amt').forEach(input => total += parseFloat(input.value) || 0);
+            document.getElementById('expTotalVal').innerText = total;
+            document.getElementById('expWordsVal').innerText = numberToBanglaWords(total) + " টাকা মাত্র";
+        }
+
+        // Bangla Number to Words (Up to Koti)
+        const bWords = ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ", "বিশ", "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আঠাশ", "উনত্রিশ", "ত্রিশ", "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "উনচল্লিশ", "চল্লিশ", "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "উনপঞ্চাশ", "পঞ্চাশ", "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "উনষাট", "ষাট", "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "উনসত্তর", "সত্তর", "একাতর", "বাহাত্তর", "তিয়াত্তর", "চুয়াত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "উনআশি", "আশি", "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটশি", "উননব্বই", "নব্বই", "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"];
+        function numberToBanglaWords(num) {
+            if (num === 0) return bWords[0];
+            let str = "", koti = Math.floor(num / 10000000); num = num % 10000000;
+            let lakh = Math.floor(num / 100000); num = num % 100000;
+            let hajar = Math.floor(num / 1000); num = num % 1000;
+            let shotok = Math.floor(num / 100); num = num % 100;
+            if (koti > 0) str += numberToBanglaWords(koti) + " কোটি ";
+            if (lakh > 0) str += bWords[lakh] + " লাখ ";
+            if (hajar > 0) str += bWords[hajar] + " হাজার ";
+            if (shotok > 0) str += bWords[shotok] + " শত ";
+            if (num > 0) str += bWords[num] + " ";
+            return str.trim();
+        }
+
+        // Submits
+        document.getElementById('depositForm').addEventListener('submit', function(e) { e.preventDefault(); alert('জমা সফলভাবে সম্পন্ন হয়েছে!'); this.reset(); calcDepositTotal(); });
+        document.getElementById('withdrawForm').addEventListener('submit', function(e) { e.preventDefault(); alert('উত্তোলন সম্পন্ন হয়েছে!'); this.reset(); calcExpenseTotal(); calcLoanWords(); });
+
+        // --- Receipt Modal Logic ---
+        function openReceiptModal(id, member, date, details, amount, type) {
+            document.getElementById('rId').innerText = id;
+            document.getElementById('rDate').innerText = date;
+            document.getElementById('rDetails').innerHTML = details;
+            document.getElementById('rTotalAmount').innerText = amount.toFixed(2);
+            document.getElementById('rWords').innerText = numberToBanglaWords(amount) + " টাকা মাত্র";
+            
+            const typeBadge = document.getElementById('rTypeBadge');
+            const memberLabel = document.getElementById('rMemberLabel');
+            const totalBox = document.getElementById('rTotalBox');
+
+            if(type === 'deposit') {
+                typeBadge.innerText = 'মানি রিসিট (জমা)';
+                typeBadge.style.color = '#fff';
+                typeBadge.style.background = '#7CD03A';
+                typeBadge.style.borderColor = '#7CD03A';
+                memberLabel.innerText = 'জমা প্রদানকারী:';
+                document.getElementById('rMember').innerText = member;
+                totalBox.style.background = 'rgba(124, 208, 58, 0.05)';
+                totalBox.style.borderColor = '#7CD03A';
+                totalBox.querySelector('h3').style.color = '#7CD03A';
+            } else {
+                typeBadge.innerText = 'ভাউচার (উত্তোলন/খরচ)';
+                typeBadge.style.color = '#fff';
+                typeBadge.style.background = '#e74c3c';
+                typeBadge.style.borderColor = '#e74c3c';
+                memberLabel.innerText = member ? 'গ্রহীতা:' : 'খাত:';
+                document.getElementById('rMember').innerText = member || 'সাধারণ খরচ';
+                totalBox.style.background = 'rgba(231, 76, 60, 0.05)';
+                totalBox.style.borderColor = '#e74c3c';
+                totalBox.querySelector('h3').style.color = '#e74c3c';
+            }
+
+            document.getElementById('receiptModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+    </script>
+</body>
+</html>

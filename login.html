@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>অ্যাডমিন লগইন - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* কালার ভেরিয়েবলস */
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* হেডার স্টাইল */
+        header {
+            background-color: #fff;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-blue);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header img { height: 40px; margin-right: 15px; }
+        /* Fallback icon if logo image is missing */
+        header .fallback-icon { font-size: 30px; color: var(--primary-blue); margin-right: 15px; }
+        header span { font-size: 22px; font-weight: 700; color: var(--primary-blue); }
+
+        /* মেইন লগইন সেকশন */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-icon {
+            font-size: 50px;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        .login-container h2 {
+            font-size: 26px;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .login-container p {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* ইনপুট ফিল্ড স্টাইল */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            font-size: 16px;
+            font-family: 'Hind Siliguri', sans-serif;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 8px rgba(10, 54, 157, 0.2);
+        }
+
+        /* লগইন বাটন */
+        .btn-login {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary-blue), #082d85);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-login:disabled {
+            background: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ব্যাক বাটন */
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary-blue);
+        }
+
+        /* এরর মেসেজ */
+        #error-msg {
+            color: #d9534f;
+            font-size: 14px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- লোগো না পেলে যেন আইকন দেখায় তার ব্যবস্থা -->
+        <i class="fas fa-handshake fallback-icon"></i> 
+        <span>বন্ধু কল্যাণ সংস্থা</span>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <div class="login-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h2>অ্যাডমিন লগইন</h2>
+            <p>ড্যাশবোর্ডে প্রবেশ করতে সঠিক তথ্য দিন</p>
+            
+            <form id="adminLoginForm">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <!-- id 'adminId' পরিবর্তন করে 'adminEmail' এবং type 'text' থেকে 'email' করা হয়েছে -->
+                    <input type="email" id="adminEmail" placeholder="অ্যাডমিন ইমেইল" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="adminPass" placeholder="পাসওয়ার্ড" required>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">লগইন করুন</button>
+                <p id="error-msg"><i class="fas fa-exclamation-circle"></i> ইমেইল বা পাসওয়ার্ড ভুল হয়েছে!</p>
+            </form>
+
+            <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> মেইন পেজে ফিরে যান</a>
+        </div>
+    </main>
+
+    <!-- Firebase SDK (Module Type) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+        // ফায়ারবেজ কনফিগারেশন
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // ফর্ম সাবমিট ইভেন্ট
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            const errorMsg = document.getElementById('error-msg');
+            const loginBtn = document.getElementById('loginBtn');
+
+            // লোডিং এনিমেশন ও বাটন ডিজেবল
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
+            loginBtn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            // ফায়ারবেজ অথেনটিকেশন চেক
+            signInWithEmailAndPassword(auth, email, pass)
+                .then((userCredential) => {
+                    // লগইন সফল হলে ড্যাশবোর্ডে রিডিরেক্ট হবে
+                    // ফায়ারবেজ নিজ থেকেই সেশন ধরে রাখে, তাই localStorage এর প্রয়োজন নেই। 
+                    // তবুও আপনার আগের সুবিধার জন্য রেখে দিলাম
+                    localStorage.setItem('adminLoggedIn', 'true'); 
+                    window.location.href = 'dashboard.html';
+                })
+                .catch((error) => {
+                    // লগইন ফেইল করলে
+                    loginBtn.innerHTML = 'লগইন করুন';
+                    loginBtn.disabled = false;
+                    
+                    // ফায়ারবেজ থেকে আসা এরর অনুযায়ী মেসেজ পরিবর্তন করতে পারেন, আপাতত সাধারণ মেসেজ রাখা হলো
+                    errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> ইমেইল বা পাসওয়ার্ড ভুল হয়েছে!';
+                    errorMsg.style.display = 'block';
+                    console.error("লগইন এরর:", error.message);
+                });
+        });
+    </script>
+
+</body>
+</html>

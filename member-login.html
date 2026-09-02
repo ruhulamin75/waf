@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সদস্য লগইন - বন্ধু কল্যাণ সংস্থা</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Hind Siliguri', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #fff;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-green);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        header img { height: 40px; margin-right: 15px; }
+        header i.fallback-logo { font-size: 30px; color: var(--primary-green); margin-right: 15px; }
+        header span { font-size: 22px; font-weight: 700; color: var(--primary-blue); }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-icon {
+            font-size: 50px;
+            color: var(--primary-green);
+            margin-bottom: 20px;
+        }
+
+        .login-container h2 {
+            font-size: 26px;
+            color: var(--primary-blue);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .login-container p {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i.icon-left { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; font-size: 18px; }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            font-size: 16px;
+            font-family: 'Hind Siliguri', sans-serif;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group i#togglePassword {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .input-group i#togglePassword:hover { color: var(--primary-blue); }
+        #loginPass { padding-right: 45px; }
+        .input-group input:focus { border-color: var(--primary-green); box-shadow: 0 0 8px rgba(124, 208, 58, 0.2); }
+
+        .btn-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary-green), #68b32e);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        .btn-login:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn-login:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #666;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+        .back-link:hover { color: var(--primary-blue); }
+
+        #error-msg {
+            color: #d9534f;
+            font-size: 15px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 600;
+        }
+
+        #loader {
+            color: var(--primary-blue);
+            font-size: 14px;
+            margin-bottom: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <!-- Logo Image or Fallback Icon -->
+        <i class="fas fa-handshake fallback-logo"></i>
+        <span>বন্ধু কল্যাণ সংস্থা</span>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <div class="login-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h2>সদস্য লগইন</h2>
+            <p>আপনার প্রোফাইল ও জমার হিসাব দেখতে লগইন করুন</p>
+
+            <div id="loader"><i class="fas fa-spinner fa-spin"></i> সার্ভারের সাথে যুক্ত হচ্ছে...</div>
+
+            <form id="memberLoginForm">
+                <div class="input-group">
+                    <i class="fas fa-phone-alt icon-left"></i>
+                    <input type="tel" id="loginPhone" placeholder="আপনার মোবাইল নম্বর" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock icon-left"></i>
+                    <input type="password" id="loginPass" placeholder="পাসওয়ার্ড" required>
+                    <i class="fas fa-eye" id="togglePassword"></i>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> লগইন করুন
+                </button>
+                <p id="error-msg"><i class="fas fa-exclamation-circle"></i> মোবাইল নম্বর বা পাসওয়ার্ড ভুল হয়েছে!</p>
+            </form>
+
+            <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> মেইন পেজে ফিরে যান</a>
+        </div>
+    </main>
+
+    <!-- Eye Button Logic -->
+    <script>
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('loginPass');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
+
+    <!-- Firebase SDK Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const loader = document.getElementById('loader');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorMsg = document.getElementById('error-msg');
+
+        // Form Submit Event
+        document.getElementById('memberLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('loginPhone').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> যাচাই করা হচ্ছে...';
+            loginBtn.disabled = true;
+            errorMsg.style.display = 'none';
+
+            try {
+                // Fetching all members from Firebase
+                const dbRef = ref(db);
+                const snapshot = await get(child(dbRef, `members`));
+                
+                if (snapshot.exists()) {
+                    let userFound = null;
+                    
+                    // Loop through members to match phone and password
+                    snapshot.forEach(childSnapshot => {
+                        let member = childSnapshot.val();
+                        if (member.phone === phone && member.password === pass) {
+                            userFound = member; // matched
+                            // adding the ID key inside the object
+                            userFound.id = childSnapshot.key;
+                        }
+                    });
+
+                    if (userFound) {
+                        // Check if account is active
+                        if (userFound.status && userFound.status !== 'active') {
+                            errorMsg.innerHTML = '<i class="fas fa-ban"></i> আপনার একাউন্টটি বর্তমানে বন্ধ আছে!';
+                            errorMsg.style.display = 'block';
+                            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> লগইন করুন';
+                            loginBtn.disabled = false;
+                            return;
+                        }
+
+                        // Success: Save Member ID to localStorage and Redirect
+                        localStorage.setItem('loggedInMemberId', userFound.id);
+                        window.location.href = 'member-profile.html';
+                        
+                    } else {
+                        // Not matched
+                        errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> মোবাইল নম্বর বা পাসওয়ার্ড ভুল হয়েছে!';
+                        errorMsg.style.display = 'block';
+                        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> লগইন করুন';
+                        loginBtn.disabled = false;
+                    }
+
+                } else {
+                    errorMsg.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ডাটাবেসে কোনো সদস্য পাওয়া যায়নি!';
+                    errorMsg.style.display = 'block';
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> লগইন করুন';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error(error);
+                errorMsg.innerHTML = '<i class="fas fa-wifi"></i> সার্ভার কানেকশনে সমস্যা হয়েছে! আবার চেষ্টা করুন।';
+                errorMsg.style.display = 'block';
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> লগইন করুন';
+                loginBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

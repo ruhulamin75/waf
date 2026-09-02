@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>সেটিংস - বন্ধু কল্যাণ সংস্থা</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0A369D;
+            --primary-green: #7CD03A;
+            --primary-red: #e74c3c;
+            --primary-orange: #f39c12;
+            --bg-light: #F4F7F6;
+            --text-dark: #333;
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --transition: 0.3s ease;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Loader --- */
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
+
+        /* --- Sidebar --- */
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
+
+        /* --- Main Content --- */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+
+        /* --- Settings Grid --- */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; align-items: start; }
+        .settings-grid > div { animation: fadeInUp 0.6s ease-out; }
+        
+        .form-container { background: var(--white); border-radius: 12px; padding: 25px; box-shadow: var(--card-shadow); border-top: 4px solid var(--primary-blue); margin-bottom: 25px; transition: 0.3s; }
+        .form-container:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .form-container h3 { color: var(--text-dark); margin-bottom: 20px; font-size: 18px; border-bottom: 2px solid #eee; padding-bottom: 10px; display: flex; align-items: center; gap: 10px;}
+        
+        /* Box Themes */
+        .box-orange { border-top-color: var(--primary-orange); } .box-orange h3 i { color: var(--primary-orange); }
+        .box-blue { border-top-color: var(--primary-blue); } .box-blue h3 i { color: var(--primary-blue); }
+        .box-green { border-top-color: var(--primary-green); } .box-green h3 i { color: var(--primary-green); }
+        .box-red { border-top-color: var(--primary-red); } .box-red h3 i { color: var(--primary-red); }
+
+        /* Toggle Buttons */
+        .toggle-form-btn { background: #fafafa; color: var(--text-dark); border: 2px dashed #ccc; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; text-align: center; font-size: 15px; transition: 0.3s; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .toggle-form-btn:hover { background: #eee; }
+        .hidden-form { display: none; }
+
+        /* Inputs */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #555; font-size: 14px;}
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fafafa; transition: 0.3s;}
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary-blue); background: var(--white); box-shadow: 0 0 0 3px rgba(10,54,157,0.1);}
+        
+        /* Rich Text Editor */
+        .editor-toolbar { display: flex; gap: 8px; margin-bottom: 8px; background: #fafafa; padding: 5px; border-radius: 6px; border: 1px solid #ddd; }
+        .editor-toolbar button { background: var(--white); border: 1px solid #ddd; padding: 5px 12px; border-radius: 4px; cursor: pointer; color: #555; transition: 0.3s; font-size: 14px; }
+        .editor-toolbar button:hover { background: rgba(10,54,157,0.1); color: var(--primary-blue); border-color: var(--primary-blue); }
+        .rich-editor { width: 100%; min-height: 120px; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fafafa; transition: 0.3s; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; }
+        .rich-editor:focus { border-color: var(--primary-blue); background: var(--white); box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
+        .rich-editor[placeholder]:empty:before { content: attr(placeholder); color: #999; pointer-events: none; display: block; }
+
+        /* Buttons */
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; }
+        .save-btn { flex: 1; background: var(--primary-blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 15px;}
+        .save-btn:hover { background: #06236b; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(10,54,157,0.2);}
+        .cancel-btn { flex: 1; background: #ffeaea; color: var(--primary-red); border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; display: none; font-size: 15px; transition: 0.3s;}
+        .cancel-btn:hover { background: var(--primary-red); color: white; transform: translateY(-2px);}
+        
+        /* Tables inside settings */
+        .table-wrapper { overflow-x: auto; margin-top: 15px;}
+        table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 400px;}
+        table th, table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        table th { background: #fafafa; color: #555; }
+        table tbody tr:hover { background: #f9f9f9; }
+        
+        .actions-group { display: flex; gap: 8px; justify-content: flex-end; }
+        .btn-action { width: 30px; height: 30px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: 0.3s; color: #fff; }
+        .btn-edit { background: var(--primary-blue); } .btn-edit:hover { background: #06236b; }
+        .btn-delete { background: var(--primary-red); } .btn-delete:hover { background: #c0392b; }
+
+        /* Danger Zone */
+        .danger-zone { grid-column: 1 / -1; }
+        .danger-btn { flex: 1; min-width: 250px; background: #fff; color: var(--primary-red); border: 2px solid var(--primary-red); padding: 15px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 10px; font-size: 16px; }
+        .danger-btn:hover { background: var(--primary-red); color: white; transform: translateY(-3px); box-shadow: 0 6px 15px rgba(231, 76, 60, 0.2); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 992px) { 
+            .settings-grid { grid-template-columns: 1fr; } 
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 15px; } .menu-toggle { display: block; }
+            .overlay.active { display: block; opacity: 1;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Security Lock -->
+    <script>
+        if (localStorage.getItem("adminLoggedIn") !== "true") {
+            alert("অনুগ্রহ করে প্রথমে অ্যাডমিন হিসেবে লগইন করুন।");
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <!-- Loader & Overlay -->
+    <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a></li>
+            <li><a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a></li>
+            <li><a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a></li>
+            <li><a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a></li>
+            <li><a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a></li>
+            <li><a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a></li>
+            <li><a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a></li>
+            <li><a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a></li>
+            <li><a href="settings.html" class="nav-item active"><i class="fas fa-cog"></i> সেটিংস</a></li>
+        </ul>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট</button>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h2>সিস্টেম সেটিংস</h2>
+            <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
+        </header>
+
+        <div class="settings-grid">
+            
+            <!-- 1. Password Change -->
+            <div style="margin-bottom: 25px;">
+                <div class="form-container box-orange" style="margin-bottom: 0;">
+                    <h3><i class="fas fa-user-shield"></i> অ্যাডমিন পাসওয়ার্ড পরিবর্তন</h3>
+                    
+                    <button type="button" class="toggle-form-btn" id="togglePassBtn" onclick="toggleFormVisibility('adminPassForm', 'togglePassBtn', 'পাসওয়ার্ড পরিবর্তন করুন')" style="color: var(--primary-orange); border-color: rgba(243,156,18,0.5); background: rgba(243,156,18,0.05);">
+                        <i class="fas fa-plus"></i> পাসওয়ার্ড পরিবর্তন করুন
+                    </button>
+
+                    <form id="adminPassForm" class="hidden-form">
+                        <div class="form-group"><label>বর্তমান পাসওয়ার্ড</label><input type="password" id="currentPass" required></div>
+                        <div class="form-group"><label>নতুন পাসওয়ার্ড</label><input type="password" id="newPass" minlength="6" required></div>
+                        
+                        <button type="submit" class="save-btn" id="changePassBtn" style="background: var(--primary-orange); width: 100%;">
+                            <i class="fas fa-key"></i> পাসওয়ার্ড পরিবর্তন করুন
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 2. Notice Board -->
+            <div>
+                <div class="form-container box-blue">
+                    <h3><i class="fas fa-bullhorn"></i> নোটিশ বোর্ড ম্যানেজমেন্ট</h3>
+                    
+                    <button type="button" class="toggle-form-btn" id="toggleNoticeBtn" onclick="toggleFormVisibility('noticeForm', 'toggleNoticeBtn', 'নতুন নোটিশ যুক্ত করুন')" style="color: var(--primary-blue); border-color: rgba(10,54,157,0.5); background: rgba(10,54,157,0.05);">
+                        <i class="fas fa-plus"></i> নতুন নোটিশ যুক্ত করুন
+                    </button>
+
+                    <form id="noticeForm" class="hidden-form">
+                        <input type="hidden" id="editNoticeId">
+                        <div class="form-group"><label>নোটিশের শিরোনাম</label><input type="text" id="nTitle" required></div>
+                        
+                        <div class="form-group">
+                            <label>বিস্তারিত বিবরণ</label>
+                            <div class="editor-toolbar">
+                                <button type="button" onclick="document.execCommand('bold', false, null)" title="Bold"><i class="fas fa-bold"></i></button>
+                                <button type="button" onclick="document.execCommand('italic', false, null)" title="Italic"><i class="fas fa-italic"></i></button>
+                                <button type="button" onclick="document.execCommand('underline', false, null)" title="Underline"><i class="fas fa-underline"></i></button>
+                                <button type="button" onclick="document.execCommand('insertUnorderedList', false, null)" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                            </div>
+                            <div id="nDesc" contenteditable="true" class="rich-editor" placeholder="নোটিশের বিস্তারিত লিখুন..."></div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button type="button" class="cancel-btn" id="cancelNoticeBtn" onclick="resetNoticeForm()">বাতিল</button>
+                            <button type="submit" class="save-btn" id="saveNoticeBtn">পাবলিশ করুন</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="form-container" style="border-top: none; padding-top: 0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>তারিখ ও বিষয়</th><th style="text-align: right;">অ্যাকশন</th></tr></thead>
+                            <tbody id="noticeTableBody"><tr><td colspan="2" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Bank Accounts -->
+            <div>
+                <div class="form-container box-green">
+                    <h3><i class="fas fa-building-columns"></i> ব্যাংক একাউন্ট যুক্তকরণ</h3>
+                    
+                    <button type="button" class="toggle-form-btn" id="toggleBankBtn" onclick="toggleFormVisibility('bankForm', 'toggleBankBtn', 'নতুন ব্যাংক যুক্ত করুন')" style="color: var(--primary-green); border-color: rgba(124,208,58,0.5); background: rgba(124,208,58,0.05);">
+                        <i class="fas fa-plus"></i> নতুন ব্যাংক যুক্ত করুন
+                    </button>
+
+                    <form id="bankForm" class="hidden-form">
+                        <input type="hidden" id="editBankId">
+                        <div class="form-group"><label>ব্যাংকের নাম</label><input type="text" id="bName" placeholder="যেমন: Islami Bank" required></div>
+                        <div class="form-group"><label>একাউন্টের নাম</label><input type="text" id="bAccName" required></div>
+                        <div class="form-group"><label>একাউন্ট নম্বর</label><input type="text" id="bAccNo" required></div>
+                        <div class="form-group"><label>শাখা / ব্রাঞ্চ (ঐচ্ছিক)</label><input type="text" id="bBranch"></div>
+                        <div class="action-buttons">
+                            <button type="button" class="cancel-btn" id="cancelBankBtn" onclick="resetBankForm()">বাতিল</button>
+                            <button type="submit" class="save-btn" id="saveBankBtn" style="background: var(--primary-green);">সংরক্ষণ করুন</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="form-container" style="border-top: none; padding-top: 0;">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>একাউন্টের বিবরণ</th><th style="text-align: right;">অ্যাকশন</th></tr></thead>
+                            <tbody id="bankTableBody"><tr><td colspan="2" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Danger Zone (Data Reset) -->
+            <div class="danger-zone">
+                <div class="form-container box-red">
+                    <h3><i class="fas fa-triangle-exclamation"></i> ডেঞ্জার জোন (ডেটা রিসেট)</h3>
+                    <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
+                        <strong>সতর্কতা:</strong> নিচের বাটনগুলোতে ক্লিক করে ডেটা মুছে ফেললে তা আর পুনরায় ফিরিয়ে আনা সম্ভব নয়। 
+                    </p>
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                        <button class="danger-btn" onclick="window.eraseData('members')">
+                            <i class="fas fa-users-slash"></i> সকল সদস্য ডিলিট করুন
+                        </button>
+                        <button class="danger-btn" onclick="window.eraseData('transactions')">
+                            <i class="fas fa-money-bill-transfer"></i> সকল লেনদেন ডিলিট করুন
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- UI & Toggle Scripts -->
+    <script>
+        window.addEventListener('load', () => setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500));
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function toggleFormVisibility(formId, btnId, defaultText) {
+            const form = document.getElementById(formId);
+            const btn = document.getElementById(btnId);
+            if (form.classList.contains('hidden-form')) {
+                form.classList.remove('hidden-form');
+                btn.innerHTML = '<i class="fas fa-minus"></i> বাতিল করুন';
+            } else {
+                form.classList.add('hidden-form');
+                btn.innerHTML = '<i class="fas fa-plus"></i> ' + defaultText;
+            }
+        }
+
+        window.openFormPanel = function(formId, btnId) {
+            document.getElementById(formId).classList.remove('hidden-form');
+            document.getElementById(btnId).innerHTML = '<i class="fas fa-minus"></i> বাতিল করুন';
+        };
+
+        window.closeFormPanel = function(formId, btnId, defaultText) {
+            document.getElementById(formId).classList.add('hidden-form');
+            document.getElementById(btnId).innerHTML = '<i class="fas fa-plus"></i> ' + defaultText;
+        };
+    </script>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        // --- Logout ---
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if(confirm("লগআউট করতে চান?")) {
+                await signOut(auth);
+                localStorage.removeItem("adminLoggedIn");
+                window.location.href = "login.html";
+            }
+        });
+
+        // --- Change Password ---
+        document.getElementById('adminPassForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const user = auth.currentUser;
+            if (!user) return alert("দয়া করে পুনরায় লগইন করুন।");
+
+            const currentPass = document.getElementById('currentPass').value;
+            const newPass = document.getElementById('newPass').value;
+            const btn = document.getElementById('changePassBtn');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পরিবর্তন হচ্ছে...';
+            btn.disabled = true;
+
+            try {
+                const credential = EmailAuthProvider.credential(user.email, currentPass);
+                await reauthenticateWithCredential(user, credential);
+                await updatePassword(user, newPass);
+                alert("পাসওয়ার্ড সফলভাবে পরিবর্তন করা হয়েছে!");
+                document.getElementById('adminPassForm').reset();
+                window.closeFormPanel('adminPassForm', 'togglePassBtn', 'পাসওয়ার্ড পরিবর্তন করুন');
+            } catch (error) {
+                alert("পাসওয়ার্ড পরিবর্তন করতে সমস্যা হয়েছে। বর্তমান পাসওয়ার্ড সঠিক কিনা যাচাই করুন।");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-key"></i> পাসওয়ার্ড পরিবর্তন করুন';
+                btn.disabled = false;
+            }
+        });
+
+        // --- Notice Board ---
+        let allNotices = [];
+        onValue(ref(db, 'notices'), (snapshot) => {
+            const tbody = document.getElementById('noticeTableBody');
+            tbody.innerHTML = ''; allNotices = [];
+            if (snapshot.val()) {
+                snapshot.forEach(child => { allNotices.push({id: child.key, ...child.val()}); });
+                allNotices.sort((a, b) => b.timestamp - a.timestamp).forEach(n => {
+                    let d = new Date(n.timestamp).toLocaleDateString('en-GB');
+                    tbody.innerHTML += `<tr>
+                        <td><div style="font-size:12px; color:#999;">${d}</div><div style="font-weight:700; color:var(--primary-blue);">${n.title}</div></td>
+                        <td>
+                            <div class="actions-group">
+                                <button class="btn-action btn-edit" onclick="window.editNotice('${n.id}')"><i class="fas fa-pen"></i></button>
+                                <button class="btn-action btn-delete" onclick="window.delNotice('${n.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td></tr>`;
+                });
+            } else tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">কোনো নোটিশ নেই</td></tr>';
+        });
+
+        document.getElementById('noticeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const descHTML = document.getElementById('nDesc').innerHTML.trim();
+            if(!descHTML) return alert("নোটিশের বিবরণ লিখুন।");
+
+            const id = document.getElementById('editNoticeId').value;
+            const data = { title: document.getElementById('nTitle').value, description: descHTML, timestamp: Date.now() };
+            
+            if(id) await update(ref(db, 'notices/' + id), data);
+            else await set(push(ref(db, 'notices')), data);
+            
+            alert('নোটিশ সফলভাবে সেভ হয়েছে!');
+            window.resetNoticeForm();
+        });
+
+        window.editNotice = (id) => {
+            const n = allNotices.find(x => x.id === id);
+            document.getElementById('editNoticeId').value = n.id; 
+            document.getElementById('nTitle').value = n.title; 
+            document.getElementById('nDesc').innerHTML = n.description || '';
+            document.getElementById('saveNoticeBtn').innerText = 'আপডেট করুন'; 
+            document.getElementById('cancelNoticeBtn').style.display = 'block';
+            window.openFormPanel('noticeForm', 'toggleNoticeBtn');
+        };
+        
+        window.delNotice = async (id) => { if(confirm("ডিলিট করবেন?")) await remove(ref(db, 'notices/' + id)); };
+        
+        window.resetNoticeForm = () => { 
+            document.getElementById('noticeForm').reset(); 
+            document.getElementById('editNoticeId').value = ''; 
+            document.getElementById('nDesc').innerHTML = ''; 
+            document.getElementById('saveNoticeBtn').innerText = 'পাবলিশ করুন'; 
+            document.getElementById('cancelNoticeBtn').style.display = 'none'; 
+            window.closeFormPanel('noticeForm', 'toggleNoticeBtn', 'নতুন নোটিশ যুক্ত করুন');
+        };
+
+        // --- Bank Accounts ---
+        let allBanks = [];
+        onValue(ref(db, 'bank_accounts'), (snapshot) => {
+            const tbody = document.getElementById('bankTableBody');
+            tbody.innerHTML = ''; allBanks = [];
+            if (snapshot.val()) {
+                snapshot.forEach(child => { allBanks.push({id: child.key, ...child.val()}); });
+                allBanks.forEach(b => {
+                    tbody.innerHTML += `<tr>
+                        <td>
+                            <div style="font-weight:700; color:var(--primary-green); font-size: 15px;">${b.bankName}</div>
+                            <div style="font-size:13px; color: #666; line-height: 1.5;">
+                                A/C Name: <strong>${b.accName}</strong><br>A/C No: <strong>${b.accNo}</strong><br>Branch: ${b.branch || '-'}
+                            </div>
+                        </td>
+                        <td style="vertical-align: top;">
+                            <div class="actions-group">
+                                <button class="btn-action btn-edit" style="background:var(--primary-green);" onclick="window.editBank('${b.id}')"><i class="fas fa-pen"></i></button>
+                                <button class="btn-action btn-delete" onclick="window.delBank('${b.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td></tr>`;
+                });
+            } else tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">কোনো ব্যাংক অ্যাকাউন্ট নেই</td></tr>';
+        });
+
+        document.getElementById('bankForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('editBankId').value;
+            const data = { bankName: document.getElementById('bName').value, accName: document.getElementById('bAccName').value, accNo: document.getElementById('bAccNo').value, branch: document.getElementById('bBranch').value };
+            
+            if(id) await update(ref(db, 'bank_accounts/' + id), data);
+            else await set(push(ref(db, 'bank_accounts')), data);
+            
+            alert('ব্যাংক অ্যাকাউন্ট সফলভাবে সেভ হয়েছে!');
+            window.resetBankForm();
+        });
+
+        window.editBank = (id) => {
+            const b = allBanks.find(x => x.id === id);
+            document.getElementById('editBankId').value = b.id; document.getElementById('bName').value = b.bankName; document.getElementById('bAccName').value = b.accName; document.getElementById('bAccNo').value = b.accNo; document.getElementById('bBranch').value = b.branch;
+            document.getElementById('saveBankBtn').innerText = 'আপডেট করুন'; document.getElementById('cancelBankBtn').style.display = 'block';
+            window.openFormPanel('bankForm', 'toggleBankBtn');
+        };
+        window.delBank = async (id) => { if(confirm("ডিলিট করবেন?")) await remove(ref(db, 'bank_accounts/' + id)); };
+        
+        window.resetBankForm = () => { 
+            document.getElementById('bankForm').reset(); 
+            document.getElementById('editBankId').value = ''; 
+            document.getElementById('saveBankBtn').innerText = 'সংরক্ষণ করুন'; 
+            document.getElementById('cancelBankBtn').style.display = 'none'; 
+            window.closeFormPanel('bankForm', 'toggleBankBtn', 'নতুন ব্যাংক যুক্ত করুন');
+        };
+
+        // --- Danger Zone ---
+        window.eraseData = async (type) => {
+            let typeName = type === 'members' ? 'সকল সদস্যের ডেটা' : 'সকল লেনদেনের ডেটা';
+            const user = auth.currentUser;
+            
+            if (confirm(`সতর্কতা! আপনি কি নিশ্চিত যে ${typeName} মুছে ফেলতে চান?`)) {
+                let adminPass = prompt("নিশ্চিত করতে আপনার বর্তমান অ্যাডমিন পাসওয়ার্ড দিন:");
+                if (adminPass && user) {
+                    try {
+                        const credential = EmailAuthProvider.credential(user.email, adminPass);
+                        await reauthenticateWithCredential(user, credential);
+                        await remove(ref(db, type));
+                        alert(`সফলভাবে ${typeName} মুছে ফেলা হয়েছে!`);
+                    } catch (error) {
+                        alert("পাসওয়ার্ড ভুল হয়েছে অথবা সমস্যা হয়েছে!");
+                    }
+                }
+            }
+        };
+
+    </script>
+</body>
+</html>
