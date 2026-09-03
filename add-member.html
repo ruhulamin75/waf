@@ -2,7 +2,8 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- মোবাইল ভিউ ফিক্স: ডেক্সটপের মত জুম আউট হবে না -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>নতুন সদস্য যুক্ত করুন - বন্ধু কল্যাণ সংস্থা</title>
     
     <!-- Google Fonts -->
@@ -27,7 +28,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw; }
 
         /* --- Sidebar Styles --- */
         .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
@@ -48,14 +49,14 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content Styles --- */
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; }
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
         .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
         
         /* --- Form Container Styles --- */
-        .form-container { background: #fff; padding: 30px; border-radius: 15px; box-shadow: var(--card-shadow); max-width: 700px; margin: 0 auto; animation: fadeInUp 0.6s ease-out; border-top: 4px solid var(--primary-blue); }
+        .form-container { background: #fff; padding: 30px; border-radius: 15px; box-shadow: var(--card-shadow); max-width: 700px; margin: 0 auto; animation: fadeInUp 0.6s ease-out; border-top: 4px solid var(--primary-blue); position: relative; z-index: 1;}
 
         .form-header { text-align: center; margin-bottom: 25px; }
         .form-header h3 { font-size: 22px; color: var(--text-dark); font-weight: 700; margin-bottom: 5px; }
@@ -75,7 +76,7 @@
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .full-width { grid-column: span 2; }
         
-        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group { display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 2;}
         .input-group label { font-size: 15px; font-weight: 600; color: #555; }
         .input-group input, .input-group textarea { padding: 12px 15px; font-size: 15px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: var(--transition); background: #fafafa; }
         .input-group input:focus, .input-group textarea:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
@@ -91,32 +92,60 @@
         .msg-error { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); }
         .msg-success { background: rgba(124, 208, 58, 0.1); color: #5a9e26; border: 1px solid rgba(124, 208, 58, 0.3); }
 
-        /* Image Cropper Modal */
-        .cropper-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; align-items: center; justify-content: center; padding: 20px;}
-        .cropper-content { background: #fff; border-radius: 15px; padding: 20px; width: 100%; max-width: 500px; text-align: center; }
-        .cropper-area { width: 100%; height: 350px; background: #eee; margin: 15px 0; border-radius: 8px; overflow: hidden;}
-        .cropper-area img { max-width: 100%; }
+        /* --- Image Cropper Modal (FIXED) --- */
+        .cropper-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85) !important; /* Solid dark background */
+            z-index: 999999 !important; /* Very high z-index to stay on top of everything */
+            align-items: center; 
+            justify-content: center; 
+            padding: 15px;
+        }
+        .cropper-content { 
+            background: #ffffff !important; /* Solid white background */
+            border-radius: 15px; 
+            padding: 20px; 
+            width: 100%; 
+            max-width: 450px; 
+            text-align: center; 
+            position: relative;
+            z-index: 9999999 !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .cropper-area { width: 100%; height: 300px; background: #eee; margin: 15px 0; border-radius: 8px; overflow: hidden;}
+        .cropper-area img { max-width: 100%; display: block; }
         
-        .cropper-btns { display: flex; gap: 10px; justify-content: center; }
-        .btn-crop-cancel { background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .btn-crop-save { background: var(--primary-green); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .cropper-btns { display: flex; gap: 10px; justify-content: center; margin-top: 15px;}
+        .btn-crop-cancel { flex: 1; background: #ffeaea; color: #e74c3c; border: none; padding: 12px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px; transition: 0.3s;}
+        .btn-crop-cancel:hover { background: #e74c3c; color: white;}
+        .btn-crop-save { flex: 1; background: var(--primary-green); color: #fff; border: none; padding: 12px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px; transition: 0.3s;}
+        .btn-crop-save:hover { background: #68b32e;}
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- Responsive --- */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; } .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 20px 15px;} .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
         }
         @media (max-width: 600px) {
             .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
-            .main-content { padding: 15px; } .form-container { padding: 20px; }
-            .cropper-area { height: 250px; }
+            .cropper-area { height: 260px; } /* Mobile a height ektu komano hoyeche */
         }
     </style>
 </head>
 <body>
+
+    <!-- Security Check -->
+    <script>
+        if (localStorage.getItem("userRole") !== "admin") {
+            alert("অনুগ্রহ করে প্রথমে অ্যাডমিন হিসেবে লগইন করুন।");
+            window.location.href = "login.html";
+        }
+    </script>
 
     <div class="overlay" id="sidebarOverlay"></div>
 
@@ -207,10 +236,10 @@
         </div>
     </main>
 
-    <!-- Cropper Modal -->
+    <!-- Cropper Modal (FIXED Z-INDEX) -->
     <div class="cropper-modal" id="cropperModal">
         <div class="cropper-content">
-            <h3 style="margin-bottom: 10px; color: var(--primary-blue);">ছবি ঠিক করুন</h3>
+            <h3 style="margin-bottom: 5px; color: var(--primary-blue);">ছবি ঠিক করুন</h3>
             <p style="font-size: 13px; color: #666; margin-bottom: 10px;">মাউস বা হাত দিয়ে টেনে ছবি সঠিক পজিশনে বসান।</p>
             
             <div class="cropper-area">
@@ -238,7 +267,7 @@
 
         // --- Image Cropping Logic ---
         let cropper;
-        let finalCroppedBase64 = ""; // এই ভ্যারিয়েবলে ফাইনাল ছবিটা সেভ থাকবে
+        let finalCroppedBase64 = "";
 
         const photoInput = document.getElementById('memberPhoto');
         const cropperModal = document.getElementById('cropperModal');
@@ -254,10 +283,8 @@
                     imageToCrop.src = event.target.result;
                     cropperModal.style.display = 'flex';
                     
-                    // আগের ক্রপার থাকলে রিমুভ করা
                     if (cropper) cropper.destroy();
                     
-                    // 1:1 Aspect Ratio তে ক্রপার ইনিশিয়ালাইজ করা
                     cropper = new Cropper(imageToCrop, {
                         aspectRatio: 1,
                         viewMode: 1,
@@ -271,28 +298,26 @@
         function closeCropper() {
             cropperModal.style.display = 'none';
             if (cropper) cropper.destroy();
-            photoInput.value = ""; // ইনপুট ক্লিয়ার
+            photoInput.value = ""; 
         }
 
         function saveCroppedImage() {
             if (!cropper) return;
             
-            // রেজুলেশন ছোট করে (যেমন 250x250) Base64 হিসেবে নেওয়া
             finalCroppedBase64 = cropper.getCroppedCanvas({
                 width: 250,
                 height: 250
             }).toDataURL('image/jpeg', 0.8);
 
-            // ফ্রন্টএন্ডে প্রিভিউ শো করানো
             picPreview.src = finalCroppedBase64;
             picPreview.style.display = 'block';
             picPlaceholder.style.display = 'none';
             
-            closeCropper(); // পপ-আপ ক্লোজ
+            closeCropper();
         }
     </script>
 
-    <!-- Firebase Logic with Base64 Image Upload -->
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
@@ -312,14 +337,13 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Security Check
-        onAuthStateChanged(auth, (user) => {
-            if (!user) window.location.href = 'login.html';
-        });
-
+        // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("লগআউট করতে চান?")) {
-                signOut(auth).then(() => window.location.href = 'login.html');
+                signOut(auth).then(() => {
+                    localStorage.removeItem("userRole");
+                    window.location.href = 'login.html';
+                });
             }
         });
 
@@ -346,27 +370,20 @@
             msgBox.style.display = 'none';
 
             try {
-                // Realtime Database এ মেম্বার ডাটা সেভ
                 await set(ref(db, 'members/' + id), {
                     id: id,
                     name: name,
                     phone: phone,
                     password: pass, 
                     address: address || "", 
-                    photo: finalCroppedBase64, // ক্রপ করা Base64 ছবি সেভ
+                    photo: finalCroppedBase64, 
                     status: "active",
                     joinDate: new Date().toISOString(),
-                    funds: {
-                        admission: 0,
-                        monthly: 0,
-                        donation: 0,
-                        total: 0
-                    }
+                    funds: { admission: 0, monthly: 0, donation: 0, total: 0 }
                 });
 
                 showMessage("সদস্য সফলভাবে যুক্ত হয়েছে!", "success");
                 
-                // Form Reset & Clear Image
                 this.reset(); 
                 finalCroppedBase64 = "";
                 document.getElementById('picPreview').style.display = 'none';
