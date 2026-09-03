@@ -119,9 +119,9 @@
 </head>
 <body>
 
-    <!-- Security Lock -->
+    <!-- Security Lock (Optimized) -->
     <script>
-        if (localStorage.getItem("adminLoggedIn") !== "true") {
+        if (localStorage.getItem("userRole") !== "admin") {
             alert("অনুগ্রহ করে প্রথমে অ্যাডমিন হিসেবে লগইন করুন।");
             window.location.href = "login.html";
         }
@@ -323,12 +323,12 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // --- Logout ---
+        // --- Logout (Optimized) ---
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             if(confirm("লগআউট করতে চান?")) {
                 await signOut(auth);
-                localStorage.removeItem("adminLoggedIn");
+                localStorage.removeItem("userRole");
                 window.location.href = "login.html";
             }
         });
