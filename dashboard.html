@@ -17,6 +17,8 @@
         :root {
             --primary-blue: #0A369D;
             --primary-green: #7CD03A;
+            --primary-red: #e74c3c;
+            --primary-orange: #f39c12;
             --bg-light: #F4F7F6;
             --text-dark: #333;
             --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -26,6 +28,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
 
         body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+
+        /* --- Loader --- */
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .hide-loader { opacity: 0; pointer-events: none; }
 
         /* --- Sidebar Styles --- */
         .sidebar {
@@ -49,7 +57,6 @@
 
         .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
         
-        /* কাস্টম স্ক্রলবার সাইডবারের জন্য */
         .nav-menu::-webkit-scrollbar { width: 5px; }
         .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
 
@@ -116,7 +123,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            display: none; /* Desktop e hidden */
+            display: none;
         }
 
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
@@ -158,43 +165,39 @@
             color: var(--primary-blue);
         }
         
-        .dash-card.green-theme { border-left-color: var(--primary-green); }
-        .dash-card.green-theme .card-icon { background: rgba(124, 208, 58, 0.15); color: #5a9e26; }
-        
         .card-info p { color: #777; font-size: 14px; font-weight: 600; margin-bottom: 5px; }
         .card-info h3 { color: var(--text-dark); font-size: 22px; font-weight: 700; }
 
-        /* --- Recent Transactions Table --- */
-        .table-container {
-            background: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: var(--card-shadow);
-            overflow-x: auto;
-            animation: fadeInUp 0.8s ease-out;
-        }
+        /* Themes */
+        .green-theme { border-left-color: var(--primary-green); } .green-theme .card-icon { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); }
+        .red-theme { border-left-color: var(--primary-red); } .red-theme .card-icon { background: rgba(231, 76, 60, 0.15); color: var(--primary-red); }
+        .orange-theme { border-left-color: var(--primary-orange); } .orange-theme .card-icon { background: rgba(243, 156, 18, 0.15); color: var(--primary-orange); }
+        
+        /* Highlight Balance Card */
+        .balance-card { background: linear-gradient(135deg, var(--primary-blue), #06236b); color: #fff; border-left: none; }
+        .balance-card .card-icon { background: rgba(255,255,255,0.2); color: #fff; }
+        .balance-card .card-info p { color: rgba(255,255,255,0.8); }
+        .balance-card .card-info h3 { color: #fff; font-size: 26px;}
 
+        /* --- Recent Transactions Table --- */
+        .table-container { background: #fff; padding: 20px; border-radius: 15px; box-shadow: var(--card-shadow); overflow-x: auto; margin-bottom: 30px;}
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tr:hover { background: rgba(0,0,0,0.01); }
         
         .badge { padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
-        .badge.deposit { background: rgba(124, 208, 58, 0.15); color: #5a9e26; }
-        .badge.withdraw { background: rgba(255, 71, 87, 0.15); color: #ff4757; }
+        .badge.deposit { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); }
+        .badge.withdraw { background: rgba(231, 76, 60, 0.15); color: var(--primary-red); }
 
-        /* Animations */
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- Responsive Styles --- */
+        /* Responsive */
         @media (max-width: 992px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; }
-            .menu-toggle { display: block; }
+            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; } .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
         }
-
         @media (max-width: 576px) {
             .dashboard-grid { grid-template-columns: 1fr; }
             .main-content { padding: 15px; }
@@ -203,92 +206,62 @@
 </head>
 <body>
 
-    <!-- Overlay for Mobile -->
+    <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
     <div class="overlay" id="sidebarOverlay"></div>
 
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-handshake"></i>
-            <h2>বন্ধু কল্যাণ সংস্থা</h2>
-        </div>
-        
+        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
         <nav class="nav-menu">
             <a href="dashboard.html" class="nav-item active"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
-            <a href="#" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
-            <a href="#" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
-            <a href="#" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
-            <a href="#" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
-            <a href="#" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
-            <a href="#" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
-            <a href="#" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
-            <a href="#" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
+            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
+            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
+            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
+            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
         </nav>
-
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
     </aside>
 
-    <!-- Main Content Area -->
     <main class="main-content">
         <div class="top-header">
             <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
             <h2>ওভারভিউ</h2>
-            <div class="user-profile">
-                <i class="fas fa-user-circle"></i>
-                <span>অ্যাডমিন</span>
-            </div>
+            <div class="user-profile"><i class="fas fa-user-circle"></i> <span>অ্যাডমিন</span></div>
         </div>
 
         <h3 class="section-title">এক নজরে হিসাব</h3>
         <div class="dashboard-grid">
+            <div class="dash-card balance-card">
+                <div class="card-icon"><i class="fas fa-scale-balanced"></i></div>
+                <div class="card-info"><p>ক্যাশ / বর্তমান ব্যালেন্স</p><h3 id="tBalance">৳ ০.০০</h3></div>
+            </div>
             <div class="dash-card">
                 <div class="card-icon"><i class="fas fa-wallet"></i></div>
-                <div class="card-info">
-                    <p>সর্বমোট ফান্ড</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
-            </div>
-            <div class="dash-card green-theme">
-                <div class="card-icon"><i class="fas fa-boxes"></i></div>
-                <div class="card-info">
-                    <p>পণ্য মজুদ (মূল্য)</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
-            </div>
-            <div class="dash-card">
-                <div class="card-icon"><i class="fas fa-money-check-alt"></i></div>
-                <div class="card-info">
-                    <p>বর্তমান ঋণ</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
-            </div>
-            <div class="dash-card green-theme">
-                <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
-                <div class="card-info">
-                    <p>বর্তমান বিনিয়োগ</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
+                <div class="card-info"><p>সর্বমোট ফান্ড (মুনাফাসহ)</p><h3 id="tFund">৳ ০.০০</h3></div>
             </div>
             <div class="dash-card green-theme">
                 <div class="card-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                <div class="card-info">
-                    <p>বর্তমান মুনাফা</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
+                <div class="card-info"><p>সর্বমোট মুনাফা</p><h3 id="tProfit">৳ ০.০০</h3></div>
             </div>
-            <div class="dash-card">
-                <div class="card-icon" style="color:#ff4757; background:rgba(255,71,87,0.1);"><i class="fas fa-file-invoice-dollar"></i></div>
-                <div class="card-info">
-                    <p>মোট খরচ</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
+            <div class="dash-card orange-theme">
+                <div class="card-icon"><i class="fas fa-boxes"></i></div>
+                <div class="card-info"><p>পণ্য মজুদ (বর্তমান মূল্য)</p><h3 id="tInventory">৳ ০.০০</h3></div>
             </div>
-            <div class="dash-card" style="border-left-color: #f39c12;">
-                <div class="card-icon" style="color:#f39c12; background:rgba(243,156,18,0.1);"><i class="fas fa-scale-balanced"></i></div>
-                <div class="card-info">
-                    <p>বর্তমান ব্যালেন্স</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
+            <div class="dash-card orange-theme">
+                <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
+                <div class="card-info"><p>বর্তমান বিনিয়োগ</p><h3 id="tInvestment">৳ ০.০০</h3></div>
+            </div>
+            <div class="dash-card red-theme">
+                <div class="card-icon"><i class="fas fa-money-check-alt"></i></div>
+                <div class="card-info"><p>বর্তমান বকেয়া ঋণ</p><h3 id="tLoan">৳ ০.০০</h3></div>
+            </div>
+            <div class="dash-card red-theme">
+                <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="card-info"><p>সর্বমোট খরচ</p><h3 id="tExpense">৳ ০.০০</h3></div>
             </div>
         </div>
 
@@ -296,79 +269,55 @@
         <div class="dashboard-grid">
             <div class="dash-card">
                 <div class="card-icon"><i class="fas fa-users"></i></div>
-                <div class="card-info">
-                    <p>মোট সদস্য</p>
-                    <h3>০ জন</h3>
-                </div>
+                <div class="card-info"><p>মোট সদস্য</p><h3 id="tMembers">০ জন</h3></div>
             </div>
             <div class="dash-card green-theme">
                 <div class="card-icon"><i class="fas fa-donate"></i></div>
-                <div class="card-info">
-                    <p>নতুন জমা (আজ)</p>
-                    <h3>৳ ০.০০</h3>
-                </div>
+                <div class="card-info"><p>আজকের নতুন জমা</p><h3 id="tTodayDep">৳ ০.০০</h3></div>
             </div>
         </div>
 
-        <h3 class="section-title" style="margin-top: 10px;">সম্প্রতি লেনদেন</h3>
+        <h3 class="section-title" style="margin-top: 10px;">সাম্প্রতিক লেনদেন</h3>
         <div class="table-container">
             <table>
                 <thead>
-                    <tr>
-                        <th>তারিখ</th>
-                        <th>সদস্যের নাম</th>
-                        <th>বিবরণ</th>
-                        <th>পরিমাণ</th>
-                        <th>ধরন</th>
-                    </tr>
+                    <tr><th>তারিখ</th><th>সদস্য/খাত</th><th>বিবরণ</th><th>পরিমাণ (৳)</th><th>ধরন</th></tr>
                 </thead>
                 <tbody id="recentTransactionsTable">
-                    <!-- ফায়ারবেজ ডাটা আসার আগ পর্যন্ত ডেমো রো -->
-                    <tr>
-                        <td>০৩ সেপ্টে, ২০২৬</td>
-                        <td>মো. রহিম মিয়া</td>
-                        <td>মাসিক চাঁদা জমা</td>
-                        <td>৳ ৫০০</td>
-                        <td><span class="badge deposit">জমা</span></td>
-                    </tr>
-                    <tr>
-                        <td>০১ সেপ্টে, ২০২৬</td>
-                        <td>করিম উল্লাহ</td>
-                        <td>ব্যবসায়িক ঋণ গ্রহণ</td>
-                        <td>৳ ১০,০০০</td>
-                        <td><span class="badge withdraw">উত্তোলন</span></td>
-                    </tr>
-                    <tr>
-                        <td colspan="5" style="text-align:center; color:#999; padding:20px;">আরও ডাটা লোড হচ্ছে...</td>
-                    </tr>
+                    <tr><td colspan="5" style="text-align:center;">ডাটাবেস থেকে লোড হচ্ছে...</td></tr>
                 </tbody>
             </table>
         </div>
     </main>
 
-    <!-- Sidebar Toggle Logic -->
+    <!-- UI Scripts -->
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebarOverlay');
-        const menuToggle = document.getElementById('menuToggle');
-
-        // ওপেন মেনু
-        menuToggle.addEventListener('click', () => {
-            sidebar.classList.add('active');
-            overlay.classList.add('active');
-        });
-
-        // ক্লোজ মেনু (ওভারলে তে ক্লিক করলে)
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('active');
-            overlay.classList.remove('active');
-        });
+        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+        
+        // Counter Animation
+        function animateCounter(element, targetValue) {
+            let startValue = 0; let startTimestamp = null;
+            const duration = 1500;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const easeProgress = 1 - Math.pow(1 - progress, 4); 
+                let currentVal = easeProgress * (targetValue - startValue) + startValue;
+                
+                element.innerText = '৳ ' + currentVal.toFixed(2);
+                if (progress < 1) window.requestAnimationFrame(step);
+                else element.innerText = '৳ ' + targetValue.toFixed(2);
+            };
+            window.requestAnimationFrame(step);
+        }
     </script>
 
-    <!-- Firebase Logic -->
+    <!-- Firebase Integration Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -382,29 +331,141 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getDatabase(app);
 
-        // Security: চেক করা হচ্ছে ইউজার লগইন করা আছে কি না
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                // ইউজার না থাকলে লগইন পেজে পাঠিয়ে দেবে
-                window.location.href = 'login.html';
-            } else {
-                console.log("অ্যাডমিন প্যানেলে স্বাগতম!", user.email);
-            }
-        });
+        // Auth Check
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
+        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
 
-        // Logout ফাংশন
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            if(confirm("আপনি কি সত্যিই লগআউট করতে চান?")) {
-                signOut(auth).then(() => {
-                    localStorage.removeItem('adminLoggedIn');
-                    window.location.href = 'login.html';
-                }).catch((error) => {
-                    alert("লগআউট করতে সমস্যা হয়েছে!");
-                    console.error(error);
+        // --- Fetch & Calculate Dashboard Data ---
+        async function fetchDashboardData() {
+            try {
+                // Fetch all required nodes
+                const membersSnap = await get(ref(db, 'members'));
+                const orgFundsSnap = await get(ref(db, 'org_funds'));
+                const productsSnap = await get(ref(db, 'products'));
+                const salesSnap = await get(ref(db, 'sales'));
+                const invSnap = await get(ref(db, 'investments'));
+                const profSnap = await get(ref(db, 'profits'));
+                const retSnap = await get(ref(db, 'returns'));
+                const trxSnap = await get(ref(db, 'transactions'));
+
+                // Variables
+                let totalMembers = 0, memberMonthlyFunds = 0;
+                let orgFunds = 0, totalLoanGiven = 0, totalLoanPaid = 0;
+                let invStockVal = 0, totalSalesProfit = 0;
+                let activeInv = 0, externalProfit = 0;
+                let totalExpense = 0, todayDep = 0;
+                const todayStr = new Date().toLocaleDateString('en-CA');
+
+                // 1. Members Data (Count & Personal Monthly Funds)
+                if (membersSnap.exists()) {
+                    membersSnap.forEach(m => {
+                        totalMembers++;
+                        let d = m.val();
+                        // Member's personal monthly funds
+                        if (d.funds && d.funds.monthly) memberMonthlyFunds += parseFloat(d.funds.monthly);
+                        // Member Loans
+                        if (d.loan) {
+                            totalLoanGiven += parseFloat(d.loan.totalAmount || 0);
+                            totalLoanPaid += parseFloat(d.loan.paidAmount || 0);
+                        }
+                    });
+                }
+                
+                // 2. Organization Funds (Admission, Fine, Donation, Others)
+                if (orgFundsSnap.exists()) {
+                    let o = orgFundsSnap.val();
+                    orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0);
+                }
+
+                // 3. Products (Inventory Value) & Sales Profit
+                if (productsSnap.exists()) {
+                    productsSnap.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
+                }
+                if (salesSnap.exists()) {
+                    salesSnap.forEach(s => totalSalesProfit += parseFloat(s.val().profit || 0));
+                }
+
+                // 4. Investments & External Profits
+                let tInv = 0, tRet = 0;
+                if (invSnap.exists()) invSnap.forEach(i => tInv += parseFloat(i.val().amount || 0));
+                if (retSnap.exists()) retSnap.forEach(r => tRet += parseFloat(r.val().amount || 0));
+                activeInv = tInv - tRet;
+
+                if (profSnap.exists()) profSnap.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
+                
+                // --- Updated Math Logic ---
+                let totalProfit = totalSalesProfit + externalProfit;
+                let baseFund = memberMonthlyFunds + orgFunds;
+                
+                // Total Fund (Now includes base deposits + total profits)
+                let totalFund = baseFund + totalProfit;
+
+                // 5. Transactions (Expenses & Recent Table)
+                let trxs = [];
+                if (trxSnap.exists()) {
+                    trxSnap.forEach(t => {
+                        let data = t.val();
+                        trxs.push(data);
+                        // Calculate Expenses
+                        if (data.type === 'withdraw_expense') totalExpense += parseFloat(data.totalAmount || 0);
+                        // Today's Deposit
+                        if (data.type === 'deposit' && data.date === todayStr) todayDep += parseFloat(data.totalAmount || 0);
+                    });
+                }
+
+                // Calculate Current Due Loan
+                let currentLoanDue = totalLoanGiven - totalLoanPaid;
+
+                // --- MASTER BALANCE FORMULA ---
+                // Balance = Total Fund - (Inventory Stock + Loan Due + Active Investment + Expenses)
+                let currentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense);
+
+                // --- Update UI ---
+                document.getElementById('tMembers').innerText = totalMembers + " জন";
+                animateCounter(document.getElementById('tTodayDep'), todayDep);
+                
+                animateCounter(document.getElementById('tFund'), totalFund);
+                animateCounter(document.getElementById('tProfit'), totalProfit);
+                animateCounter(document.getElementById('tInventory'), invStockVal);
+                animateCounter(document.getElementById('tInvestment'), activeInv);
+                animateCounter(document.getElementById('tLoan'), currentLoanDue);
+                animateCounter(document.getElementById('tExpense'), totalExpense);
+                animateCounter(document.getElementById('tBalance'), currentBalance);
+
+                // --- Render Recent Transactions Table ---
+                const tbody = document.getElementById('recentTransactionsTable');
+                tbody.innerHTML = '';
+                
+                trxs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(t => {
+                    let d = new Date(t.timestamp).toLocaleDateString('en-GB');
+                    let isDep = t.type.includes('deposit');
+                    let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">উত্তোলন</span>`;
+                    let entity = t.memberName ? t.memberName : 'সাধারণ খাত';
+                    
+                    tbody.innerHTML += `<tr>
+                        <td>${d}</td>
+                        <td style="font-weight:600;">${entity}</td>
+                        <td style="font-size:13px; color:#555;">${t.details}</td>
+                        <td style="font-weight:700;">${t.totalAmount.toFixed(2)}</td>
+                        <td>${badge}</td>
+                    </tr>`;
                 });
+                if(trxs.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো লেনদেন নেই</td></tr>';
+
+                // Hide Loader
+                document.getElementById('pageLoader').classList.add('hide-loader');
+
+            } catch (error) {
+                console.error("Dashboard Load Error:", error);
+                alert("ডাটা লোড হতে সমস্যা হচ্ছে। ইন্টারনেট চেক করুন।");
             }
-        });
+        }
+
+        // Initialize Fetch
+        fetchDashboardData();
+
     </script>
 </body>
 </html>
