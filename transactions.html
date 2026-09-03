@@ -14,6 +14,7 @@
         :root {
             --primary-blue: #0A369D;
             --primary-green: #7CD03A;
+            --primary-red: #e74c3c;
             --bg-light: #F4F7F6;
             --text-dark: #333;
             --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -72,7 +73,7 @@
         .total-amount { font-size: 24px; font-weight: 700; color: var(--primary-green); margin-bottom: 5px; }
         .amount-in-words { font-size: 16px; font-weight: 600; color: #555; font-style: italic; }
 
-        /* Dynamic Rows */
+        /* Dynamic Expense Rows */
         .dynamic-row { display: grid; grid-template-columns: 2fr 3fr 2fr auto; gap: 15px; align-items: center; margin-bottom: 15px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
         .btn-add-row { background: rgba(10,54,157,0.1); color: var(--primary-blue); border: 2px dashed var(--primary-blue); padding: 10px 15px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; margin-bottom: 20px; }
         .btn-add-row:hover { background: var(--primary-blue); color: #fff; }
@@ -80,6 +81,7 @@
         
         .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px 25px; border: none; border-radius: 8px; font-size: 17px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
+        .btn-submit:disabled { background: #ccc; cursor: not-allowed; transform: none;}
         .btn-withdraw-submit { background: linear-gradient(135deg, #e74c3c, #c0392b); }
 
         /* --- Transaction Table --- */
@@ -96,9 +98,7 @@
 
         .actions-group { display: flex; gap: 8px; }
         .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); color: #fff; }
-        .btn-view { background: #3498db; } .btn-view:hover { background: #2980b9; }
         .btn-receipt { background: var(--primary-green); } .btn-receipt:hover { background: #68b32e; }
-        .btn-edit { background: #f39c12; } .btn-edit:hover { background: #d68910; }
         .btn-delete { background: #e74c3c; } .btn-delete:hover { background: #c0392b; }
 
         /* --- Receipt Modal --- */
@@ -109,12 +109,9 @@
         .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; transition: 0.2s; }
         .close-modal:hover { color: #e74c3c; }
 
-        /* Receipt Formatting */
         .receipt-header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 15px; margin-bottom: 20px; }
-        .receipt-header .r-logo { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .receipt-header .r-logo i { font-size: 35px; color: var(--primary-blue); }
+        .receipt-header i { font-size: 35px; color: var(--primary-blue); margin-bottom: 10px; }
         .receipt-header h2 { color: var(--primary-blue); font-weight: 700; margin-bottom: 5px; font-size: 22px; }
-        .receipt-header p { font-size: 14px; color: #666; margin-bottom: 5px; }
         .r-title { background: #f1f1f1; display: inline-block; padding: 4px 15px; border-radius: 15px; font-weight: bold; color: var(--text-dark); font-size: 14px; border: 1px solid #ddd; }
 
         .receipt-info { margin-bottom: 20px; }
@@ -133,38 +130,19 @@
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        @media (max-width: 992px) {
-            .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
-            .overlay.active { display: block; opacity: 1; }
-        }
-        @media (max-width: 768px) {
-            .dynamic-row { grid-template-columns: 1fr; gap: 10px; position: relative; padding-bottom: 50px; }
-            .btn-remove-row { position: absolute; bottom: 10px; right: 15px; width: auto; padding: 5px 15px; margin-top: 0; }
-            .check-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .check-amount-input { width: 100%; }
-        }
-
-        /* --- Print CSS --- */
         @media print {
             body * { visibility: hidden; }
             .modal-content.printable, .modal-content.printable * { visibility: visible; }
             .modal-content.printable { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; box-shadow: none; border-radius: 0; }
             .close-modal, .btn-print { display: none !important; }
-            .receipt-header .r-logo img { display: block !important; margin: 0 auto 10px auto; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Loader -->
-    <div id="pageLoader">
-        <div class="spinner"></div>
-        <h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3>
-    </div>
+    <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
     <div class="overlay" id="sidebarOverlay"></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
         <nav class="nav-menu">
@@ -175,6 +153,8 @@
             <a href="transactions.html" class="nav-item active"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
             <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
             <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
         </nav>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
     </aside>
@@ -186,7 +166,6 @@
             <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
         </div>
 
-        <!-- Master Switch -->
         <div class="controls-wrapper">
             <select class="action-select" id="modeSelector">
                 <option value="deposit">১. ফান্ডে টাকা জমা করুন</option>
@@ -194,17 +173,15 @@
             </select>
         </div>
 
-        <!-- SECTION 1: DEPOSIT (জমা) -->
+        <!-- SECTION 1: DEPOSIT -->
         <div class="form-section active" id="sec-deposit">
             <h3 class="form-title"><i class="fas fa-hand-holding-usd"></i> টাকা জমার রসিদ তৈরি</h3>
             <form id="depositForm">
                 <div class="form-grid">
                     <div class="input-group">
-                        <label>সদস্যের নাম ও আইডি</label>
+                        <label>সদস্য নির্বাচন করুন</label>
                         <select id="depMember" required>
-                            <option value="">সদস্য নির্বাচন করুন</option>
-                            <option value="WAF-01">মো. রহিম মিয়া (WAF-01)</option>
-                            <option value="WAF-02">করিম উল্লাহ (WAF-02)</option>
+                            <option value="">ডাটা লোড হচ্ছে...</option>
                         </select>
                     </div>
                     <div class="input-group">
@@ -220,8 +197,12 @@
                         <input type="number" id="amtAdm" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
                     </div>
                     <div class="check-item">
-                        <label><input type="checkbox" onchange="toggleDepInput('chkMon', 'amtMon')" id="chkMon"> মাসিক জমা</label>
+                        <label><input type="checkbox" onchange="toggleDepInput('chkMon', 'amtMon')" id="chkMon"> মাসিক জমা (সদস্যের ফান্ডে যুক্ত হবে)</label>
                         <input type="number" id="amtMon" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
+                    </div>
+                    <div class="check-item">
+                        <label><input type="checkbox" onchange="toggleDepInput('chkFine', 'amtFine')" id="chkFine"> জরিমানা</label>
+                        <input type="number" id="amtFine" class="check-amount-input dep-amt" placeholder="পরিমাণ (৳)" min="1" oninput="calcDepositTotal()">
                     </div>
                     <div class="check-item">
                         <label><input type="checkbox" onchange="toggleDepInput('chkDon', 'amtDon')" id="chkDon"> ডোনেশন</label>
@@ -239,11 +220,11 @@
                     <div class="amount-in-words">কথায়: <span id="depWordsVal">শূন্য টাকা মাত্র</span></div>
                 </div>
 
-                <button type="submit" class="btn-submit"><i class="fas fa-check-circle"></i> জমা নিশ্চিত করুন</button>
+                <button type="submit" class="btn-submit" id="depSubmitBtn"><i class="fas fa-check-circle"></i> জমা নিশ্চিত করুন</button>
             </form>
         </div>
 
-        <!-- SECTION 2: WITHDRAWAL (উত্তোলন) -->
+        <!-- SECTION 2: WITHDRAWAL -->
         <div class="form-section" id="sec-withdraw" style="border-top-color: #e74c3c;">
             <h3 class="form-title" style="color: #e74c3c;"><i class="fas fa-money-bill-wave"></i> ফান্ড উত্তোলন ফর্ম</h3>
             <div class="input-group" style="margin-bottom: 25px; max-width: 300px;">
@@ -255,14 +236,13 @@
             </div>
 
             <form id="withdrawForm">
+                <!-- Loan Mode -->
                 <div id="wd-loan-mode">
                     <div class="form-grid">
                         <div class="input-group">
-                            <label>সদস্যের নাম ও আইডি (ঋণগ্রহীতা)</label>
+                            <label>সদস্য নির্বাচন করুন (ঋণগ্রহীতা)</label>
                             <select id="wdLoanMember" required>
-                                <option value="">সদস্য নির্বাচন করুন</option>
-                                <option value="WAF-01">মো. রহিম মিয়া (WAF-01)</option>
-                                <option value="WAF-02">করিম উল্লাহ (WAF-02)</option>
+                                <option value="">ডাটা লোড হচ্ছে...</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -277,6 +257,7 @@
                     <p class="amount-in-words" style="text-align: right; margin-top: 10px;">কথায়: <span id="loanWordsVal">শূন্য টাকা মাত্র</span></p>
                 </div>
 
+                <!-- Expense Mode -->
                 <div id="wd-expense-mode" style="display: none;">
                     <div class="input-group" style="max-width: 250px; margin-bottom: 15px;">
                         <label>তারিখ</label>
@@ -292,11 +273,11 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit btn-withdraw-submit" style="margin-top: 20px;"><i class="fas fa-file-invoice"></i> উত্তোলন সম্পন্ন করুন</button>
+                <button type="submit" class="btn-submit btn-withdraw-submit" id="wdSubmitBtn" style="margin-top: 20px;"><i class="fas fa-file-invoice"></i> উত্তোলন সম্পন্ন করুন</button>
             </form>
         </div>
 
-        <!-- --- Transaction List Section --- -->
+        <!-- Transaction List -->
         <h3 class="section-title">সকল লেনদেনের তালিকা</h3>
         <div class="table-responsive">
             <table>
@@ -311,77 +292,32 @@
                     </tr>
                 </thead>
                 <tbody id="transactionList">
-                    <!-- Demo Row: Deposit -->
-                    <tr>
-                        <td>03 Sep, 2026</td>
-                        <td>মাসিক জমা, ডোনেশন</td>
-                        <td>মো. রহিম মিয়া (WAF-01)</td>
-                        <td>1,500.00</td>
-                        <td><span class="type-badge type-dep">জমা</span></td>
-                        <td>
-                            <div class="actions-group">
-                                <button class="btn-action btn-view" title="বিস্তারিত দেখুন"><i class="fas fa-eye"></i></button>
-                                <button class="btn-action btn-receipt" title="রিসিট প্রিন্ট করুন" onclick="openReceiptModal('TRX-101', 'মো. রহিম মিয়া (WAF-01)', '03 Sep, 2026', 'মাসিক জমা: 1000<br>ডোনেশন: 500', 1500, 'deposit')"><i class="fas fa-file-invoice"></i></button>
-                                <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
-                                <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                    <!-- Demo Row: Withdraw (Loan) -->
-                    <tr>
-                        <td>01 Sep, 2026</td>
-                        <td>ঋণ প্রদান</td>
-                        <td>করিম উল্লাহ (WAF-02)</td>
-                        <td>10,000.00</td>
-                        <td><span class="type-badge type-wd">উত্তোলন</span></td>
-                        <td>
-                            <div class="actions-group">
-                                <button class="btn-action btn-view" title="বিস্তারিত দেখুন"><i class="fas fa-eye"></i></button>
-                                <button class="btn-action btn-receipt" title="ভাউচার প্রিন্ট করুন" onclick="openReceiptModal('TRX-102', 'করিম উল্লাহ (WAF-02)', '01 Sep, 2026', 'ঋণ গ্রহণ', 10000, 'withdraw')"><i class="fas fa-file-invoice"></i></button>
-                                <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
-                                <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
-                            </div>
-                        </td>
-                    </tr>
+                    <tr><td colspan="6" style="text-align:center;">ডাটা লোড হচ্ছে...</td></tr>
                 </tbody>
             </table>
         </div>
     </main>
 
-    <!-- --- Receipt Modal (Printable) --- -->
+    <!-- Receipt Modal -->
     <div class="modal" id="receiptModal">
         <div class="modal-content printable">
             <button class="close-modal" onclick="closeModal('receiptModal')"><i class="fas fa-times"></i></button>
             
             <div class="receipt-header">
-                <div class="r-logo">
-                    <!-- Replace the icon with your logo image if you have one: <img src="logo.png" alt="Logo" style="height: 50px;"> -->
-                    <i class="fas fa-handshake"></i>
-                    <h2>বন্ধু কল্যাণ সংস্থা</h2>
-                </div>
-                <p>ব্রাহ্মণপাড়া, কুমিল্লা | স্থাপিত: ২০২০</p>
+                <i class="fas fa-handshake"></i>
+                <h2>বন্ধু কল্যাণ সংস্থা</h2>
+                <p>ব্রাহ্মণপাড়া, কুমিল্লা</p>
                 <div class="r-title" id="rTypeBadge">মানি রিসিট (জমা)</div>
             </div>
 
             <div class="receipt-info">
-                <div class="info-row">
-                    <span class="label">রিসিট/ভাউচার নং:</span>
-                    <span class="val" id="rId">TRX-000</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">তারিখ:</span>
-                    <span class="val" id="rDate">DD MMM, YYYY</span>
-                </div>
-                <div class="info-row">
-                    <span class="label" id="rMemberLabel">সদস্যের নাম:</span>
-                    <span class="val" id="rMember">Name (ID)</span>
-                </div>
+                <div class="info-row"><span class="label">রিসিট নং:</span><span class="val" id="rId">TRX-000</span></div>
+                <div class="info-row"><span class="label">তারিখ:</span><span class="val" id="rDate">DD MMM, YYYY</span></div>
+                <div class="info-row"><span class="label" id="rMemberLabel">নাম:</span><span class="val" id="rMember">Name</span></div>
                 
                 <div style="margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ddd;">
-                    <span class="label" style="display: block; margin-bottom: 5px;">বিবরণ / খাতের তালিকা:</span>
-                    <div class="val" id="rDetails" style="font-weight: normal; font-size: 15px;">
-                        <!-- Details injected via JS -->
-                    </div>
+                    <span class="label" style="display: block; margin-bottom: 5px;">খাতের তালিকা:</span>
+                    <div class="val" id="rDetails" style="font-weight: normal; font-size: 15px; line-height: 1.5;"></div>
                 </div>
             </div>
 
@@ -392,7 +328,6 @@
 
             <div class="r-footer">
                 <p>এটি একটি কম্পিউটার জেনারেটেড রিসিট।</p>
-                <p>&copy; বন্ধু কল্যাণ সংস্থা</p>
             </div>
 
             <button class="btn-print" onclick="window.print()" style="margin-top: 15px;">
@@ -401,11 +336,9 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- UI Logic Scripts -->
     <script>
-        // --- Init ---
         window.addEventListener('load', () => {
-            setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500);
             const today = new Date().toLocaleDateString('en-CA');
             document.getElementById('depDate').value = today;
             document.getElementById('wdLoanDate').value = today;
@@ -413,18 +346,15 @@
             addExpenseRow();
         });
 
-        // Sidebar
         document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
         document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
 
-        // Mode Switch
         document.getElementById('modeSelector').addEventListener('change', function() {
             document.getElementById('sec-deposit').classList.remove('active');
             document.getElementById('sec-withdraw').classList.remove('active');
             document.getElementById(this.value === 'deposit' ? 'sec-deposit' : 'sec-withdraw').classList.add('active');
         });
 
-        // Deposit Logic
         function toggleDepInput(chkId, amtId) {
             const chk = document.getElementById(chkId), amt = document.getElementById(amtId);
             if (chk.checked) { amt.classList.add('active'); amt.required = true; } 
@@ -442,7 +372,6 @@
             document.getElementById('depWordsVal').innerText = numberToBanglaWords(total) + " টাকা মাত্র";
         }
 
-        // Withdraw Logic
         function switchWithdrawMode() {
             const isLoan = document.getElementById('withdrawType').value === 'loan';
             document.getElementById('wd-loan-mode').style.display = isLoan ? 'block' : 'none';
@@ -461,7 +390,12 @@
         function addExpenseRow() {
             expCount++;
             const rowId = `exp-row-${expCount}`;
-            const html = `<div class="dynamic-row" id="${rowId}"><div class="input-group"><label>খাত</label><input type="text" required></div><div class="input-group"><label>বিবরণ</label><input type="text"></div><div class="input-group"><label>পরিমাণ (৳)</label><input type="number" class="exp-amt" required min="1" oninput="calcExpenseTotal()"></div><button type="button" class="btn-remove-row" onclick="removeExpenseRow('${rowId}')"><i class="fas fa-trash"></i></button></div>`;
+            const html = `<div class="dynamic-row" id="${rowId}">
+                <div class="input-group"><label>খাত</label><input type="text" class="exp-name" required></div>
+                <div class="input-group"><label>বিবরণ</label><input type="text" class="exp-desc"></div>
+                <div class="input-group"><label>পরিমাণ (৳)</label><input type="number" class="exp-amt" required min="1" oninput="calcExpenseTotal()"></div>
+                <button type="button" class="btn-remove-row" onclick="removeExpenseRow('${rowId}')"><i class="fas fa-trash"></i></button>
+            </div>`;
             document.getElementById('expenseRowsContainer').insertAdjacentHTML('beforeend', html);
         }
         function removeExpenseRow(id) { document.getElementById(id).remove(); calcExpenseTotal(); }
@@ -471,7 +405,6 @@
             document.getElementById('expWordsVal').innerText = numberToBanglaWords(total) + " টাকা মাত্র";
         }
 
-        // Bangla Number to Words (Up to Koti)
         const bWords = ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ", "বিশ", "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আঠাশ", "উনত্রিশ", "ত্রিশ", "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "উনচল্লিশ", "চল্লিশ", "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "উনপঞ্চাশ", "পঞ্চাশ", "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "উনষাট", "ষাট", "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "উনসত্তর", "সত্তর", "একাতর", "বাহাত্তর", "তিয়াত্তর", "চুয়াত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "উনআশি", "আশি", "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটশি", "উননব্বই", "নব্বই", "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"];
         function numberToBanglaWords(num) {
             if (num === 0) return bWords[0];
@@ -487,49 +420,270 @@
             return str.trim();
         }
 
-        // Submits
-        document.getElementById('depositForm').addEventListener('submit', function(e) { e.preventDefault(); alert('জমা সফলভাবে সম্পন্ন হয়েছে!'); this.reset(); calcDepositTotal(); });
-        document.getElementById('withdrawForm').addEventListener('submit', function(e) { e.preventDefault(); alert('উত্তোলন সম্পন্ন হয়েছে!'); this.reset(); calcExpenseTotal(); calcLoanWords(); });
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+    </script>
 
-        // --- Receipt Modal Logic ---
-        function openReceiptModal(id, member, date, details, amount, type) {
-            document.getElementById('rId').innerText = id;
-            document.getElementById('rDate').innerText = date;
-            document.getElementById('rDetails').innerHTML = details;
-            document.getElementById('rTotalAmount').innerText = amount.toFixed(2);
-            document.getElementById('rWords').innerText = numberToBanglaWords(amount) + " টাকা মাত্র";
+    <!-- Firebase Integration Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, update, get, child, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Security Check
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
+        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+
+        // Load Members for Dropdown
+        onValue(ref(db, 'members'), (snapshot) => {
+            const depMember = document.getElementById('depMember');
+            const wdLoanMember = document.getElementById('wdLoanMember');
             
+            depMember.innerHTML = '<option value="">সদস্য নির্বাচন করুন</option>';
+            wdLoanMember.innerHTML = '<option value="">সদস্য নির্বাচন করুন</option>';
+            
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    let m = child.val();
+                    let option = `<option value="${m.id}">${m.name} (${m.id})</option>`;
+                    depMember.insertAdjacentHTML('beforeend', option);
+                    wdLoanMember.insertAdjacentHTML('beforeend', option);
+                });
+            }
+            setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500);
+        });
+
+        // 1. Submit Deposit
+        document.getElementById('depositForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('depSubmitBtn');
+            const memberId = document.getElementById('depMember').value;
+            const date = document.getElementById('depDate').value;
+            
+            const amtAdm = document.getElementById('chkAdm').checked ? (parseFloat(document.getElementById('amtAdm').value) || 0) : 0;
+            const amtMon = document.getElementById('chkMon').checked ? (parseFloat(document.getElementById('amtMon').value) || 0) : 0;
+            const amtFine = document.getElementById('chkFine').checked ? (parseFloat(document.getElementById('amtFine').value) || 0) : 0;
+            const amtDon = document.getElementById('chkDon').checked ? (parseFloat(document.getElementById('amtDon').value) || 0) : 0;
+            
+            const chkOth = document.getElementById('chkOth').checked;
+            const txtOth = document.getElementById('txtOth').value || "অন্যান্য";
+            const amtOth = chkOth ? (parseFloat(document.getElementById('amtOth').value) || 0) : 0;
+            
+            const total = amtAdm + amtMon + amtFine + amtDon + amtOth;
+            if(total <= 0) return alert('দয়া করে জমার পরিমাণ উল্লেখ করুন!');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+            btn.disabled = true;
+
+            try {
+                // Get Member Name & Current Funds
+                const memberSnap = await get(ref(db, 'members/' + memberId));
+                let memberData = memberSnap.val();
+                if(!memberData) throw new Error("সদস্য খুঁজে পাওয়া যায়নি!");
+
+                let updates = {};
+                const newTrxKey = push(child(ref(db), 'transactions')).key;
+                
+                let detailsArr = [];
+                if(amtAdm > 0) detailsArr.push(`ভর্তি ফি: ৳ ${amtAdm}`);
+                if(amtMon > 0) detailsArr.push(`মাসিক জমা: ৳ ${amtMon}`);
+                if(amtFine > 0) detailsArr.push(`জরিমানা: ৳ ${amtFine}`);
+                if(amtDon > 0) detailsArr.push(`ডোনেশন: ৳ ${amtDon}`);
+                if(amtOth > 0) detailsArr.push(`${txtOth}: ৳ ${amtOth}`);
+
+                // Transaction Log
+                updates['/transactions/' + newTrxKey] = {
+                    id: newTrxKey, memberId: memberId, memberName: memberData.name,
+                    date: date, timestamp: Date.now(), type: 'deposit',
+                    details: detailsArr.join('<br>'), totalAmount: total
+                };
+
+                // Update Member's Personal Monthly Fund
+                let currentMonthly = (memberData.funds && memberData.funds.monthly) ? memberData.funds.monthly : 0;
+                updates[`/members/${memberId}/funds/monthly`] = currentMonthly + amtMon;
+                
+                // Update Organization Funds (Everything else)
+                const orgSnap = await get(ref(db, 'org_funds'));
+                let orgData = orgSnap.val() || { admission: 0, fine: 0, donation: 0, others: 0 };
+                
+                updates['/org_funds/admission'] = (orgData.admission || 0) + amtAdm;
+                updates['/org_funds/fine'] = (orgData.fine || 0) + amtFine;
+                updates['/org_funds/donation'] = (orgData.donation || 0) + amtDon;
+                updates['/org_funds/others'] = (orgData.others || 0) + amtOth;
+                
+                // Execute Simultaneous Update
+                await update(ref(db), updates);
+                
+                alert('জমা সফলভাবে সম্পন্ন হয়েছে!');
+                this.reset();
+                document.querySelectorAll('.dep-amt, .other-text-input').forEach(el => { el.classList.remove('active'); el.required = false; });
+                calcDepositTotal();
+                
+            } catch(error) {
+                console.error(error); alert("জমা সম্পন্ন করতে সমস্যা হয়েছে!");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> জমা নিশ্চিত করুন';
+                btn.disabled = false;
+            }
+        });
+
+        // 2. Submit Withdrawal (Loan or Expense)
+        document.getElementById('withdrawForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('wdSubmitBtn');
+            const mode = document.getElementById('withdrawType').value;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+            btn.disabled = true;
+
+            try {
+                let updates = {};
+                const newTrxKey = push(child(ref(db), 'transactions')).key;
+
+                if(mode === 'loan') {
+                    const memberId = document.getElementById('wdLoanMember').value;
+                    const amt = parseFloat(document.getElementById('wdLoanAmount').value);
+                    const date = document.getElementById('wdLoanDate').value;
+
+                    const memberSnap = await get(ref(db, 'members/' + memberId));
+                    let memberData = memberSnap.val();
+
+                    updates['/transactions/' + newTrxKey] = {
+                        id: newTrxKey, memberId: memberId, memberName: memberData.name,
+                        date: date, timestamp: Date.now(), type: 'withdraw_loan',
+                        details: 'ঋণ প্রদান', totalAmount: amt
+                    };
+
+                    // In a real scenario, you'd update a separate Loan table or member's loan node here
+                    // updates[`/loans/${newTrxKey}`] = { ... }
+
+                } else {
+                    const total = parseFloat(document.getElementById('expTotalVal').innerText);
+                    const date = document.getElementById('wdExpDate').value;
+                    if(total <= 0) throw new Error("খরচের পরিমাণ শূন্য!");
+
+                    let detailsArr = [];
+                    document.querySelectorAll('.dynamic-row').forEach(row => {
+                        let name = row.querySelector('.exp-name').value;
+                        let amt = row.querySelector('.exp-amt').value;
+                        if(name && amt) detailsArr.push(`${name}: ৳ ${amt}`);
+                    });
+
+                    updates['/transactions/' + newTrxKey] = {
+                        id: newTrxKey, date: date, timestamp: Date.now(), type: 'withdraw_expense',
+                        details: detailsArr.join('<br>'), totalAmount: total
+                    };
+                }
+
+                await update(ref(db), updates);
+                alert('উত্তোলন সম্পন্ন হয়েছে!');
+                
+                this.reset();
+                if(mode === 'expense') {
+                    document.getElementById('expenseRowsContainer').innerHTML = '';
+                    expCount = 0; addExpenseRow(); calcExpenseTotal();
+                } else calcLoanWords();
+
+            } catch(error) {
+                console.error(error); alert(error.message || "উত্তোলন সম্পন্ন করতে সমস্যা হয়েছে!");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-file-invoice"></i> উত্তোলন সম্পন্ন করুন';
+                btn.disabled = false;
+            }
+        });
+
+        // 3. Load Transaction List
+        onValue(ref(db, 'transactions'), (snapshot) => {
+            const tbody = document.getElementById('transactionList');
+            tbody.innerHTML = '';
+            
+            if(snapshot.exists()) {
+                let trxs = [];
+                snapshot.forEach(child => { trxs.push({key: child.key, ...child.val()}); });
+                
+                // Show latest first
+                trxs.sort((a,b) => b.timestamp - a.timestamp).forEach(trx => {
+                    let d = new Date(trx.timestamp).toLocaleDateString('en-GB');
+                    let isDep = trx.type === 'deposit';
+                    let typeBadge = isDep ? `<span class="type-badge type-dep">জমা</span>` : `<span class="type-badge type-wd">উত্তোলন</span>`;
+                    let entity = trx.memberName ? `${trx.memberName} (${trx.memberId})` : 'সাধারণ খরচ / অন্যান্য';
+
+                    // Convert to string for inline function parameter
+                    let detailsStr = trx.details.replace(/'/g, "\\'"); 
+
+                    tbody.innerHTML += `<tr>
+                        <td>${d}</td>
+                        <td style="font-size: 13px;">${trx.details}</td>
+                        <td style="font-weight:600;">${entity}</td>
+                        <td style="font-weight:700;">${trx.totalAmount.toFixed(2)}</td>
+                        <td>${typeBadge}</td>
+                        <td>
+                            <div class="actions-group">
+                                <button class="btn-action btn-receipt" title="রিসিট প্রিন্ট" onclick="window.openReceipt('${trx.id}')"><i class="fas fa-receipt"></i></button>
+                                <button class="btn-action btn-delete" title="ডিলিট" onclick="window.deleteTrx('${trx.key}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">কোনো লেনদেন পাওয়া যায়নি।</td></tr>';
+            }
+        });
+
+        // Global functions for inline HTML calling
+        window.deleteTrx = async function(key) {
+            if(confirm('আপনি কি এই লেনদেনটি ডিলিট করতে চান? (এটি সংশ্লিষ্ট ফান্ড আপডেট করবে না, শুধু হিস্ট্রি মুছবে)')) {
+                await remove(ref(db, 'transactions/' + key));
+            }
+        }
+
+        window.openReceipt = async function(trxId) {
+            const snap = await get(ref(db, 'transactions/' + trxId));
+            if(!snap.exists()) return;
+            let trx = snap.val();
+
+            document.getElementById('rId').innerText = "#" + trx.timestamp.toString().slice(-6);
+            document.getElementById('rDate').innerText = new Date(trx.timestamp).toLocaleDateString('en-GB');
+            document.getElementById('rTotalAmount').innerText = trx.totalAmount.toFixed(2);
+            document.getElementById('rWords').innerText = numberToBanglaWords(trx.totalAmount) + " টাকা মাত্র";
+            document.getElementById('rDetails').innerHTML = trx.details;
+
             const typeBadge = document.getElementById('rTypeBadge');
-            const memberLabel = document.getElementById('rMemberLabel');
             const totalBox = document.getElementById('rTotalBox');
 
-            if(type === 'deposit') {
+            if(trx.type === 'deposit') {
                 typeBadge.innerText = 'মানি রিসিট (জমা)';
-                typeBadge.style.color = '#fff';
-                typeBadge.style.background = '#7CD03A';
-                typeBadge.style.borderColor = '#7CD03A';
-                memberLabel.innerText = 'জমা প্রদানকারী:';
-                document.getElementById('rMember').innerText = member;
+                typeBadge.style.background = 'var(--primary-green)';
+                document.getElementById('rMemberLabel').innerText = 'জমা প্রদানকারী:';
+                document.getElementById('rMember').innerText = trx.memberName ? `${trx.memberName} (${trx.memberId})` : '-';
                 totalBox.style.background = 'rgba(124, 208, 58, 0.05)';
-                totalBox.style.borderColor = '#7CD03A';
-                totalBox.querySelector('h3').style.color = '#7CD03A';
+                totalBox.style.borderColor = 'var(--primary-green)';
+                totalBox.querySelector('h3').style.color = 'var(--primary-green)';
             } else {
                 typeBadge.innerText = 'ভাউচার (উত্তোলন/খরচ)';
-                typeBadge.style.color = '#fff';
-                typeBadge.style.background = '#e74c3c';
-                typeBadge.style.borderColor = '#e74c3c';
-                memberLabel.innerText = member ? 'গ্রহীতা:' : 'খাত:';
-                document.getElementById('rMember').innerText = member || 'সাধারণ খরচ';
+                typeBadge.style.background = 'var(--primary-red)';
+                document.getElementById('rMemberLabel').innerText = trx.type === 'withdraw_loan' ? 'গ্রহীতা:' : 'খাত:';
+                document.getElementById('rMember').innerText = trx.memberName ? `${trx.memberName} (${trx.memberId})` : 'সাধারণ খরচ';
                 totalBox.style.background = 'rgba(231, 76, 60, 0.05)';
-                totalBox.style.borderColor = '#e74c3c';
-                totalBox.querySelector('h3').style.color = '#e74c3c';
+                totalBox.style.borderColor = 'var(--primary-red)';
+                totalBox.querySelector('h3').style.color = 'var(--primary-red)';
             }
 
             document.getElementById('receiptModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
         }
 
     </script>
