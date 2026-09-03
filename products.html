@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>পণ্য তালিকা ও লেনদেন - বন্ধু কল্যাণ সংস্থা</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw;}
 
         /* --- Loader & Sidebar --- */
         #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
@@ -41,7 +41,7 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content --- */
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; animation: fadeInUp 0.6s ease-out; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
@@ -56,13 +56,9 @@
         .card-green { border-left-color: var(--primary-green); } .card-green i { color: var(--primary-green); }
         .card-red { border-left-color: #e74c3c; } .card-red i { color: #e74c3c; }
 
-        /* --- Action Selector & Search --- */
+        /* --- Action Selector --- */
         .controls-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; background: #fff; padding: 15px 20px; border-radius: 12px; box-shadow: var(--card-shadow); flex-wrap: wrap; }
-        .action-select { padding: 10px 15px; border: 2px solid var(--primary-blue); border-radius: 8px; font-size: 16px; font-weight: 600; color: var(--primary-blue); outline: none; cursor: pointer; background: rgba(10,54,157,0.05); }
-        .search-box { position: relative; flex: 1; max-width: 400px; }
-        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; }
-        .search-box input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; }
-        .search-box input:focus { border-color: var(--primary-blue); }
+        .action-select { padding: 10px 15px; border: 2px solid var(--primary-blue); border-radius: 8px; font-size: 16px; font-weight: 600; color: var(--primary-blue); outline: none; cursor: pointer; background: rgba(10,54,157,0.05); width: 100%; max-width: 400px; text-align: center;}
 
         /* --- Forms Styling --- */
         .form-section { background: #fff; padding: 25px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; display: none; animation: fadeIn 0.4s; }
@@ -72,47 +68,56 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         .input-group { display: flex; flex-direction: column; gap: 8px; }
         .input-group label { font-size: 14px; font-weight: 600; color: #555; }
-        .input-group input, .input-group select { padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; outline: none; background: #fafafa; font-family: sans-serif; }
-        .input-group input:focus, .input-group select:focus { border-color: var(--primary-blue); background: #fff; }
+        .input-group input, .input-group select { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fafafa; font-family: sans-serif; transition: 0.3s;}
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 3px rgba(10,54,157,0.1);}
         .input-group input[readonly] { background: #eee; color: #555; cursor: not-allowed; }
         
         .hidden-field { display: none; margin-top: 8px; }
         
-        .btn-submit { background: var(--primary-blue); color: #fff; padding: 12px 20px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn-submit:hover { background: #06236b; }
-        .btn-submit:disabled { background: #999; cursor: not-allowed; }
+        .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
+        .btn-submit:disabled { background: #999; cursor: not-allowed; transform: none; box-shadow: none;}
 
         #sellProfit { font-weight: 700; transition: color 0.3s, background 0.3s; }
 
         /* --- Tables --- */
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); margin-top: 20px; }
-        .table-responsive { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
+        .table-container { background: #fff; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; overflow: hidden; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 15px; white-space: nowrap;}
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tbody tr:hover { background: #fafafa; }
         
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .badge { padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
         .b-due { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
         .b-paid { background: rgba(124, 208, 58, 0.1); color: #5a9e26; }
 
-        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; }
-        .btn-pay:hover { background: #68b32e; }
+        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;}
+        .btn-pay:hover { background: #68b32e; transform: translateY(-2px); box-shadow: 0 3px 8px rgba(124, 208, 58, 0.3);}
 
         /* Payment Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; padding: 15px;}
         .modal.active { display: flex; animation: fadeIn 0.3s; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
-        .modal-content h3 { color: var(--primary-blue); margin-bottom: 15px; }
-        .close-modal { background: #e74c3c; color: #fff; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; margin-top: 15px; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; text-align: center; position: relative; }
+        .modal-content h3 { color: var(--primary-blue); margin-bottom: 15px; font-size: 22px; }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.05); color: #555; width: 35px; height: 35px; border-radius: 50%; border: none; font-size: 18px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center;}
+        .close-modal:hover { background: #e74c3c; color: #fff; }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* Responsive Fixes */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 20px 15px; max-width: 100vw;} .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
+            
+            .table-container::before {
+                content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
+                font-size: 12px; color: #999; padding: 8px 0; background: #fafafa; border-bottom: 1px solid #eee;
+            }
         }
     </style>
 </head>
@@ -151,21 +156,21 @@
         <div class="summary-grid">
             <div class="summary-card">
                 <i class="fas fa-boxes"></i>
-                <div class="info"><h4>মোট পণ্য মজুদ (৳)</h4><h2 id="totalInventoryValue">0.00</h2></div>
+                <div class="info"><h4>মোট পণ্য মজুদ (বর্তমান মূল্য)</h4><h2 id="totalInventoryValue">0.00</h2></div>
             </div>
             <div class="summary-card card-green">
                 <i class="fas fa-chart-line"></i>
-                <div class="info"><h4>মোট লাভ (৳)</h4><h2 id="totalProfit">0.00</h2></div>
+                <div class="info"><h4>মোট লাভ</h4><h2 id="totalProfit">0.00</h2></div>
             </div>
             <div class="summary-card card-red">
                 <i class="fas fa-file-invoice-dollar"></i>
-                <div class="info"><h4>বর্তমান বকেয়া/ঋণ (৳)</h4><h2 id="totalDueAmount">0.00</h2></div>
+                <div class="info"><h4>বর্তমান বকেয়া (বিক্রয়)</h4><h2 id="totalDueAmount">0.00</h2></div>
             </div>
         </div>
 
         <div class="controls-wrapper">
             <select class="action-select" id="actionSelector">
-                <option value="add">১. নতুন পণ্য যুক্ত করুন</option>
+                <option value="add">১. নতুন পণ্য যুক্ত করুন (মজুদ)</option>
                 <option value="sell">২. পণ্য বিক্রি করুন</option>
             </select>
         </div>
@@ -207,8 +212,8 @@
                         <input type="number" id="addQty" min="1" step="any" required placeholder="1, 2, 3...">
                     </div>
                     <div class="input-group">
-                        <label>সর্বমোট দাম (Total Cost)</label>
-                        <input type="number" id="addCost" min="1" step="any" required placeholder="Cost (৳)">
+                        <label>সর্বমোট ক্রয়মূল্য (Total Cost)</label>
+                        <input type="number" id="addCost" min="1" step="any" required placeholder="Total Cost (৳)">
                     </div>
                 </div>
                 <button type="submit" class="btn-submit" id="addSubmitBtn"><i class="fas fa-save"></i> পণ্য মজুদ করুন</button>
@@ -216,8 +221,8 @@
         </div>
 
         <!-- FORM 2: Sell Product -->
-        <div class="form-section" id="form-sell">
-            <h3><i class="fas fa-shopping-cart"></i> পণ্য বিক্রি করুন</h3>
+        <div class="form-section" id="form-sell" style="border-top-color: var(--primary-green);">
+            <h3 style="color: var(--primary-green);"><i class="fas fa-shopping-cart"></i> পণ্য বিক্রি করুন</h3>
             <form id="sellProductForm">
                 <div class="form-grid">
                     <div class="input-group">
@@ -241,7 +246,7 @@
                         <input type="text" id="sellAvailable" readonly value="0">
                     </div>
                     <div class="input-group">
-                        <label>পরিমাণ (Sell Qty)</label>
+                        <label>বিক্রয় পরিমাণ (Sell Qty)</label>
                         <input type="number" id="sellQty" min="1" step="any" required placeholder="1, 2...">
                     </div>
                     <div class="input-group">
@@ -249,49 +254,53 @@
                         <input type="text" id="sellRemaining" readonly value="0">
                     </div>
                     <div class="input-group">
-                        <label>ক্রয়মূল্য (Cost Price ৳)</label>
+                        <label>মোট ক্রয়মূল্য (Total Cost Price ৳)</label>
                         <input type="text" id="sellCost" readonly value="0">
                     </div>
                     <div class="input-group">
-                        <label>বিক্রয় মূল্য (Selling Price ৳)</label>
-                        <input type="number" id="sellPrice" min="1" step="any" required placeholder="Price (৳)">
+                        <label>সর্বমোট বিক্রয় মূল্য (Selling Price ৳)</label>
+                        <input type="number" id="sellPrice" min="1" step="any" required placeholder="Total Price (৳)">
                     </div>
                     <div class="input-group">
                         <label>লাভ বা ক্ষতি (Profit/Loss ৳)</label>
                         <input type="text" id="sellProfit" readonly value="0" style="background:#fff;">
                     </div>
                     <div class="input-group">
-                        <label>নগদ পেমেন্ট (Cash ৳)</label>
+                        <label>নগদ পেমেন্ট গ্রহণ (Cash ৳)</label>
                         <input type="number" id="sellPaid" min="0" step="any" required placeholder="Paid amount">
                     </div>
                     <div class="input-group">
                         <label>বকেয়া আছে (Due ৳)</label>
-                        <input type="text" id="sellDue" readonly value="0">
+                        <input type="text" id="sellDue" readonly value="0" style="color: var(--primary-red); font-weight: bold;">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit" id="sellSubmitBtn" style="background: var(--primary-green);"><i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন</button>
+                <button type="submit" class="btn-submit" id="sellSubmitBtn" style="background: linear-gradient(135deg, var(--primary-green), #68b32e);"><i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন</button>
             </form>
         </div>
 
         <!-- Tables -->
-        <h3 class="section-title">মজুদ পণ্যের তালিকা</h3>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr><th>তারিখ</th><th>পণ্যের নাম</th><th>ধরণ</th><th>পরিমাণ</th><th>মোট ক্রয়মূল্য (৳)</th></tr>
-                </thead>
-                <tbody id="inventoryTable"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
-            </table>
+        <h3 class="section-title"><i class="fas fa-boxes"></i> বর্তমান মজুদ পণ্যের তালিকা</h3>
+        <div class="table-container">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>তারিখ</th><th>পণ্যের নাম</th><th>ধরণ</th><th>বর্তমান পরিমাণ</th><th>বর্তমান ক্রয়মূল্য (৳)</th></tr>
+                    </thead>
+                    <tbody id="inventoryTable"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                </table>
+            </div>
         </div>
 
-        <h3 class="section-title">বিক্রিত পণ্য ও বকেয়া তালিকা</h3>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr><th>তারিখ</th><th>ক্রেতা</th><th>পণ্য</th><th>পরিমাণ</th><th>মূল্য</th><th>বকেয়া (৳)</th><th>অ্যাকশন</th></tr>
-                </thead>
-                <tbody id="salesTable"><tr><td colspan="7" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
-            </table>
+        <h3 class="section-title"><i class="fas fa-list-alt"></i> বিক্রিত পণ্য ও বকেয়া তালিকা</h3>
+        <div class="table-container">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr><th>তারিখ</th><th>ক্রেতা</th><th>পণ্য</th><th>বিক্রয় পরিমাণ</th><th>মোট মূল্য</th><th>বকেয়া (৳)</th><th>অ্যাকশন</th></tr>
+                    </thead>
+                    <tbody id="salesTable"><tr><td colspan="7" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                </table>
+            </div>
         </div>
 
     </main>
@@ -299,20 +308,20 @@
     <!-- Payment Modal -->
     <div class="modal" id="paymentModal">
         <div class="modal-content">
-            <h3>বকেয়া জমা নিন</h3>
-            <p id="payCustomerName" style="color: #666; margin-bottom:15px;"></p>
+            <button class="close-modal" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></button>
+            <h3 style="display: flex; align-items: center; justify-content: center; gap: 8px;"><i class="fas fa-hand-holding-usd"></i> বকেয়া জমা নিন</h3>
+            <p id="payCustomerName" style="color: #666; margin-bottom:20px; font-weight: 600;"></p>
             <form id="payDueForm">
                 <input type="hidden" id="paySaleId">
                 <div class="input-group" style="text-align: left; margin-bottom: 15px;">
                     <label>বর্তমান বকেয়া (৳)</label>
-                    <input type="text" id="payCurrentDue" readonly>
+                    <input type="text" id="payCurrentDue" readonly style="color: var(--primary-red); font-weight: bold;">
                 </div>
-                <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+                <div class="input-group" style="text-align: left; margin-bottom: 20px;">
                     <label>জমাকৃত টাকার পরিমাণ (৳)</label>
-                    <input type="number" id="payAmountInput" min="1" required placeholder="Amount">
+                    <input type="number" id="payAmountInput" min="1" step="any" required placeholder="Amount">
                 </div>
-                <button type="submit" class="btn-submit" id="paySubmitBtn" style="width: 100%; margin-top:0;">জমা দিন</button>
-                <button type="button" class="close-modal" onclick="closeModal('paymentModal')">বন্ধ করুন</button>
+                <button type="submit" class="btn-submit" id="paySubmitBtn" style="width: 100%; margin-top:0; background: var(--primary-green);"><i class="fas fa-check-circle"></i> অ্যাকাউন্টে জমা দিন</button>
             </form>
         </div>
     </div>
@@ -383,19 +392,20 @@
                     allProducts.push(p);
                     if(p.qty > 0) totalInvValue += p.totalCost;
 
+                    // Only show products that have quantity > 0 or at least exist
                     tbody.innerHTML += `<tr>
                         <td>${new Date(p.timestamp).toLocaleDateString('en-GB')}</td>
-                        <td>${p.name}</td>
+                        <td style="font-weight: 600;">${p.name}</td>
                         <td>${p.category}</td>
-                        <td>${p.qty} ${p.unit}</td>
-                        <td>${p.totalCost.toFixed(2)}</td>
+                        <td><span class="badge" style="background:#eee; color:#333; font-size:14px;">${p.qty} ${p.unit}</span></td>
+                        <td style="font-weight:700;">${p.totalCost.toFixed(2)}</td>
                     </tr>`;
                 });
                 populateSellDropdowns();
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো পণ্য নেই</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো পণ্য মজুদ নেই</td></tr>';
             }
-            document.getElementById('totalInventoryValue').innerText = totalInvValue.toFixed(2);
+            document.getElementById('totalInventoryValue').innerText = '৳ ' + totalInvValue.toFixed(2);
         });
 
         // Fetch Sales & Dues
@@ -406,32 +416,34 @@
             let totalDue = 0, totalProfit = 0;
 
             if (snapshot.exists()) {
-                snapshot.forEach(child => {
-                    let s = child.val();
-                    s.id = child.key;
+                let salesDataArr = [];
+                snapshot.forEach(child => { salesDataArr.push({id: child.key, ...child.val()}); });
+                
+                // Sort by latest
+                salesDataArr.sort((a,b) => b.timestamp - a.timestamp).forEach(s => {
                     allSales.push(s);
-                    
                     totalDue += s.due;
                     totalProfit += s.profit;
 
-                    let dueBadge = s.due > 0 ? `<span class="badge b-due">${s.due.toFixed(2)}</span>` : `<span class="badge b-paid">Paid</span>`;
-                    let actionBtn = s.due > 0 ? `<button class="btn-pay" onclick="window.openPaymentModal('${s.id}')">Pay Due</button>` : `<i class="fas fa-check" style="color:#5a9e26;"></i>`;
+                    let dueBadge = s.due > 0 ? `<span class="badge b-due">৳ ${s.due.toFixed(2)}</span>` : `<span class="badge b-paid"><i class="fas fa-check"></i> পরিশোধিত</span>`;
+                    let actionBtn = s.due > 0 ? `<button class="btn-pay" onclick="window.openPaymentModal('${s.id}')"><i class="fas fa-hand-holding-usd"></i> জমা নিন</button>` : `<span style="color:var(--primary-green); font-weight:bold;"><i class="fas fa-check-double"></i> সম্পন্ন</span>`;
 
                     tbody.innerHTML += `<tr>
                         <td>${new Date(s.timestamp).toLocaleDateString('en-GB')}</td>
-                        <td>${s.customer}</td>
-                        <td>${s.productName} (${s.qty})</td>
-                        <td>${s.price.toFixed(2)}</td>
+                        <td style="font-weight: 600;">${s.customer}</td>
+                        <td>${s.productName}</td>
+                        <td>${s.qty}</td>
+                        <td style="font-weight:700;">${s.price.toFixed(2)}</td>
                         <td>${dueBadge}</td>
                         <td>${actionBtn}</td>
                     </tr>`;
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">কোনো বিক্রয় নেই</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">কোনো বিক্রয়ের রেকর্ড নেই</td></tr>';
             }
             
-            document.getElementById('totalDueAmount').innerText = totalDue.toFixed(2);
-            document.getElementById('totalProfit').innerText = totalProfit.toFixed(2);
+            document.getElementById('totalDueAmount').innerText = '৳ ' + totalDue.toFixed(2);
+            document.getElementById('totalProfit').innerText = '৳ ' + totalProfit.toFixed(2);
         });
 
         // Add Product Form
@@ -457,9 +469,18 @@
 
             try {
                 await set(push(ref(db, 'products')), data);
-                alert("পণ্য সফলভাবে যুক্ত হয়েছে!");
+                
+                // Add to transactions history
+                const trxKey = push(ref(db, 'transactions')).key;
+                await set(ref(db, `transactions/${trxKey}`), {
+                    id: trxKey, date: new Date().toLocaleDateString('en-CA'),
+                    timestamp: Date.now(), type: 'withdraw_expense', // count as expense
+                    details: `পণ্য ক্রয়: ${data.name}`, totalAmount: cost
+                });
+
+                alert("পণ্য সফলভাবে যুক্ত ও মজুদ হয়েছে!");
                 this.reset();
-            } catch(e) { alert("সমস্যা হয়েছে!"); }
+            } catch(e) { alert("সমস্যা হয়েছে!"); console.error(e);}
             finally { btn.innerHTML = '<i class="fas fa-save"></i> পণ্য মজুদ করুন'; btn.disabled = false; }
         });
 
@@ -500,7 +521,7 @@
                 document.getElementById('sellQty').value = qty;
             }
             
-            document.getElementById('sellRemaining').value = selectedProduct.qty - qty;
+            document.getElementById('sellRemaining').value = (selectedProduct.qty - qty).toFixed(2);
 
             const cost = qty * selectedProduct.unitPrice;
             document.getElementById('sellCost').value = cost.toFixed(2);
@@ -510,9 +531,9 @@
             const profitEl = document.getElementById('sellProfit');
             profitEl.value = profit.toFixed(2);
             
-            if(price === 0) { profitEl.style.color = '#333'; profitEl.style.backgroundColor = '#fff'; }
-            else if(profit >= 0) { profitEl.style.color = 'green'; profitEl.style.backgroundColor = 'rgba(124, 208, 58, 0.1)'; }
-            else { profitEl.style.color = 'red'; profitEl.style.backgroundColor = 'rgba(231, 76, 60, 0.1)'; }
+            if(price === 0) { profitEl.style.color = '#333'; profitEl.style.backgroundColor = '#fafafa'; }
+            else if(profit >= 0) { profitEl.style.color = 'var(--primary-green)'; profitEl.style.backgroundColor = 'rgba(124, 208, 58, 0.1)'; }
+            else { profitEl.style.color = 'var(--primary-red)'; profitEl.style.backgroundColor = 'rgba(231, 76, 60, 0.1)'; }
 
             const paid = parseFloat(document.getElementById('sellPaid').value) || 0;
             const due = price - paid;
@@ -532,12 +553,13 @@
             let paid = parseFloat(document.getElementById('sellPaid').value);
             let profit = parseFloat(document.getElementById('sellProfit').value);
             let due = price - paid;
+            let customerName = document.getElementById('sellCustomer').value;
 
             let salesData = {
-                customer: document.getElementById('sellCustomer').value,
+                customer: customerName,
                 productId: selectedProduct.id,
                 productName: selectedProduct.name,
-                qty: qty, price: price, profit: profit, due: due > 0 ? due : 0,
+                qty: qty + ' ' + selectedProduct.unit, price: price, profit: profit, due: due > 0 ? due : 0,
                 timestamp: Date.now()
             };
 
@@ -551,9 +573,22 @@
 
             try {
                 await update(ref(db), updates);
-                alert("পণ্য বিক্রয় সম্পন্ন হয়েছে!");
-                this.reset(); selectedProduct = null; document.getElementById('actionSelector').value = 'add'; document.getElementById('actionSelector').dispatchEvent(new Event('change'));
-            } catch(e) { alert("বিক্রয় সম্পন্ন করতে সমস্যা হয়েছে!"); }
+                
+                // Add to transactions history if Paid > 0
+                if(paid > 0) {
+                    const trxKey = push(ref(db, 'transactions')).key;
+                    await set(ref(db, `transactions/${trxKey}`), {
+                        id: trxKey, date: new Date().toLocaleDateString('en-CA'),
+                        timestamp: Date.now(), type: 'deposit', // Cash inflow
+                        details: `পণ্য বিক্রয় (নগদ): ${selectedProduct.name}`, totalAmount: paid
+                    });
+                }
+
+                alert("পণ্য বিক্রয় সফলভাবে সম্পন্ন হয়েছে!");
+                this.reset(); selectedProduct = null; 
+                document.getElementById('actionSelector').value = 'add'; 
+                document.getElementById('actionSelector').dispatchEvent(new Event('change'));
+            } catch(e) { alert("বিক্রয় সম্পন্ন করতে সমস্যা হয়েছে!"); console.error(e);}
             finally { btn.innerHTML = '<i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন'; btn.disabled = false; }
         });
 
@@ -578,14 +613,23 @@
             let sale = allSales.find(s => s.id === saleId);
             if(amount > sale.due) return alert("বকেয়ার চেয়ে বেশি টাকা জমা নেয়া যাবে না!");
 
-            btn.innerHTML = 'প্রসেসিং...'; btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
 
             try {
                 await update(ref(db, `sales/${saleId}`), { due: sale.due - amount });
+                
+                // Add to transactions history
+                const trxKey = push(ref(db, 'transactions')).key;
+                await set(ref(db, `transactions/${trxKey}`), {
+                    id: trxKey, date: new Date().toLocaleDateString('en-CA'),
+                    timestamp: Date.now(), type: 'deposit', 
+                    details: `বকেয়া আদায়: ${sale.productName}`, totalAmount: amount
+                });
+
                 alert("পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে!");
                 document.getElementById('paymentModal').classList.remove('active');
             } catch(e) { alert("পেমেন্ট নিতে সমস্যা হয়েছে!"); }
-            finally { btn.innerHTML = 'জমা দিন'; btn.disabled = false; }
+            finally { btn.innerHTML = '<i class="fas fa-check-circle"></i> অ্যাকাউন্টে জমা দিন'; btn.disabled = false; }
         });
 
     </script>
