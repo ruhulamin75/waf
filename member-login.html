@@ -280,6 +280,7 @@
 
                         // Success: Save Member ID to localStorage and Redirect
                         localStorage.setItem('loggedInMemberId', userFound.id);
+                        localStorage.setItem('userRole', 'member'); // <-- নতুন যুক্ত করা হলো
                         window.location.href = 'member-profile.html';
                         
                     } else {
