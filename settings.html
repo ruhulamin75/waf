@@ -119,14 +119,6 @@
 </head>
 <body>
 
-    <!-- Security Lock (Optimized) -->
-    <script>
-        if (localStorage.getItem("userRole") !== "admin") {
-            alert("অনুগ্রহ করে প্রথমে অ্যাডমিন হিসেবে লগইন করুন।");
-            window.location.href = "login.html";
-        }
-    </script>
-
     <!-- Loader & Overlay -->
     <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -307,7 +299,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
-        import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -323,12 +315,16 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        // Security Check
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = 'login.html';
+        });
+
         // --- Logout (Optimized) ---
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             if(confirm("লগআউট করতে চান?")) {
                 await signOut(auth);
-                localStorage.removeItem("userRole");
                 window.location.href = "login.html";
             }
         });
