@@ -2,19 +2,14 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <!-- মোবাইল ভিউ ফিক্স: ডেক্সটপের মত জুম আউট হবে না -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>নতুন সদস্য যুক্ত করুন - বন্ধু কল্যাণ সংস্থা</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Cropper.js CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 
     <style>
@@ -92,19 +87,19 @@
         .msg-error { background: rgba(255, 71, 87, 0.1); color: #ff4757; border: 1px solid rgba(255, 71, 87, 0.3); }
         .msg-success { background: rgba(124, 208, 58, 0.1); color: #5a9e26; border: 1px solid rgba(124, 208, 58, 0.3); }
 
-        /* --- Image Cropper Modal (FIXED) --- */
+        /* --- Image Cropper Modal --- */
         .cropper-modal { 
             display: none; 
             position: fixed; 
             top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85) !important; /* Solid dark background */
-            z-index: 999999 !important; /* Very high z-index to stay on top of everything */
+            background: rgba(0,0,0,0.85) !important; 
+            z-index: 999999 !important; 
             align-items: center; 
             justify-content: center; 
             padding: 15px;
         }
         .cropper-content { 
-            background: #ffffff !important; /* Solid white background */
+            background: #ffffff !important; 
             border-radius: 15px; 
             padding: 20px; 
             width: 100%; 
@@ -133,19 +128,11 @@
         }
         @media (max-width: 600px) {
             .form-grid { grid-template-columns: 1fr; } .full-width { grid-column: span 1; }
-            .cropper-area { height: 260px; } /* Mobile a height ektu komano hoyeche */
+            .cropper-area { height: 260px; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Security Check -->
-    <script>
-        if (localStorage.getItem("userRole") !== "admin") {
-            alert("অনুগ্রহ করে প্রথমে অ্যাডমিন হিসেবে লগইন করুন।");
-            window.location.href = "login.html";
-        }
-    </script>
 
     <div class="overlay" id="sidebarOverlay"></div>
 
@@ -189,7 +176,6 @@
             </div>
 
             <form id="addMemberForm">
-                
                 <!-- Picture Upload -->
                 <div class="profile-pic-wrapper">
                     <div class="pic-upload-container">
@@ -236,7 +222,7 @@
         </div>
     </main>
 
-    <!-- Cropper Modal (FIXED Z-INDEX) -->
+    <!-- Cropper Modal -->
     <div class="cropper-modal" id="cropperModal">
         <div class="cropper-content">
             <h3 style="margin-bottom: 5px; color: var(--primary-blue);">ছবি ঠিক করুন</h3>
@@ -336,6 +322,11 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
+
+        // Security Check
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = 'login.html';
+        });
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
