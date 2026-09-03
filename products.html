@@ -70,11 +70,11 @@
         .input-group label { font-size: 14px; font-weight: 600; color: #555; }
         .input-group input, .input-group select { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; background: #fafafa; font-family: sans-serif; transition: 0.3s;}
         .input-group input:focus, .input-group select:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 3px rgba(10,54,157,0.1);}
-        .input-group input[readonly] { background: #eee; color: #555; cursor: not-allowed; }
+        .input-group input[readonly] { background: #eee; color: #555; cursor: not-allowed; font-weight: bold;}
         
         .hidden-field { display: none; margin-top: 8px; }
         
-        .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-submit { background: var(--primary-blue); color: #fff; padding: 15px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
         .btn-submit:disabled { background: #999; cursor: not-allowed; transform: none; box-shadow: none;}
 
@@ -94,7 +94,7 @@
         .b-due { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
         .b-paid { background: rgba(124, 208, 58, 0.1); color: #5a9e26; }
 
-        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;}
+        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;}
         .btn-pay:hover { background: #68b32e; transform: translateY(-2px); box-shadow: 0 3px 8px rgba(124, 208, 58, 0.3);}
 
         /* Payment Modal */
@@ -175,14 +175,19 @@
             </select>
         </div>
 
-        <!-- FORM 1: Add Product -->
+        <!-- FORM 1: Add / Update Product -->
         <div class="form-section active" id="form-add">
-            <h3><i class="fas fa-plus-circle"></i> নতুন পণ্য যুক্ত করুন</h3>
+            <h3><i class="fas fa-plus-circle"></i> পণ্য মজুদ করুন</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px; margin-top: -15px;">আগের কোনো পণ্যের নাম লিখলে সেটি অটোমেটিক নিচে আপডেট হয়ে যাবে।</p>
+            
             <form id="addProductForm">
                 <div class="form-grid">
                     <div class="input-group">
                         <label>পণ্যের নাম</label>
-                        <input type="text" id="addName" required placeholder="যেমন: খাতা">
+                        <input type="text" id="addName" list="productList" required placeholder="যেমন: খাতা">
+                        <datalist id="productList">
+                            <!-- JS Will Populate -->
+                        </datalist>
                     </div>
                     <div class="input-group">
                         <label>পণ্যের ধরণ</label>
@@ -355,7 +360,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -381,7 +386,9 @@
         // Fetch Inventory
         onValue(ref(db, 'products'), (snapshot) => {
             const tbody = document.getElementById('inventoryTable');
+            const dataList = document.getElementById('productList');
             tbody.innerHTML = '';
+            dataList.innerHTML = '';
             allProducts = [];
             let totalInvValue = 0;
 
@@ -392,7 +399,9 @@
                     allProducts.push(p);
                     if(p.qty > 0) totalInvValue += p.totalCost;
 
-                    // Only show products that have quantity > 0 or at least exist
+                    // Add to Datalist for Suggestion
+                    dataList.innerHTML += `<option value="${p.name}">`;
+
                     tbody.innerHTML += `<tr>
                         <td>${new Date(p.timestamp).toLocaleDateString('en-GB')}</td>
                         <td style="font-weight: 600;">${p.name}</td>
@@ -408,7 +417,108 @@
             document.getElementById('totalInventoryValue').innerText = '৳ ' + totalInvValue.toFixed(2);
         });
 
-        // Fetch Sales & Dues
+        // Add Product: Auto-fill fields if product already exists
+        document.getElementById('addName').addEventListener('input', function() {
+            let typedName = this.value.toLowerCase().trim();
+            let match = allProducts.find(p => p.name.toLowerCase() === typedName);
+            
+            if(match) {
+                // Auto Select category and unit based on previous save
+                let catSelect = document.getElementById('addCategory');
+                let unitSelect = document.getElementById('addUnit');
+                
+                // If it was custom, we just let it be, or set it if matches options
+                if([...catSelect.options].some(o => o.value === match.category)) {
+                    catSelect.value = match.category;
+                } else {
+                    catSelect.value = "Other";
+                    document.getElementById('addCategoryOther').style.display = 'block';
+                    document.getElementById('addCategoryOther').value = match.category;
+                }
+
+                if([...unitSelect.options].some(o => o.value === match.unit)) {
+                    unitSelect.value = match.unit;
+                } else {
+                    unitSelect.value = "Other";
+                    document.getElementById('addUnitOther').style.display = 'block';
+                    document.getElementById('addUnitOther').value = match.unit;
+                }
+            }
+        });
+
+        // Add or Update Product Submit
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addSubmitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
+
+            let cat = document.getElementById('addCategory').value;
+            if(cat === 'Other') cat = document.getElementById('addCategoryOther').value;
+            let unit = document.getElementById('addUnit').value;
+            if(unit === 'Other') unit = document.getElementById('addUnitOther').value;
+            
+            let nameVal = document.getElementById('addName').value.trim();
+            let qty = parseFloat(document.getElementById('addQty').value);
+            let cost = parseFloat(document.getElementById('addCost').value);
+
+            // Check if product already exists
+            let match = allProducts.find(p => p.name.toLowerCase() === nameVal.toLowerCase());
+
+            try {
+                if(match) {
+                    // UPDATE Existing Product
+                    let newQty = match.qty + qty;
+                    let newCost = match.totalCost + cost;
+                    let newUnitPrice = newCost / newQty;
+
+                    await update(ref(db, `products/${match.id}`), {
+                        qty: newQty,
+                        totalCost: newCost,
+                        unitPrice: newUnitPrice,
+                        timestamp: Date.now() // updates date to latest modification
+                    });
+
+                    // Add to transactions history
+                    const trxKey = push(ref(db, 'transactions')).key;
+                    await set(ref(db, `transactions/${trxKey}`), {
+                        id: trxKey, date: new Date().toLocaleDateString('en-CA'),
+                        timestamp: Date.now(), type: 'withdraw_expense', 
+                        details: `পণ্য মজুদ আপডেট: ${match.name}`, totalAmount: cost
+                    });
+
+                    alert("বিদ্যমান পণ্যের মজুদ সফলভাবে আপডেট হয়েছে!");
+
+                } else {
+                    // PUSH New Product
+                    let data = {
+                        name: nameVal,
+                        category: cat, unit: unit, qty: qty, 
+                        totalCost: cost, unitPrice: cost / qty,
+                        timestamp: Date.now()
+                    };
+                    await set(push(ref(db, 'products')), data);
+                    
+                    const trxKey = push(ref(db, 'transactions')).key;
+                    await set(ref(db, `transactions/${trxKey}`), {
+                        id: trxKey, date: new Date().toLocaleDateString('en-CA'),
+                        timestamp: Date.now(), type: 'withdraw_expense',
+                        details: `নতুন পণ্য ক্রয়: ${data.name}`, totalAmount: cost
+                    });
+
+                    alert("নতুন পণ্য সফলভাবে যুক্ত ও মজুদ হয়েছে!");
+                }
+
+                this.reset();
+            } catch(e) { 
+                alert("সমস্যা হয়েছে!"); 
+                console.error(e);
+            } finally { 
+                btn.innerHTML = '<i class="fas fa-save"></i> পণ্য মজুদ করুন'; 
+                btn.disabled = false; 
+            }
+        });
+
+        // --- Fetch Sales & Dues ---
         onValue(ref(db, 'sales'), (snapshot) => {
             const tbody = document.getElementById('salesTable');
             tbody.innerHTML = '';
@@ -419,7 +529,6 @@
                 let salesDataArr = [];
                 snapshot.forEach(child => { salesDataArr.push({id: child.key, ...child.val()}); });
                 
-                // Sort by latest
                 salesDataArr.sort((a,b) => b.timestamp - a.timestamp).forEach(s => {
                     allSales.push(s);
                     totalDue += s.due;
@@ -446,49 +555,11 @@
             document.getElementById('totalProfit').innerText = '৳ ' + totalProfit.toFixed(2);
         });
 
-        // Add Product Form
-        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('addSubmitBtn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
-
-            let cat = document.getElementById('addCategory').value;
-            if(cat === 'Other') cat = document.getElementById('addCategoryOther').value;
-            let unit = document.getElementById('addUnit').value;
-            if(unit === 'Other') unit = document.getElementById('addUnitOther').value;
-            
-            let qty = parseFloat(document.getElementById('addQty').value);
-            let cost = parseFloat(document.getElementById('addCost').value);
-
-            let data = {
-                name: document.getElementById('addName').value,
-                category: cat, unit: unit, qty: qty, 
-                totalCost: cost, unitPrice: cost / qty,
-                timestamp: Date.now()
-            };
-
-            try {
-                await set(push(ref(db, 'products')), data);
-                
-                // Add to transactions history
-                const trxKey = push(ref(db, 'transactions')).key;
-                await set(ref(db, `transactions/${trxKey}`), {
-                    id: trxKey, date: new Date().toLocaleDateString('en-CA'),
-                    timestamp: Date.now(), type: 'withdraw_expense', // count as expense
-                    details: `পণ্য ক্রয়: ${data.name}`, totalAmount: cost
-                });
-
-                alert("পণ্য সফলভাবে যুক্ত ও মজুদ হয়েছে!");
-                this.reset();
-            } catch(e) { alert("সমস্যা হয়েছে!"); console.error(e);}
-            finally { btn.innerHTML = '<i class="fas fa-save"></i> পণ্য মজুদ করুন'; btn.disabled = false; }
-        });
-
-        // Sell Calculations Logic
+        // --- Sell Calculations Logic ---
         let selectedProduct = null;
         function populateSellDropdowns() {
             const catSelect = document.getElementById('sellCategory');
-            catSelect.innerHTML = '<option value="">ধরণ নির্বাচন করুন</option>';
+            catSelect.innerHTML = '<option value="">আগে ধরণ নির্বাচন করুন</option>';
             const categories = [...new Set(allProducts.filter(i => i.qty > 0).map(i => i.category))];
             categories.forEach(c => catSelect.innerHTML += `<option value="${c}">${c}</option>`);
         }
@@ -540,19 +611,26 @@
             document.getElementById('sellDue').value = due > 0 ? due.toFixed(2) : 0;
         }
 
-        // Sell Form Submit
+        // --- Sell Form Submit ---
         document.getElementById('sellProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if(!selectedProduct) return alert('পণ্য নির্বাচন করুন');
-            
-            const btn = document.getElementById('sellSubmitBtn');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
 
             let qty = parseFloat(document.getElementById('sellQty').value);
             let price = parseFloat(document.getElementById('sellPrice').value);
             let paid = parseFloat(document.getElementById('sellPaid').value);
             let profit = parseFloat(document.getElementById('sellProfit').value);
             let due = price - paid;
+            
+            // Validation: Cash paid cannot be less than profit (if profit is positive)
+            if (profit > 0 && paid < profit) {
+                alert(`সতর্কতা: নগদ গ্রহণকৃত টাকা (৳${paid}) অবশ্যই লাভের (৳${profit}) সমান বা বেশি হতে হবে!`);
+                return;
+            }
+            
+            const btn = document.getElementById('sellSubmitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
+
             let customerName = document.getElementById('sellCustomer').value;
 
             let salesData = {
@@ -567,19 +645,22 @@
             let remainingCost = selectedProduct.totalCost - (qty * selectedProduct.unitPrice);
 
             let updates = {};
-            updates['/sales/' + push(child(ref(db), 'sales')).key] = salesData;
+            const newSaleKey = push(ref(db, 'sales')).key; // Fixed: removed undefined 'child'
+            updates[`/sales/${newSaleKey}`] = salesData;
             updates[`/products/${selectedProduct.id}/qty`] = remainingQty;
             updates[`/products/${selectedProduct.id}/totalCost`] = remainingCost;
 
             try {
+                // Execute main updates
                 await update(ref(db), updates);
                 
-                // Add to transactions history if Paid > 0
+                // Add to transactions history (Only the principal recovered portion is effectively considered a normal deposit. 
+                // However, logic says whatever is paid, record it. Dashboard formula balances it based on profit).
                 if(paid > 0) {
                     const trxKey = push(ref(db, 'transactions')).key;
                     await set(ref(db, `transactions/${trxKey}`), {
                         id: trxKey, date: new Date().toLocaleDateString('en-CA'),
-                        timestamp: Date.now(), type: 'deposit', // Cash inflow
+                        timestamp: Date.now(), type: 'deposit', 
                         details: `পণ্য বিক্রয় (নগদ): ${selectedProduct.name}`, totalAmount: paid
                     });
                 }
@@ -588,11 +669,16 @@
                 this.reset(); selectedProduct = null; 
                 document.getElementById('actionSelector').value = 'add'; 
                 document.getElementById('actionSelector').dispatchEvent(new Event('change'));
-            } catch(e) { alert("বিক্রয় সম্পন্ন করতে সমস্যা হয়েছে!"); console.error(e);}
-            finally { btn.innerHTML = '<i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন'; btn.disabled = false; }
+            } catch(e) { 
+                alert("বিক্রয় সম্পন্ন করতে সমস্যা হয়েছে!"); 
+                console.error(e);
+            } finally { 
+                btn.innerHTML = '<i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন'; 
+                btn.disabled = false; 
+            }
         });
 
-        // Pay Due Logic
+        // --- Pay Due Logic ---
         window.openPaymentModal = function(saleId) {
             let sale = allSales.find(s => s.id === saleId);
             if(!sale) return;
@@ -618,7 +704,6 @@
             try {
                 await update(ref(db, `sales/${saleId}`), { due: sale.due - amount });
                 
-                // Add to transactions history
                 const trxKey = push(ref(db, 'transactions')).key;
                 await set(ref(db, `transactions/${trxKey}`), {
                     id: trxKey, date: new Date().toLocaleDateString('en-CA'),
