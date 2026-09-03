@@ -23,7 +23,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
         body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
 
-        /* --- Loader & Sidebar (Reused) --- */
+        /* --- Loader & Sidebar --- */
         #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
         .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -80,8 +80,8 @@
         
         .btn-submit { background: var(--primary-blue); color: #fff; padding: 12px 20px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         .btn-submit:hover { background: #06236b; }
+        .btn-submit:disabled { background: #999; cursor: not-allowed; }
 
-        /* Profit/Loss input color logic handled via JS, adding transition */
         #sellProfit { font-weight: 700; transition: color 0.3s, background 0.3s; }
 
         /* --- Tables --- */
@@ -98,11 +98,6 @@
 
         .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; }
         .btn-pay:hover { background: #68b32e; }
-        .btn-action { background: none; border: none; cursor: pointer; color: #999; margin: 0 5px; font-size: 16px; }
-        .btn-action.edit:hover { color: #f39c12; } .btn-action.delete:hover { color: #e74c3c; }
-
-        .load-more-btn { display: block; margin: 0 auto 30px auto; background: #eee; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: 600; color: #555; }
-        .load-more-btn:hover { background: #ddd; }
 
         /* Payment Modal */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; }
@@ -123,14 +118,12 @@
 </head>
 <body>
 
-    <!-- Loader -->
     <div id="pageLoader">
         <div class="spinner"></div>
         <h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3>
     </div>
     <div class="overlay" id="sidebarOverlay"></div>
 
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
         <nav class="nav-menu">
@@ -138,8 +131,11 @@
             <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
             <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
             <a href="products.html" class="nav-item active"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
-            <a href="#" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
-            <a href="#" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
+            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
+            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
+            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
+            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
         </nav>
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
     </aside>
@@ -155,28 +151,23 @@
         <div class="summary-grid">
             <div class="summary-card">
                 <i class="fas fa-boxes"></i>
-                <div class="info"><h4>মোট পণ্য মজুদ (৳)</h4><h2 id="totalInventoryValue">0</h2></div>
+                <div class="info"><h4>মোট পণ্য মজুদ (৳)</h4><h2 id="totalInventoryValue">0.00</h2></div>
             </div>
             <div class="summary-card card-green">
                 <i class="fas fa-chart-line"></i>
-                <div class="info"><h4>মোট লাভ (৳)</h4><h2 id="totalProfit">0</h2></div>
+                <div class="info"><h4>মোট লাভ (৳)</h4><h2 id="totalProfit">0.00</h2></div>
             </div>
             <div class="summary-card card-red">
                 <i class="fas fa-file-invoice-dollar"></i>
-                <div class="info"><h4>বর্তমান বকেয়া/ঋণ (৳)</h4><h2 id="totalDueAmount">0</h2></div>
+                <div class="info"><h4>বর্তমান বকেয়া/ঋণ (৳)</h4><h2 id="totalDueAmount">0.00</h2></div>
             </div>
         </div>
 
-        <!-- Controls -->
         <div class="controls-wrapper">
             <select class="action-select" id="actionSelector">
                 <option value="add">১. নতুন পণ্য যুক্ত করুন</option>
                 <option value="sell">২. পণ্য বিক্রি করুন</option>
             </select>
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="পণ্য বা ক্রেতা খুঁজুন...">
-            </div>
         </div>
 
         <!-- FORM 1: Add Product -->
@@ -220,7 +211,7 @@
                         <input type="number" id="addCost" min="1" step="any" required placeholder="Cost (৳)">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit"><i class="fas fa-save"></i> পণ্য মজুদ করুন</button>
+                <button type="submit" class="btn-submit" id="addSubmitBtn"><i class="fas fa-save"></i> পণ্য মজুদ করুন</button>
             </form>
         </div>
 
@@ -237,14 +228,12 @@
                         <label>পণ্যের ধরণ</label>
                         <select id="sellCategory" required>
                             <option value="">আগে ধরণ নির্বাচন করুন</option>
-                            <!-- JS Will Populate -->
                         </select>
                     </div>
                     <div class="input-group">
                         <label>পণ্যের নাম</label>
                         <select id="sellName" required>
                             <option value="">পণ্য নির্বাচন করুন</option>
-                            <!-- JS Will Populate -->
                         </select>
                     </div>
                     <div class="input-group">
@@ -279,84 +268,31 @@
                         <label>বকেয়া আছে (Due ৳)</label>
                         <input type="text" id="sellDue" readonly value="0">
                     </div>
-                    <div class="input-group">
-                        <label>কিস্তির মাস (Months)</label>
-                        <select id="sellMonths">
-                            <option value="1">১ মাস</option>
-                            <option value="3">৩ মাস</option>
-                            <option value="6">৬ মাস</option>
-                            <option value="12">১২ মাস</option>
-                            <option value="18">১৮ মাস</option>
-                            <option value="24">২৪ মাস</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>মাসিক পরিশোধ (Monthly ৳)</label>
-                        <input type="text" id="sellMonthly" readonly value="0">
-                    </div>
                 </div>
-                <button type="submit" class="btn-submit" style="background: var(--primary-green);"><i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন</button>
+                <button type="submit" class="btn-submit" id="sellSubmitBtn" style="background: var(--primary-green);"><i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন</button>
             </form>
         </div>
 
-        <!-- Inventory List -->
+        <!-- Tables -->
         <h3 class="section-title">মজুদ পণ্যের তালিকা</h3>
         <div class="table-responsive">
             <table>
                 <thead>
-                    <tr>
-                        <th>তারিখ</th>
-                        <th>পণ্যের নাম</th>
-                        <th>ধরণ</th>
-                        <th>পরিমাণ</th>
-                        <th>মোট ক্রয়মূল্য (৳)</th>
-                    </tr>
+                    <tr><th>তারিখ</th><th>পণ্যের নাম</th><th>ধরণ</th><th>পরিমাণ</th><th>মোট ক্রয়মূল্য (৳)</th></tr>
                 </thead>
-                <tbody id="inventoryTable">
-                    <!-- JS Data -->
-                </tbody>
+                <tbody id="inventoryTable"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
             </table>
         </div>
 
-        <!-- Sales & Dues List -->
         <h3 class="section-title">বিক্রিত পণ্য ও বকেয়া তালিকা</h3>
         <div class="table-responsive">
             <table>
                 <thead>
-                    <tr>
-                        <th>তারিখ</th>
-                        <th>ক্রেতা</th>
-                        <th>পণ্য</th>
-                        <th>পরিমাণ</th>
-                        <th>মূল্য</th>
-                        <th>বকেয়া (৳)</th>
-                        <th>অ্যাকশন</th>
-                    </tr>
+                    <tr><th>তারিখ</th><th>ক্রেতা</th><th>পণ্য</th><th>পরিমাণ</th><th>মূল্য</th><th>বকেয়া (৳)</th><th>অ্যাকশন</th></tr>
                 </thead>
-                <tbody id="salesTable">
-                    <!-- JS Data -->
-                </tbody>
+                <tbody id="salesTable"><tr><td colspan="7" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
             </table>
         </div>
-
-        <!-- Transaction History -->
-        <h3 class="section-title">লেনদেন ইতিহাস</h3>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>তারিখ</th>
-                        <th>বিবরণ (Type)</th>
-                        <th>পরিমাণ (Amount)</th>
-                        <th>অ্যাকশন</th>
-                    </tr>
-                </thead>
-                <tbody id="transactionTable">
-                    <!-- JS Data -->
-                </tbody>
-            </table>
-        </div>
-        <button class="load-more-btn" id="loadMoreBtn">আরও দেখুন (Load More)</button>
 
     </main>
 
@@ -365,22 +301,24 @@
         <div class="modal-content">
             <h3>বকেয়া জমা নিন</h3>
             <p id="payCustomerName" style="color: #666; margin-bottom:15px;"></p>
-            <div class="input-group" style="text-align: left; margin-bottom: 15px;">
-                <label>বর্তমান বকেয়া (৳)</label>
-                <input type="text" id="payCurrentDue" readonly>
-            </div>
-            <div class="input-group" style="text-align: left; margin-bottom: 15px;">
-                <label>জমাকৃত টাকার পরিমাণ (৳)</label>
-                <input type="number" id="payAmountInput" min="1" placeholder="Amount">
-            </div>
-            <input type="hidden" id="paySaleId">
-            <button class="btn-submit" style="width: 100%; margin-top:0;" onclick="submitPayment()">জমা দিন</button>
-            <button class="close-modal" onclick="closeModal('paymentModal')">বন্ধ করুন</button>
+            <form id="payDueForm">
+                <input type="hidden" id="paySaleId">
+                <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+                    <label>বর্তমান বকেয়া (৳)</label>
+                    <input type="text" id="payCurrentDue" readonly>
+                </div>
+                <div class="input-group" style="text-align: left; margin-bottom: 15px;">
+                    <label>জমাকৃত টাকার পরিমাণ (৳)</label>
+                    <input type="number" id="payAmountInput" min="1" required placeholder="Amount">
+                </div>
+                <button type="submit" class="btn-submit" id="paySubmitBtn" style="width: 100%; margin-top:0;">জমা দিন</button>
+                <button type="button" class="close-modal" onclick="closeModal('paymentModal')">বন্ধ করুন</button>
+            </form>
         </div>
     </div>
 
+    <!-- UI Scripts -->
     <script>
-        // --- Core UI Logic ---
         window.addEventListener('load', () => setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500));
         
         const menuToggle = document.getElementById('menuToggle');
@@ -389,74 +327,168 @@
         menuToggle.addEventListener('click', () => { sidebar.classList.add('active'); overlay.classList.add('active'); });
         overlay.addEventListener('click', () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); });
 
-        // Action Selector (Add/Sell Toggle)
         document.getElementById('actionSelector').addEventListener('change', function() {
             document.getElementById('form-add').classList.remove('active');
             document.getElementById('form-sell').classList.remove('active');
             document.getElementById('form-' + this.value).classList.add('active');
-            if(this.value === 'sell') populateSellDropdowns();
         });
 
         function checkOther(selectObj, inputId) {
             const inputField = document.getElementById(inputId);
             inputField.style.display = selectObj.value === 'Other' ? 'block' : 'none';
-            if(selectObj.value === 'Other') inputField.required = true;
-            else inputField.required = false;
+            inputField.required = selectObj.value === 'Other';
         }
 
-        // --- Mock Database (For Demo & Calculations) ---
-        // Inventory Array
-        let inventory = [
-            { id: 1, date: getBDTime(), name: "A4 Paper", category: "Stationery", unit: "Packet", qty: 50, totalCost: 15000, unitPrice: 300 },
-            { id: 2, date: getBDTime(), name: "Rice (Miniket)", category: "Grocery", unit: "Kg", qty: 100, totalCost: 6500, unitPrice: 65 }
-        ];
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    </script>
 
-        // Sales Array
-        let sales = [
-            { id: 1, date: getBDTime(), customer: "Rahim Ali", product: "A4 Paper", qty: 5, price: 1750, due: 750, months: 3 }
-        ];
+    <!-- Firebase Integration Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push, set, update, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
-        // Transactions
-        let transactions = [
-            { id: 1, date: getBDTime(), type: "Purchase: A4 Paper", amount: 15000 },
-            { id: 2, date: getBDTime(), type: "Purchase: Rice", amount: 6500 },
-            { id: 3, date: getBDTime(), type: "Sale: A4 Paper", amount: 1750 }
-        ];
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
 
-        let displayLimit = 5;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
 
-        // Date Generator (Bangladesh Time)
-        function getBDTime() {
-            const options = { timeZone: "Asia/Dhaka", year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' };
-            return new Date().toLocaleString("en-US", options);
-        }
+        // Auth Check
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
+        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
 
-        // --- Form Calculation Logic (Sales) ---
+        let allProducts = [];
+        let allSales = [];
+
+        // Fetch Inventory
+        onValue(ref(db, 'products'), (snapshot) => {
+            const tbody = document.getElementById('inventoryTable');
+            tbody.innerHTML = '';
+            allProducts = [];
+            let totalInvValue = 0;
+
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    let p = child.val();
+                    p.id = child.key;
+                    allProducts.push(p);
+                    if(p.qty > 0) totalInvValue += p.totalCost;
+
+                    tbody.innerHTML += `<tr>
+                        <td>${new Date(p.timestamp).toLocaleDateString('en-GB')}</td>
+                        <td>${p.name}</td>
+                        <td>${p.category}</td>
+                        <td>${p.qty} ${p.unit}</td>
+                        <td>${p.totalCost.toFixed(2)}</td>
+                    </tr>`;
+                });
+                populateSellDropdowns();
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো পণ্য নেই</td></tr>';
+            }
+            document.getElementById('totalInventoryValue').innerText = totalInvValue.toFixed(2);
+        });
+
+        // Fetch Sales & Dues
+        onValue(ref(db, 'sales'), (snapshot) => {
+            const tbody = document.getElementById('salesTable');
+            tbody.innerHTML = '';
+            allSales = [];
+            let totalDue = 0, totalProfit = 0;
+
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    let s = child.val();
+                    s.id = child.key;
+                    allSales.push(s);
+                    
+                    totalDue += s.due;
+                    totalProfit += s.profit;
+
+                    let dueBadge = s.due > 0 ? `<span class="badge b-due">${s.due.toFixed(2)}</span>` : `<span class="badge b-paid">Paid</span>`;
+                    let actionBtn = s.due > 0 ? `<button class="btn-pay" onclick="window.openPaymentModal('${s.id}')">Pay Due</button>` : `<i class="fas fa-check" style="color:#5a9e26;"></i>`;
+
+                    tbody.innerHTML += `<tr>
+                        <td>${new Date(s.timestamp).toLocaleDateString('en-GB')}</td>
+                        <td>${s.customer}</td>
+                        <td>${s.productName} (${s.qty})</td>
+                        <td>${s.price.toFixed(2)}</td>
+                        <td>${dueBadge}</td>
+                        <td>${actionBtn}</td>
+                    </tr>`;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;">কোনো বিক্রয় নেই</td></tr>';
+            }
+            
+            document.getElementById('totalDueAmount').innerText = totalDue.toFixed(2);
+            document.getElementById('totalProfit').innerText = totalProfit.toFixed(2);
+        });
+
+        // Add Product Form
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addSubmitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
+
+            let cat = document.getElementById('addCategory').value;
+            if(cat === 'Other') cat = document.getElementById('addCategoryOther').value;
+            let unit = document.getElementById('addUnit').value;
+            if(unit === 'Other') unit = document.getElementById('addUnitOther').value;
+            
+            let qty = parseFloat(document.getElementById('addQty').value);
+            let cost = parseFloat(document.getElementById('addCost').value);
+
+            let data = {
+                name: document.getElementById('addName').value,
+                category: cat, unit: unit, qty: qty, 
+                totalCost: cost, unitPrice: cost / qty,
+                timestamp: Date.now()
+            };
+
+            try {
+                await set(push(ref(db, 'products')), data);
+                alert("পণ্য সফলভাবে যুক্ত হয়েছে!");
+                this.reset();
+            } catch(e) { alert("সমস্যা হয়েছে!"); }
+            finally { btn.innerHTML = '<i class="fas fa-save"></i> পণ্য মজুদ করুন'; btn.disabled = false; }
+        });
+
+        // Sell Calculations Logic
         let selectedProduct = null;
-
         function populateSellDropdowns() {
             const catSelect = document.getElementById('sellCategory');
             catSelect.innerHTML = '<option value="">ধরণ নির্বাচন করুন</option>';
-            const categories = [...new Set(inventory.filter(i => i.qty > 0).map(i => i.category))];
+            const categories = [...new Set(allProducts.filter(i => i.qty > 0).map(i => i.category))];
             categories.forEach(c => catSelect.innerHTML += `<option value="${c}">${c}</option>`);
         }
 
         document.getElementById('sellCategory').addEventListener('change', function() {
             const nameSelect = document.getElementById('sellName');
             nameSelect.innerHTML = '<option value="">পণ্য নির্বাচন করুন</option>';
-            const prods = inventory.filter(i => i.category === this.value && i.qty > 0);
-            prods.forEach(p => nameSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`);
+            allProducts.filter(i => i.category === this.value && i.qty > 0).forEach(p => {
+                nameSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
         });
 
         document.getElementById('sellName').addEventListener('change', function() {
-            selectedProduct = inventory.find(i => i.id == this.value);
+            selectedProduct = allProducts.find(i => i.id === this.value);
             if(selectedProduct) {
                 document.getElementById('sellAvailable').value = selectedProduct.qty + " " + selectedProduct.unit;
                 calculateSell();
             }
         });
 
-        const sellInputs = ['sellQty', 'sellPrice', 'sellPaid', 'sellMonths'];
+        const sellInputs = ['sellQty', 'sellPrice', 'sellPaid'];
         sellInputs.forEach(id => document.getElementById(id).addEventListener('input', calculateSell));
 
         function calculateSell() {
@@ -464,12 +496,11 @@
             
             let qty = parseFloat(document.getElementById('sellQty').value) || 0;
             if(qty > selectedProduct.qty) {
-                qty = selectedProduct.qty; // Prevent overselling visually
+                qty = selectedProduct.qty; 
                 document.getElementById('sellQty').value = qty;
             }
             
-            const rem = selectedProduct.qty - qty;
-            document.getElementById('sellRemaining').value = rem;
+            document.getElementById('sellRemaining').value = selectedProduct.qty - qty;
 
             const cost = qty * selectedProduct.unitPrice;
             document.getElementById('sellCost').value = cost.toFixed(2);
@@ -479,7 +510,6 @@
             const profitEl = document.getElementById('sellProfit');
             profitEl.value = profit.toFixed(2);
             
-            // Color formatting for Profit/Loss
             if(price === 0) { profitEl.style.color = '#333'; profitEl.style.backgroundColor = '#fff'; }
             else if(profit >= 0) { profitEl.style.color = 'green'; profitEl.style.backgroundColor = 'rgba(124, 208, 58, 0.1)'; }
             else { profitEl.style.color = 'red'; profitEl.style.backgroundColor = 'rgba(231, 76, 60, 0.1)'; }
@@ -487,142 +517,76 @@
             const paid = parseFloat(document.getElementById('sellPaid').value) || 0;
             const due = price - paid;
             document.getElementById('sellDue').value = due > 0 ? due.toFixed(2) : 0;
-
-            const months = parseInt(document.getElementById('sellMonths').value) || 1;
-            document.getElementById('sellMonthly').value = due > 0 ? (due / months).toFixed(2) : 0;
         }
 
-        // --- Render Data to Tables ---
-        function renderData() {
-            // Inventory
-            let invHTML = '';
-            let totalInvValue = 0;
-            inventory.forEach(i => {
-                invHTML += `<tr><td>${i.date}</td><td>${i.name}</td><td>${i.category}</td><td>${i.qty} ${i.unit}</td><td>${i.totalCost.toFixed(2)}</td></tr>`;
-                totalInvValue += i.totalCost;
-            });
-            document.getElementById('inventoryTable').innerHTML = invHTML;
-            document.getElementById('totalInventoryValue').innerText = totalInvValue.toFixed(2);
-
-            // Sales & Dues
-            let salesHTML = '';
-            let totalDue = 0;
-            sales.forEach(s => {
-                let dueBadge = s.due > 0 ? `<span class="badge b-due">${s.due.toFixed(2)}</span>` : `<span class="badge b-paid">Paid</span>`;
-                let actionBtn = s.due > 0 ? `<button class="btn-pay" onclick="openPaymentModal(${s.id}, '${s.customer}', ${s.due})">Pay Due</button>` : `<i class="fas fa-check" style="color:#5a9e26;"></i>`;
-                salesHTML += `<tr><td>${s.date}</td><td>${s.customer}</td><td>${s.product} (${s.qty})</td><td>${s.price.toFixed(2)}</td><td>${dueBadge}</td><td>${actionBtn}</td></tr>`;
-                totalDue += s.due;
-            });
-            document.getElementById('salesTable').innerHTML = salesHTML;
-            document.getElementById('totalDueAmount').innerText = totalDue.toFixed(2);
-
-            // Transactions
-            let transHTML = '';
-            let loopLimit = Math.min(displayLimit, transactions.length);
-            // Reverse to show latest first
-            let reversedTrans = [...transactions].reverse();
-            
-            for(let i=0; i<loopLimit; i++) {
-                let t = reversedTrans[i];
-                transHTML += `<tr><td>${t.date}</td><td>${t.type}</td><td>${t.amount.toFixed(2)}</td>
-                              <td><button class="btn-action edit"><i class="fas fa-edit"></i></button>
-                                  <button class="btn-action delete"><i class="fas fa-trash"></i></button></td></tr>`;
-            }
-            document.getElementById('transactionTable').innerHTML = transHTML;
-            
-            // Hide load more if all shown
-            document.getElementById('loadMoreBtn').style.display = loopLimit >= transactions.length ? 'none' : 'block';
-
-            // Placeholder for total profit logic (Sum of all sales profit) - Simplified for demo
-            document.getElementById('totalProfit').innerText = "1200.00"; 
-        }
-
-        document.getElementById('loadMoreBtn').addEventListener('click', () => {
-            displayLimit += 10;
-            renderData();
-        });
-
-        // --- Handle Submissions ---
-        document.getElementById('addProductForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            let cat = document.getElementById('addCategory').value;
-            if(cat === 'Other') cat = document.getElementById('addCategoryOther').value;
-            let unit = document.getElementById('addUnit').value;
-            if(unit === 'Other') unit = document.getElementById('addUnitOther').value;
-            
-            let qty = parseFloat(document.getElementById('addQty').value);
-            let cost = parseFloat(document.getElementById('addCost').value);
-            
-            inventory.push({
-                id: Date.now(), date: getBDTime(),
-                name: document.getElementById('addName').value,
-                category: cat, unit: unit, qty: qty, totalCost: cost, unitPrice: cost / qty
-            });
-            
-            transactions.push({ id: Date.now(), date: getBDTime(), type: "Purchase: " + document.getElementById('addName').value, amount: cost });
-            
-            this.reset();
-            alert("পণ্য সফলভাবে যুক্ত হয়েছে!");
-            renderData();
-        });
-
-        document.getElementById('sellProductForm').addEventListener('submit', function(e) {
+        // Sell Form Submit
+        document.getElementById('sellProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if(!selectedProduct) return alert('পণ্য নির্বাচন করুন');
             
+            const btn = document.getElementById('sellSubmitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
+
             let qty = parseFloat(document.getElementById('sellQty').value);
             let price = parseFloat(document.getElementById('sellPrice').value);
             let paid = parseFloat(document.getElementById('sellPaid').value);
-            let months = parseInt(document.getElementById('sellMonths').value);
+            let profit = parseFloat(document.getElementById('sellProfit').value);
             let due = price - paid;
-            
-            // Deduct from inventory
-            selectedProduct.qty -= qty;
-            selectedProduct.totalCost -= (qty * selectedProduct.unitPrice);
-            
-            let customer = document.getElementById('sellCustomer').value;
-            sales.push({ id: Date.now(), date: getBDTime(), customer: customer, product: selectedProduct.name, qty: qty, price: price, due: due > 0 ? due : 0, months: months });
-            
-            transactions.push({ id: Date.now(), date: getBDTime(), type: "Sale: " + selectedProduct.name, amount: price });
-            if(paid > 0) transactions.push({ id: Date.now(), date: getBDTime(), type: "Cash Received: " + customer, amount: paid });
-            
-            this.reset();
-            selectedProduct = null;
-            populateSellDropdowns();
-            alert("পণ্য বিক্রয় সম্পন্ন হয়েছে!");
-            renderData();
+
+            let salesData = {
+                customer: document.getElementById('sellCustomer').value,
+                productId: selectedProduct.id,
+                productName: selectedProduct.name,
+                qty: qty, price: price, profit: profit, due: due > 0 ? due : 0,
+                timestamp: Date.now()
+            };
+
+            let remainingQty = selectedProduct.qty - qty;
+            let remainingCost = selectedProduct.totalCost - (qty * selectedProduct.unitPrice);
+
+            let updates = {};
+            updates['/sales/' + push(child(ref(db), 'sales')).key] = salesData;
+            updates[`/products/${selectedProduct.id}/qty`] = remainingQty;
+            updates[`/products/${selectedProduct.id}/totalCost`] = remainingCost;
+
+            try {
+                await update(ref(db), updates);
+                alert("পণ্য বিক্রয় সম্পন্ন হয়েছে!");
+                this.reset(); selectedProduct = null; document.getElementById('actionSelector').value = 'add'; document.getElementById('actionSelector').dispatchEvent(new Event('change'));
+            } catch(e) { alert("বিক্রয় সম্পন্ন করতে সমস্যা হয়েছে!"); }
+            finally { btn.innerHTML = '<i class="fas fa-check"></i> বিক্রি নিশ্চিত করুন'; btn.disabled = false; }
         });
 
-        // --- Modals ---
-        function openPaymentModal(saleId, customer, dueAmount) {
+        // Pay Due Logic
+        window.openPaymentModal = function(saleId) {
+            let sale = allSales.find(s => s.id === saleId);
+            if(!sale) return;
             document.getElementById('paySaleId').value = saleId;
-            document.getElementById('payCustomerName').innerText = "ক্রেতা: " + customer;
-            document.getElementById('payCurrentDue').value = dueAmount.toFixed(2);
+            document.getElementById('payCustomerName').innerText = "ক্রেতা: " + sale.customer;
+            document.getElementById('payCurrentDue').value = sale.due.toFixed(2);
             document.getElementById('payAmountInput').value = '';
-            document.getElementById('payAmountInput').max = dueAmount;
+            document.getElementById('payAmountInput').max = sale.due;
             document.getElementById('paymentModal').classList.add('active');
         }
 
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-        function submitPayment() {
-            let saleId = document.getElementById('paySaleId').value;
-            let amount = parseFloat(document.getElementById('payAmountInput').value);
-            if(!amount || amount <= 0) return alert("সঠিক পরিমাণ দিন!");
+        document.getElementById('payDueForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('paySubmitBtn');
+            const saleId = document.getElementById('paySaleId').value;
+            const amount = parseFloat(document.getElementById('payAmountInput').value);
             
-            let sale = sales.find(s => s.id == saleId);
+            let sale = allSales.find(s => s.id === saleId);
             if(amount > sale.due) return alert("বকেয়ার চেয়ে বেশি টাকা জমা নেয়া যাবে না!");
 
-            sale.due -= amount;
-            transactions.push({ id: Date.now(), date: getBDTime(), type: "Due Collected: " + sale.customer, amount: amount });
-            
-            closeModal('paymentModal');
-            alert("পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে!");
-            renderData();
-        }
+            btn.innerHTML = 'প্রসেসিং...'; btn.disabled = true;
 
-        // Initial Render
-        renderData();
+            try {
+                await update(ref(db, `sales/${saleId}`), { due: sale.due - amount });
+                alert("পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে!");
+                document.getElementById('paymentModal').classList.remove('active');
+            } catch(e) { alert("পেমেন্ট নিতে সমস্যা হয়েছে!"); }
+            finally { btn.innerHTML = 'জমা দিন'; btn.disabled = false; }
+        });
 
     </script>
 </body>
