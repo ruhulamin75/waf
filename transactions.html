@@ -147,17 +147,19 @@
             }
         }
 
+        /* --- Print CSS FIX --- */
         @media print {
-            body * { visibility: hidden; }
-            .modal-content.printable, .modal-content.printable * { visibility: visible; }
-            .modal-content.printable { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; box-shadow: none; border-radius: 0; }
+            body { background: white; margin: 0; padding: 0; display: block; }
+            body > *:not(.modal) { display: none !important; }
+            .modal.active { position: static; background: none; display: block; padding: 0; visibility: visible; }
+            .modal-content.printable { margin: 0 auto; box-shadow: none; border: 1px solid #ccc; padding: 30px; width: 100%; max-width: 500px; transform: none; visibility: visible; }
+            .modal-content.printable * { visibility: visible; }
             .close-modal, .btn-print { display: none !important; }
+            @page { margin: 15mm; size: auto; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Removed LocalStorage check here -->
 
     <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
     <div class="overlay" id="sidebarOverlay"></div>
@@ -365,6 +367,7 @@
             document.getElementById('wdLoanDate').value = today;
             document.getElementById('wdExpDate').value = today;
             addExpenseRow();
+            switchWithdrawMode(); // <--- ফিক্স: পেজ লোড হওয়ার সাথে সাথে Required ফিল্ডগুলো ঠিক করে দেওয়া হলো
         });
 
         document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
@@ -397,9 +400,13 @@
             const isLoan = document.getElementById('withdrawType').value === 'loan';
             document.getElementById('wd-loan-mode').style.display = isLoan ? 'block' : 'none';
             document.getElementById('wd-expense-mode').style.display = isLoan ? 'none' : 'block';
+            
+            // ফিক্স: হিডেন ফিল্ডের Required ট্যাগ রিমুভ করা
             document.getElementById('wdLoanMember').required = isLoan;
             document.getElementById('wdLoanAmount').required = isLoan;
-            document.querySelectorAll('.exp-amt').forEach(el => el.required = !isLoan);
+            
+            document.getElementById('wdExpDate').required = !isLoan;
+            document.querySelectorAll('.exp-amt, .exp-name').forEach(el => el.required = !isLoan);
         }
 
         function calcLoanWords() {
@@ -418,6 +425,7 @@
                 <button type="button" class="btn-remove-row" onclick="removeExpenseRow('${rowId}')"><i class="fas fa-trash"></i></button>
             </div>`;
             document.getElementById('expenseRowsContainer').insertAdjacentHTML('beforeend', html);
+            switchWithdrawMode(); // Ensure new row gets correct 'required' status
         }
         function removeExpenseRow(id) { document.getElementById(id).remove(); calcExpenseTotal(); }
         function calcExpenseTotal() {
@@ -426,7 +434,7 @@
             document.getElementById('expWordsVal').innerText = numberToBanglaWords(total) + " টাকা মাত্র";
         }
 
-        const bWords = ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ", "বিশ", "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আঠাশ", "উনত্রিশ", "ত্রিশ", "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "উনচল্লিশ", "চল্লিশ", "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "উনপঞ্চাশ", "পঞ্চাশ", "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "উনষাট", "ষাট", "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "উনসত্তর", "সত্তর", "একাতর", "বাহাত্তর", "তিয়াত্তর", "চুয়াত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "উনআশি", "আশি", "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটশি", "উননব্বই", "নব্বই", "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"];
+        const bWords = ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ", "বিশ", "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আটাশ", "উনত্রিশ", "ত্রিশ", "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "উনচল্লিশ", "চল্লিশ", "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "উনপঞ্চাশ", "পঞ্চাশ", "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "উনষাট", "ষাট", "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "উনসত্তর", "সত্তর", "একাতর", "বাহাত্তর", "তিয়াত্তর", "চুয়াত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "উনআশি", "আশি", "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটশি", "উননব্বই", "নব্বই", "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"];
         function numberToBanglaWords(num) {
             if (num === 0) return bWords[0];
             let str = "", koti = Math.floor(num / 10000000); num = num % 10000000;
