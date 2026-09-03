@@ -17,6 +17,7 @@
         :root {
             --primary-blue: #0A369D;
             --primary-green: #7CD03A;
+            --primary-red: #e74c3c;
             --bg-light: #F4F7F6;
             --text-dark: #333;
             --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
@@ -114,6 +115,16 @@
         .save-btn { grid-column: 1/-1; background: var(--primary-green); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; width: 100%;}
         .save-btn:hover { background: #68b32e; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(124, 208, 58, 0.2);}
 
+        /* --- Image Cropper Modal --- */
+        .cropper-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10001; align-items: center; justify-content: center; padding: 20px;}
+        .cropper-content { background: #fff; border-radius: 15px; padding: 20px; width: 100%; max-width: 500px; text-align: center; }
+        .cropper-area { width: 100%; height: 350px; background: #eee; margin: 15px 0; border-radius: 8px; overflow: hidden;}
+        .cropper-area img { max-width: 100%; }
+        
+        .cropper-btns { display: flex; gap: 10px; justify-content: center; }
+        .btn-crop-cancel { background: #e74c3c; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .btn-crop-save { background: var(--primary-green); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
         /* Animations */
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes fadeUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -123,6 +134,7 @@
             .dashboard-grid, .form-grid { grid-template-columns: 1fr; } 
             .welcome-card { flex-direction: column; text-align: center; gap: 20px; padding: 25px; } 
             .btn-profile span { display: none; }
+            .cropper-area { height: 250px; }
         }
     </style>
 </head>
@@ -130,9 +142,9 @@
 
     <!-- Security Lock -->
     <script>
-        if (!localStorage.getItem("loggedInMemberId")) {
+        if (localStorage.getItem("userRole") !== "member") {
             alert("সিস্টেমে প্রবেশ করতে অনুগ্রহ করে আপনার নম্বর দিয়ে লগইন করুন।");
-            window.location.href = "member-login.html";
+            window.location.href = "login.html";
         }
     </script>
 
@@ -145,10 +157,10 @@
         </div>
         <div class="user-menu">
             <button class="btn-profile" onclick="openProfileModal()">
-                <i class="fa-solid fa-user-pen"></i> 
+                <i class="fas fa-user-pen"></i> 
                 <span>প্রোফাইল</span>
             </button>
-            <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-right-from-bracket"></i></button>
         </div>
     </header>
 
@@ -158,19 +170,19 @@
         <div class="welcome-card">
             <div class="welcome-text">
                 <h1>স্বাগতম, <span id="mWelcomeName">...</span></h1>
-                <p><i class="fas fa-id-badge"></i> আইডি: <span id="mWelcomeId" style="font-weight: 700;">...</span> &nbsp;|&nbsp; <i class="fa-solid fa-phone"></i> <span id="mWelcomePhone">...</span></p>
+                <p><i class="fas fa-id-badge"></i> আইডি: <span id="mWelcomeId" style="font-weight: 700;">...</span> &nbsp;|&nbsp; <i class="fas fa-phone"></i> <span id="mWelcomePhone">...</span></p>
             </div>
-            <img id="mWelcomePic" class="welcome-avatar" src="https://via.placeholder.com/150?text=Photo" alt="Profile">
+            <img id="mWelcomePic" class="welcome-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile">
         </div>
 
         <!-- Funds Summary -->
         <div class="fund-grid">
-            <div class="fund-card"><h3>ভর্তি ফি / অন্যান্য জমা</h3><div class="amount" id="tAdmission">৳ ০</div></div>
-            <div class="fund-card"><h3>মাসিক জমা</h3><div class="amount" id="tMonthly">৳ ০</div></div>
-            <div class="fund-card"><h3>জরিমানা / ডোনেশন</h3><div class="amount" id="tOthers">৳ ০</div></div>
+            <div class="fund-card"><h3>ভর্তি ফি / অন্যান্য জমা</h3><div class="amount" id="tAdmission">৳ ০.০০</div></div>
+            <div class="fund-card"><h3>মাসিক জমা</h3><div class="amount" id="tMonthly">৳ ০.০০</div></div>
+            <div class="fund-card"><h3>জরিমানা / ডোনেশন</h3><div class="amount" id="tOthers">৳ ০.০০</div></div>
             <div class="fund-card total-card">
                 <h3 style="color: var(--primary-green);">ব্যক্তিগত সর্বমোট জমা</h3>
-                <div class="amount" id="tTotal">৳ ০</div>
+                <div class="amount" id="tTotal">৳ ০.০০</div>
             </div>
         </div>
 
@@ -180,7 +192,7 @@
             <!-- Column 1: Notice -->
             <div>
                 <div class="section-card">
-                    <h3><i class="fa-solid fa-bullhorn"></i> নোটিশ বোর্ড</h3>
+                    <h3><i class="fas fa-bullhorn"></i> নোটিশ বোর্ড</h3>
                     <div id="noticesContainer"><div style="text-align: center; color: gray;">লোড হচ্ছে...</div></div>
                 </div>
             </div>
@@ -188,7 +200,7 @@
             <!-- Column 2: Personal Transactions -->
             <div>
                 <div class="section-card" style="border-top-color: var(--primary-green);">
-                    <h3 style="color: var(--primary-green); border-bottom-color: rgba(124, 208, 58, 0.2);"><i class="fa-solid fa-clock-rotate-left"></i> আপনার সাম্প্রতিক জমা</h3>
+                    <h3 style="color: var(--primary-green); border-bottom-color: rgba(124, 208, 58, 0.2);"><i class="fas fa-clock-rotate-left"></i> আপনার সাম্প্রতিক লেনদেন</h3>
                     <div class="table-wrapper">
                         <table>
                             <thead>
@@ -208,12 +220,12 @@
     <!-- Profile Edit Modal -->
     <div class="modal" id="profileModal">
         <div class="modal-content">
-            <button class="close-btn" onclick="document.getElementById('profileModal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+            <button class="close-btn" onclick="document.getElementById('profileModal').style.display='none'"><i class="fas fa-times"></i></button>
             <h2 style="color: var(--primary-blue); margin-bottom: 20px; text-align: center; font-weight: 700;">প্রোফাইল আপডেট</h2>
             
             <form id="profileForm">
                 <div class="pic-wrapper" onclick="document.getElementById('editPicInput').click()">
-                    <img id="editPicPreview" src="https://via.placeholder.com/150?text=Upload">
+                    <img id="editPicPreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
                 </div>
                 <input type="file" id="editPicInput" accept="image/png, image/jpeg" style="display:none;">
                 <div style="text-align: center; margin-bottom: 25px; font-size: 13px; color: #666; font-weight: 600;">ছবি পরিবর্তন করতে ছবির উপর ক্লিক করুন</div>
@@ -224,18 +236,26 @@
                     <div class="form-group full"><label>বর্তমান ঠিকানা</label><input type="text" id="pAddress"></div>
                     <div class="form-group full"><label>পাসওয়ার্ড (লগইন এর জন্য)</label><input type="text" id="pPassword" required></div>
                     
-                    <button type="submit" class="save-btn" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> প্রোফাইল আপডেট করুন</button>
+                    <button type="submit" class="save-btn" id="saveProfileBtn"><i class="fas fa-save"></i> প্রোফাইল আপডেট করুন</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Image Cropper Modal -->
-    <div class="modal" id="cropperModal" style="z-index: 10000;">
-        <div class="modal-content" style="max-width: 400px; text-align: center;">
-            <h3>ছবি ক্রপ করুন</h3>
-            <div style="width: 100%; height: 300px; background: #eee; margin: 15px 0;"><img id="imageToCrop" style="max-width: 100%;"></div>
-            <button class="save-btn" type="button" onclick="cropImage()">ক্রপ সম্পন্ন করুন</button>
+    <div class="cropper-modal" id="cropperModal">
+        <div class="cropper-content">
+            <h3 style="margin-bottom: 10px; color: var(--primary-blue);">ছবি ক্রপ করুন</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">মাউস বা হাত দিয়ে টেনে ছবি স্কয়ার মাপে বসান।</p>
+            
+            <div class="cropper-area">
+                <img id="imageToCrop" src="">
+            </div>
+            
+            <div class="cropper-btns">
+                <button type="button" class="btn-crop-cancel" onclick="closeCropper()"><i class="fas fa-times"></i> বাতিল</button>
+                <button type="button" class="btn-crop-save" onclick="cropImage()"><i class="fas fa-check"></i> ক্রপ করুন</button>
+            </div>
         </div>
     </div>
 
@@ -244,7 +264,7 @@
     <!-- Firebase SDK Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -262,34 +282,34 @@
         let loggedInUserId = localStorage.getItem('loggedInMemberId');
         
         window.logout = function() {
+            localStorage.removeItem("userRole");
             localStorage.removeItem("loggedInMemberId");
-            window.location.href = "member-login.html";
+            window.location.href = "login.html";
         }
 
         // ==========================================
-        // Number Counting Animation Function
+        // Number Counting Animation
         // ==========================================
-        function animateCounter(element, targetValue, duration) {
-            let startValue = 0;
-            let startTimestamp = null;
+        function animateCounter(element, targetValue) {
+            let startValue = 0; let startTimestamp = null;
+            const duration = 1500;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
                 const easeProgress = 1 - Math.pow(1 - progress, 4); 
-                let currentVal = Math.floor(easeProgress * (targetValue - startValue) + startValue);
+                let currentVal = easeProgress * (targetValue - startValue) + startValue;
                 
-                element.innerText = '৳ ' + currentVal;
-                
+                element.innerText = '৳ ' + currentVal.toFixed(2);
                 if (progress < 1) window.requestAnimationFrame(step);
-                else element.innerText = '৳ ' + targetValue;
+                else element.innerText = '৳ ' + targetValue.toFixed(2);
             };
             window.requestAnimationFrame(step);
         }
 
         // --- Data Loading ---
-        function loadDashboardData() {
+        async function loadDashboardData() {
             
-            // 1. Fetch Profile Data
+            // 1. Fetch Profile Data & Funds
             onValue(ref(db, 'members/' + loggedInUserId), (snapshot) => {
                 const m = snapshot.val();
                 if(!m) {
@@ -298,11 +318,12 @@
                     return;
                 }
                 
+                // Set Header Info
                 document.getElementById('mWelcomeName').innerText = m.name || 'অজ্ঞাত';
                 document.getElementById('mWelcomeId').innerText = m.id || loggedInUserId;
                 document.getElementById('mWelcomePhone').innerText = m.phone || 'N/A';
                 
-                let defaultPic = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'; // Default Male Avatar
+                let defaultPic = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
                 if(m.photo) {
                     document.getElementById('mWelcomePic').src = m.photo;
                     document.getElementById('editPicPreview').src = m.photo;
@@ -311,20 +332,80 @@
                     document.getElementById('editPicPreview').src = defaultPic;
                 }
                 
+                // Set Form Info
                 document.getElementById('pName').value = m.name || '';
                 document.getElementById('pPhone').value = m.phone || '';
                 document.getElementById('pAddress').value = m.address || '';
                 document.getElementById('pPassword').value = m.password || '';
                 
-                // Hide Loader
-                setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 600);
+                // Personal Fund Extraction
+                // Note: Based on transactions.html structure, admission, fine, donation are saved to Org_funds.
+                // However, we will show what is directly available under member's object or calculate from transactions.
+                // Assuming only 'monthly' is saved to member.funds.monthly directly.
+                let monthlyFund = (m.funds && m.funds.monthly) ? parseFloat(m.funds.monthly) : 0;
+                
+                // Since other funds go to Org, the member's personal fund display might only show Monthly,
+                // Or we need to calculate all past transactions of this user. Let's do the exact calculation below!
             });
 
-            // 2. Fetch Notices
+            // 2. Fetch User's Transactions & Calculate exact funds
+            onValue(ref(db, 'transactions'), (snapshot) => {
+                const tbody = document.getElementById('trxContainer');
+                tbody.innerHTML = '';
+                
+                let sumAdmission = 0, sumMonthly = 0, sumOthers = 0;
+                let myTrxs = [];
+
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        let t = child.val();
+                        // Filter transactions belonging to the logged-in member
+                        if(t.memberId === loggedInUserId) {
+                            myTrxs.push(t);
+                            
+                            // Categorize deposits for the summary blocks
+                            if(t.type === 'deposit') {
+                                if(t.details.includes('ভর্তি ফি')) sumAdmission += extractAmount(t.details, 'ভর্তি ফি');
+                                if(t.details.includes('মাসিক জমা')) sumMonthly += extractAmount(t.details, 'মাসিক জমা');
+                                
+                                let totalKnown = extractAmount(t.details, 'ভর্তি ফি') + extractAmount(t.details, 'মাসিক জমা');
+                                let remainingForOthers = t.totalAmount - totalKnown;
+                                if(remainingForOthers > 0) sumOthers += remainingForOthers;
+                            }
+                        }
+                    });
+                }
+
+                // Animate Funds Widgets
+                animateCounter(document.getElementById('tAdmission'), sumAdmission);
+                animateCounter(document.getElementById('tMonthly'), sumMonthly);
+                animateCounter(document.getElementById('tOthers'), sumOthers);
+                let totalFund = sumAdmission + sumMonthly + sumOthers;
+                animateCounter(document.getElementById('tTotal'), totalFund);
+
+                // Render Transaction Table (Latest first)
+                myTrxs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 10).forEach(trx => {
+                    let d = new Date(trx.timestamp).toLocaleDateString('en-GB');
+                    let amountColor = trx.type.includes('deposit') ? 'var(--primary-blue)' : 'var(--primary-red)';
+                    
+                    tbody.innerHTML += `<tr>
+                        <td>${d}</td>
+                        <td style="font-size: 14px;">${trx.details}</td>
+                        <td style="text-align:right; font-weight:700; color:${amountColor};">${trx.totalAmount.toFixed(2)}</td>
+                    </tr>`;
+                });
+                
+                if(myTrxs.length === 0) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">কোনো লেনদেনের রেকর্ড নেই</td></tr>';
+                
+                // Hide Loader
+                setTimeout(() => document.getElementById('pageLoader').classList.add('hide-loader'), 500);
+            });
+
+            // 3. Fetch Notices
             onValue(ref(db, 'notices'), (snapshot) => {
                 const cont = document.getElementById('noticesContainer');
                 cont.innerHTML = '';
-                if(snapshot.val()) {
+                if(snapshot.exists()) {
                     let notices = [];
                     snapshot.forEach(child => { notices.push({id: child.key, ...child.val()}); });
                     
@@ -333,51 +414,56 @@
                         cont.innerHTML += `<div class="notice-item">
                             <h4>${n.title}</h4>
                             <p>${n.description}</p>
-                            <span class="notice-date"><i class="fa-regular fa-clock"></i> ${d}</span>
+                            <span class="notice-date"><i class="fas fa-clock"></i> ${d}</span>
                         </div>`;
                     });
-                } else { cont.innerHTML = '<div style="color:gray; text-align:center;">কোনো নোটিশ নেই</div>'; }
+                } else { cont.innerHTML = '<div style="color:gray; text-align:center; padding: 20px;">কোনো নোটিশ নেই</div>'; }
             });
-            
-            // Note: Currently, transactions data structure might be different based on deposit setup.
-            // But we simulate a fetch for the member's personal fund data here based on common structure.
-            // If the structure is complex, this logic needs adjustment. Assuming basic demo for layout completion.
-            
-            animateCounter(document.getElementById('tAdmission'), 1500, 1000);
-            animateCounter(document.getElementById('tMonthly'), 4500, 1000);
-            animateCounter(document.getElementById('tOthers'), 500, 1000);
-            animateCounter(document.getElementById('tTotal'), 6500, 1500);
-            
-            document.getElementById('trxContainer').innerHTML = `
-                <tr><td>03 Sep, 2026</td><td>মাসিক জমা, ডোনেশন</td><td style="text-align:right; font-weight:bold; color:var(--primary-blue);">1500</td></tr>
-                <tr><td>01 Aug, 2026</td><td>মাসিক জমা</td><td style="text-align:right; font-weight:bold; color:var(--primary-blue);">1000</td></tr>
-                <tr><td>15 Jul, 2026</td><td>ভর্তি ফি, মাসিক জমা</td><td style="text-align:right; font-weight:bold; color:var(--primary-blue);">4000</td></tr>
-            `;
         }
         
+        // Helper to extract numeric amount from details string (e.g. "মাসিক জমা: ৳ 500")
+        function extractAmount(detailsStr, keyword) {
+            let match = detailsStr.match(new RegExp(`${keyword}: ৳ (\\d+(\\.\\d+)?)`));
+            return match ? parseFloat(match[1]) : 0;
+        }
+
         loadDashboardData();
 
         // --- Profile Modal & Image Crop Logic ---
         window.openProfileModal = () => document.getElementById('profileModal').style.display = 'block';
 
-        let cropper; let updatedImgBase64 = null;
+        let cropper; let finalCroppedBase64 = null;
+        
         document.getElementById('editPicInput').addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     document.getElementById('imageToCrop').src = event.target.result;
                     document.getElementById('cropperModal').style.display = 'flex';
+                    
                     if (cropper) cropper.destroy();
-                    cropper = new Cropper(document.getElementById('imageToCrop'), { aspectRatio: 1, viewMode: 1 });
+                    cropper = new Cropper(document.getElementById('imageToCrop'), {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        background: false
+                    });
                 };
-                reader.readAsDataURL(e.target.files[0]);
+                reader.readAsDataURL(file);
             }
         });
-        
-        window.cropImage = () => {
-            updatedImgBase64 = cropper.getCroppedCanvas({width: 300, height: 300}).toDataURL('image/jpeg', 0.8);
-            document.getElementById('editPicPreview').src = updatedImgBase64;
+
+        window.closeCropper = function() {
             document.getElementById('cropperModal').style.display = 'none';
+            if (cropper) cropper.destroy();
+            document.getElementById('editPicInput').value = "";
+        }
+        
+        window.cropImage = function() {
+            if (!cropper) return;
+            finalCroppedBase64 = cropper.getCroppedCanvas({ width: 250, height: 250 }).toDataURL('image/jpeg', 0.8);
+            document.getElementById('editPicPreview').src = finalCroppedBase64;
+            closeCropper();
         };
 
         // --- Save Profile ---
@@ -392,7 +478,7 @@
                 address: document.getElementById('pAddress').value,
                 password: document.getElementById('pPassword').value
             };
-            if(updatedImgBase64) updates.photo = updatedImgBase64;
+            if(finalCroppedBase64) updates.photo = finalCroppedBase64;
 
             try {
                 await update(ref(db, 'members/' + loggedInUserId), updates);
@@ -402,7 +488,7 @@
                 alert('আপডেট করতে সমস্যা হয়েছে!'); 
                 console.error(error);
             } finally { 
-                btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> প্রোফাইল আপডেট করুন'; 
+                btn.innerHTML = '<i class="fas fa-save"></i> প্রোফাইল আপডেট করুন'; 
                 btn.disabled = false; 
             }
         });
