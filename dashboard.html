@@ -374,13 +374,19 @@
                 let baseFund = memberMonthlyFunds + orgFunds;
                 let totalFund = baseFund + totalProfit; // সর্বমোট ফান্ড (মুনাফাসহ)
 
-                // 5. Transactions
+                // 5. Transactions (Expenses Calculation Fixed)
                 let trxs = [];
                 if (trxSnap.exists()) {
                     trxSnap.forEach(t => {
                         let data = t.val();
                         trxs.push(data);
-                        if (data.type === 'withdraw_expense') totalExpense += parseFloat(data.totalAmount || 0);
+                        
+                        // Strict filter: Calculate Expense ONLY if it is a general expense (not product purchase)
+                        if (data.type === 'withdraw_expense' && !data.details.includes('পণ্য')) {
+                            totalExpense += parseFloat(data.totalAmount || 0);
+                        }
+                        
+                        // Today's Deposit
                         if (data.type === 'deposit' && data.date === todayStr) todayDep += parseFloat(data.totalAmount || 0);
                     });
                 }
