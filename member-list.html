@@ -2,7 +2,8 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- মোবাইল ভিউ ফিক্স: যেন ডেক্সটপের মত জুম আউট না হয় -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>সদস্য তালিকা - বন্ধু কল্যাণ সংস্থা</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,20 +25,8 @@
         body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
 
         /* --- Page Loader --- */
-        #pageLoader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #fff; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.5s ease;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid rgba(10,54,157,0.2);
-            border-top-color: var(--primary-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
+        #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease; }
+        .spinner { width: 50px; height: 50px; border: 5px solid rgba(10,54,157,0.2); border-top-color: var(--primary-blue); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .hide-loader { opacity: 0; pointer-events: none; }
 
@@ -62,75 +51,67 @@
         .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
 
         /* --- Search Bar --- */
-        .search-container { background: #fff; padding: 20px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 25px; display: flex; align-items: center; gap: 15px; }
-        .search-box { flex: 1; position: relative; }
+        .search-container { background: #fff; padding: 20px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 25px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;}
+        .search-box { flex: 1; position: relative; min-width: 250px;}
         .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #999; font-size: 16px; }
         .search-box input { width: 100%; padding: 12px 15px 12px 45px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; outline: none; transition: var(--transition); }
         .search-box input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
-        .total-member-badge { background: rgba(124, 208, 58, 0.15); color: #5a9e26; padding: 10px 20px; border-radius: 10px; font-weight: 700; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .total-member-badge { background: rgba(124, 208, 58, 0.15); color: #5a9e26; padding: 10px 20px; border-radius: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; white-space: nowrap; flex-grow: 1; max-width: max-content;}
 
-        /* --- Table Container (Mobile Scroll Ready) --- */
+        /* --- Table Container --- */
         .table-container { background: #fff; border-radius: 15px; box-shadow: var(--card-shadow); overflow: hidden; }
-        .table-responsive { 
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch; 
-            width: 100%; 
-        }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
         
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; white-space: nowrap; }
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tbody tr { transition: var(--transition); }
         tbody tr:hover { background: rgba(0,0,0,0.01); }
 
-        .pic-placeholder { width: 45px; height: 45px; border-radius: 50%; background: #f1f1f1; display: flex; align-items: center; justify-content: center; color: #999; border: 2px solid #ddd; }
+        .pic-placeholder { width: 45px; height: 45px; border-radius: 50%; background: #f1f1f1; display: flex; align-items: center; justify-content: center; color: #999; border: 2px solid #ddd; overflow: hidden;}
+        .pic-placeholder img { width: 100%; height: 100%; object-fit: cover;}
         .member-id-badge { background: #eee; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; color: #555; }
         .member-name { font-weight: 700; color: var(--text-dark); display: block; font-size: 16px; margin-top: 3px; }
 
-        .actions-group { display: flex; gap: 8px; align-items: center; }
+        .actions-group { display: flex; gap: 8px; align-items: center; justify-content: center;}
         .btn-action { width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); color: #fff; }
-        .btn-move { background: #95a5a6; } .btn-move:hover { background: #7f8c8d; }
         .btn-view { background: #3498db; } .btn-view:hover { background: #2980b9; }
-        .btn-edit { background: #f39c12; } .btn-edit:hover { background: #d68910; }
         .btn-delete { background: #e74c3c; } .btn-delete:hover { background: #c0392b; }
 
         /* --- Modal --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); padding: 15px;}
         .modal.active { display: flex; opacity: 1; }
-        .modal-content { background: #fff; width: 90%; max-width: 500px; border-radius: 15px; padding: 25px; position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: var(--transition); }
+        .modal-content { background: #fff; width: 100%; max-width: 450px; border-radius: 15px; padding: 25px; position: relative; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: var(--transition); }
         .modal.active .modal-content { transform: scale(1); }
-        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; transition: 0.2s; }
-        .close-modal:hover { color: #e74c3c; }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.05); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; color: #555; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center;}
+        .close-modal:hover { background: #e74c3c; color: #fff; }
 
         /* Print Header (Hidden on Web) */
         .print-header { display: none; text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary-blue); padding-bottom: 10px; }
-        .print-header img { height: 60px; margin-bottom: 10px; }
         .print-header h1 { color: var(--primary-blue); font-size: 24px; font-weight: 700; margin: 0; }
         .print-header p { color: #555; font-size: 14px; margin: 5px 0 0 0; }
 
         .view-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; }
         .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #f1f1f1; padding: 10px 0; }
         .info-label { color: #777; font-weight: 600; font-size: 14px; }
-        .info-value { color: var(--text-dark); font-weight: 700; text-align: right; }
+        .info-value { color: var(--text-dark); font-weight: 700; text-align: right; font-size: 15px;}
         
         .btn-print { background: var(--primary-green); color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer; transition: var(--transition); }
         .btn-print:hover { background: #68b32e; }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Responsive */
+        /* Responsive Fixes */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; } .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 20px 15px;} .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
         }
         @media (max-width: 600px) {
-            .search-container { flex-direction: column; } .total-member-badge { width: 100%; justify-content: center; }
-            .main-content { padding: 15px; }
-            /* Mobile warning for table scroll */
+            .total-member-badge { max-width: 100%; width: 100%; }
             .table-container::before {
                 content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
-                font-size: 12px; color: #999; padding: 5px 0; background: #fafafa; border-bottom: 1px solid #eee;
+                font-size: 12px; color: #999; padding: 8px 0; background: #fafafa; border-bottom: 1px solid #eee;
             }
         }
         
@@ -140,12 +121,8 @@
             .modal-content.printable, .modal-content.printable * { visibility: visible; }
             .modal-content.printable { position: absolute; left: 0; top: 0; width: 100%; padding: 0; box-shadow: none; border-radius: 0; }
             .close-modal, .btn-print { display: none !important; }
-            
-            /* Show Print Header & Hide Web Header */
             .print-header { display: block; }
             .view-header { border-bottom: none; margin-bottom: 10px; }
-            
-            /* Hide Password Row strictly during Print */
             .no-print { display: none !important; }
         }
     </style>
@@ -158,10 +135,8 @@
         <h3 style="color: var(--primary-blue);">ডাটা লোড হচ্ছে...</h3>
     </div>
 
-    <!-- Mobile Sidebar Overlay -->
     <div class="overlay" id="sidebarOverlay"></div>
 
-    <!-- Complete Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-handshake"></i>
@@ -196,16 +171,16 @@
         <div class="search-container">
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="সদস্যের আইডি, নাম বা মোবাইল নম্বর দিয়ে খুঁজুন...">
+                <input type="text" id="searchInput" placeholder="সদস্যের আইডি, নাম বা মোবাইল দিয়ে খুঁজুন...">
             </div>
             <div class="total-member-badge">
-                <i class="fas fa-users"></i> মোট সদস্য: <span id="totalMembers">২</span> জন
+                <i class="fas fa-users"></i> মোট সদস্য: <span id="totalMembers">0</span> জন
             </div>
         </div>
 
         <div class="table-container">
             <div class="table-responsive">
-                <table id="memberTable">
+                <table>
                     <thead>
                         <tr>
                             <th>ছবি</th>
@@ -215,40 +190,7 @@
                         </tr>
                     </thead>
                     <tbody id="memberTableBody">
-                        <!-- ডেমো ডাটা ১ -->
-                        <tr>
-                            <td><div class="pic-placeholder"><i class="fas fa-user"></i></div></td>
-                            <td>
-                                <span class="member-id-badge">WAF-01</span>
-                                <span class="member-name">মো. রহিম মিয়া</span>
-                            </td>
-                            <td>০১৭xxxxxxx১</td>
-                            <td>
-                                <div class="actions-group" style="justify-content: center;">
-                                    <button class="btn-action btn-move" title="উপরে/নিচে নিন"><i class="fas fa-arrows-alt-v"></i></button>
-                                    <button class="btn-action btn-view" title="বিস্তারিত দেখুন" onclick="openViewModal('WAF-01')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                        <!-- ডেমো ডাটা ২ -->
-                        <tr>
-                            <td><div class="pic-placeholder"><i class="fas fa-user"></i></div></td>
-                            <td>
-                                <span class="member-id-badge">WAF-02</span>
-                                <span class="member-name">করিম উল্লাহ</span>
-                            </td>
-                            <td>০১৯xxxxxxx২</td>
-                            <td>
-                                <div class="actions-group" style="justify-content: center;">
-                                    <button class="btn-action btn-move" title="উপরে/নিচে নিন"><i class="fas fa-arrows-alt-v"></i></button>
-                                    <button class="btn-action btn-view" title="বিস্তারিত দেখুন" onclick="openViewModal('WAF-02')"><i class="fas fa-eye"></i></button>
-                                    <button class="btn-action btn-edit" title="এডিট করুন"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-action btn-delete" title="ডিলিট করুন"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            </td>
-                        </tr>
+                        <tr><td colspan="4" style="text-align:center;">ডাটাবেস থেকে লোড হচ্ছে...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -260,41 +202,38 @@
         <div class="modal-content printable" id="printArea">
             <button class="close-modal" onclick="closeModal('viewModal')"><i class="fas fa-times"></i></button>
             
-            <!-- Print specific header (Hidden on Web) -->
             <div class="print-header">
-                <img src="logo.png" alt="Logo">
                 <h1>বন্ধু কল্যাণ সংস্থা</h1>
                 <p>ডিজিটাল সদস্য প্রোফাইল</p>
             </div>
 
             <div class="view-header">
-                <div class="pic-placeholder" style="width:100px; height:100px; margin:0 auto 10px auto; border:3px solid #0A369D; font-size:40px;"><i class="fas fa-user"></i></div>
-                <h3 style="color:#0A369D; font-size:22px; margin-bottom:5px;">মো. রহিম মিয়া</h3>
-                <span class="member-id-badge">WAF-01</span>
+                <div class="pic-placeholder" id="vPhoto" style="width:100px; height:100px; margin:0 auto 10px auto; border:3px solid #0A369D; font-size:40px;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h3 id="vName" style="color:#0A369D; font-size:22px; margin-bottom:5px;">নাম</h3>
+                <span id="vId" class="member-id-badge">ID</span>
             </div>
 
             <div class="info-row">
                 <span class="info-label">মোবাইল নম্বর</span>
-                <span class="info-value">০১৭xxxxxxx১</span>
+                <span class="info-value" id="vPhone">০১৭...</span>
             </div>
-            
-            <!-- Password Row: Web এ দেখাবে, Print এ লুকানো থাকবে (no-print) -->
             <div class="info-row no-print">
                 <span class="info-label">পাসওয়ার্ড</span>
-                <span class="info-value" style="color: #e74c3c;">১২৩৪৫</span>
+                <span class="info-value" id="vPass" style="color: #e74c3c;">...</span>
             </div>
-            
             <div class="info-row">
-                <span class="info-label">ঠিকানা</span>
-                <span class="info-value">ব্রাহ্মণপাড়া, কুমিল্লা</span>
+                <span class="info-label">বর্তমান ঠিকানা</span>
+                <span class="info-value" id="vAddress">...</span>
             </div>
             <div class="info-row">
                 <span class="info-label">যোগদানের তারিখ</span>
-                <span class="info-value">০৩ সেপ্টে, ২০২৬</span>
+                <span class="info-value" id="vJoinDate">...</span>
             </div>
             <div class="info-row">
                 <span class="info-label">স্ট্যাটাস</span>
-                <span class="info-value" style="color: #7CD03A;">অ্যাকটিভ</span>
+                <span class="info-value" id="vStatus" style="color: #7CD03A;">অ্যাকটিভ</span>
             </div>
 
             <button class="btn-print" onclick="window.print()">
@@ -303,16 +242,8 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Core UI Scripts -->
     <script>
-        // Page Loader Logic
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                document.getElementById('pageLoader').classList.add('hide-loader');
-            }, 600); // 600ms loader delay
-        });
-
-        // Sidebar Toggle
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         const menuToggle = document.getElementById('menuToggle');
@@ -320,19 +251,138 @@
         menuToggle.addEventListener('click', () => { sidebar.classList.add('active'); overlay.classList.add('active'); });
         overlay.addEventListener('click', () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); });
 
-        // Search Filter (Dynamic)
+        // Search Filter (Dynamic Client Side)
         document.getElementById('searchInput').addEventListener('keyup', function() {
             let filter = this.value.toLowerCase();
             let rows = document.querySelectorAll('#memberTableBody tr');
             rows.forEach(row => {
-                let text = row.cells[1].textContent.toLowerCase() + " " + row.cells[2].textContent.toLowerCase();
-                row.style.display = text.indexOf(filter) > -1 ? "" : "none";
+                let text = row.cells[1] ? row.cells[1].textContent.toLowerCase() : "";
+                let text2 = row.cells[2] ? row.cells[2].textContent.toLowerCase() : "";
+                let combined = text + " " + text2;
+                row.style.display = combined.indexOf(filter) > -1 ? "" : "none";
             });
         });
 
-        // View Modal Logic
-        function openViewModal(id) { document.getElementById('viewModal').classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+    </script>
+
+    <!-- Firebase SDK Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
+            authDomain: "waf-database-8df19.firebaseapp.com",
+            databaseURL: "https://waf-database-8df19-default-rtdb.firebaseio.com",
+            projectId: "waf-database-8df19",
+            storageBucket: "waf-database-8df19.firebasestorage.app",
+            messagingSenderId: "660108849951",
+            appId: "1:660108849951:web:c57927e6c6b4372f12762a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        // Security Check
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
+        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+
+        let allMembers = [];
+
+        // Fetch Members from Firebase
+        onValue(ref(db, 'members'), (snapshot) => {
+            const tbody = document.getElementById('memberTableBody');
+            tbody.innerHTML = '';
+            allMembers = [];
+            let count = 0;
+
+            if (snapshot.exists()) {
+                snapshot.forEach(childSnapshot => {
+                    let m = childSnapshot.val();
+                    allMembers.push(m);
+                    count++;
+                    
+                    // Photo logic
+                    let photoHtml = m.photo 
+                        ? `<img src="${m.photo}" alt="${m.name}">` 
+                        : `<i class="fas fa-user"></i>`;
+                        
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><div class="pic-placeholder">${photoHtml}</div></td>
+                            <td>
+                                <span class="member-id-badge">${m.id}</span>
+                                <span class="member-name">${m.name}</span>
+                            </td>
+                            <td>${m.phone}</td>
+                            <td>
+                                <div class="actions-group">
+                                    <button class="btn-action btn-view" title="বিস্তারিত দেখুন" onclick="window.viewMember('${m.id}')"><i class="fas fa-eye"></i></button>
+                                    <button class="btn-action btn-delete" title="ডিলিট করুন" onclick="window.deleteMember('${m.id}')"><i class="fas fa-trash-alt"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">কোনো সদস্য পাওয়া যায়নি।</td></tr>';
+            }
+            
+            document.getElementById('totalMembers').innerText = count;
+            
+            // Hide Loader
+            setTimeout(() => { document.getElementById('pageLoader').classList.add('hide-loader'); }, 500);
+        });
+
+        // Global functions for inline HTML calling
+        window.viewMember = function(id) {
+            const m = allMembers.find(member => member.id === id);
+            if(m) {
+                // Populate Modal Data
+                document.getElementById('vId').innerText = m.id;
+                document.getElementById('vName').innerText = m.name;
+                document.getElementById('vPhone').innerText = m.phone;
+                document.getElementById('vPass').innerText = m.password || 'N/A';
+                document.getElementById('vAddress').innerText = m.address || 'দেওয়া হয়নি';
+                
+                let dateStr = m.joinDate ? new Date(m.joinDate).toLocaleDateString('en-GB') : '-';
+                document.getElementById('vJoinDate').innerText = dateStr;
+                
+                let statObj = document.getElementById('vStatus');
+                if(m.status === 'active') {
+                    statObj.innerText = 'অ্যাকটিভ';
+                    statObj.style.color = '#7CD03A';
+                } else {
+                    statObj.innerText = m.status || 'সাসপেন্ড';
+                    statObj.style.color = '#e74c3c';
+                }
+
+                const photoDiv = document.getElementById('vPhoto');
+                if(m.photo) {
+                    photoDiv.innerHTML = `<img src="${m.photo}" alt="${m.name}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+                } else {
+                    photoDiv.innerHTML = `<i class="fas fa-user"></i>`;
+                }
+
+                document.getElementById('viewModal').classList.add('active');
+            }
+        }
+
+        window.deleteMember = async function(id) {
+            if(confirm("সতর্কতা! আপনি কি নিশ্চিত যে এই সদস্যকে ডিলিট করতে চান? সদস্যের ব্যক্তিগত জমার হিসাবও মুছে যাবে!")) {
+                try {
+                    await remove(ref(db, 'members/' + id));
+                    alert("সদস্যকে সফলভাবে ডাটাবেস থেকে রিমুভ করা হয়েছে।");
+                } catch(error) {
+                    alert("ডিলিট করতে সমস্যা হয়েছে!");
+                    console.error(error);
+                }
+            }
+        }
+
     </script>
 </body>
 </html>
