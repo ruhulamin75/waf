@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>বর্তমান ঋণ - বন্ধু কল্যাণ সংস্থা</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw; }
 
         /* --- Loader --- */
         #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
@@ -43,7 +43,7 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content --- */
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; animation: fadeInUp 0.6s ease-out; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
@@ -68,9 +68,10 @@
         .search-box input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; outline: none; transition: 0.3s;}
         .search-box input:focus { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(10,54,157,0.1);}
 
-        .table-responsive { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; }
+        .table-container { background: #fff; padding: 15px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; overflow: hidden; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block; }
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; white-space: nowrap; font-size: 15px; }
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tbody tr:hover { background: #fafafa; }
         
@@ -82,18 +83,24 @@
         .b-due { background: rgba(231, 76, 60, 0.1); color: var(--primary-red); }
         .b-paid { background: rgba(124, 208, 58, 0.1); color: var(--primary-green); }
 
-        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; transition: 0.3s; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-pay:hover { background: #68b32e; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(124, 208, 58, 0.3);}
-        .btn-pay.disabled { background: #ccc; cursor: not-allowed; color: #666; transform: none; box-shadow: none;}
+        .actions-group { display: flex; gap: 8px; align-items: center;}
+        
+        .btn-action { width: 32px; height: 32px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: var(--transition); color: #fff; }
+        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;}
+        .btn-pay:hover { background: #68b32e; transform: translateY(-2px); box-shadow: 0 3px 8px rgba(124, 208, 58, 0.3);}
+        .btn-pay:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; color: #666;}
+        
+        .btn-edit { background: var(--primary-blue); } .btn-edit:hover { background: #06236b; }
+        .btn-delete { background: #e74c3c; } .btn-delete:hover { background: #c0392b; }
 
-        /* --- Payment Modal --- */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); }
+        /* --- Payment & Edit Modal --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); padding: 15px;}
         .modal.active { display: flex; opacity: 1; }
-        .modal-content { background: #fff; padding: 25px; border-radius: 15px; width: 90%; max-width: 400px; text-align: center; transform: scale(0.9); transition: var(--transition); position: relative; }
+        .modal-content { background: #fff; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; text-align: center; transform: scale(0.9); transition: var(--transition); position: relative; }
         .modal.active .modal-content { transform: scale(1); }
         
-        .close-modal { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 20px; color: #999; cursor: pointer; transition: 0.2s; }
-        .close-modal:hover { color: var(--primary-red); }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.05); color: #555; width: 35px; height: 35px; border-radius: 50%; border: none; font-size: 18px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;}
+        .close-modal:hover { background: var(--primary-red); color: white;}
 
         .modal-header { margin-bottom: 20px; border-bottom: 1px dashed #ddd; padding-bottom: 15px; }
         .modal-header h3 { color: var(--primary-blue); font-size: 22px; margin-bottom: 5px; }
@@ -103,7 +110,7 @@
         .input-group label { font-size: 14px; font-weight: 600; color: #555; }
         .input-group input { padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; background: #fafafa; transition: 0.3s;}
         .input-group input:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 3px rgba(10,54,157,0.1); }
-        .input-group input[readonly] { background: #eee; color: var(--primary-red); font-weight: 700; cursor: not-allowed; }
+        .input-group input[readonly] { background: #eee; font-weight: 700; cursor: not-allowed; }
 
         .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 10px; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
@@ -111,10 +118,18 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- Mobile Responsive Fixes --- */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 20px 15px; max-width: 100vw; } .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
+            
+            .table-container::before {
+                content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
+                font-size: 12px; color: #999; padding-bottom: 10px; background: #fff;
+            }
+            .section-header { flex-direction: column; align-items: flex-start; }
+            .search-box { max-width: 100%; }
         }
     </style>
 </head>
@@ -173,50 +188,79 @@
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>গ্রহীতার বিবরণ</th>
-                        <th>গ্রহণের তারিখ</th>
-                        <th>মোট ঋণ (৳)</th>
-                        <th>পরিশোধিত (৳)</th>
-                        <th>বর্তমান বকেয়া (৳)</th>
-                        <th style="text-align: center;">অ্যাকশন</th>
-                    </tr>
-                </thead>
-                <tbody id="loanTableBody">
-                    <tr><td colspan="6" style="text-align:center;">ডাটাবেস থেকে লোড হচ্ছে...</td></tr>
-                </tbody>
-            </table>
+        <div class="table-container">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>গ্রহীতার বিবরণ</th>
+                            <th>গ্রহণের তারিখ</th>
+                            <th>মোট ঋণ (৳)</th>
+                            <th>পরিশোধিত (৳)</th>
+                            <th>বর্তমান বকেয়া (৳)</th>
+                            <th>অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="loanTableBody">
+                        <tr><td colspan="6" style="text-align:center;">ডাটাবেস থেকে লোড হচ্ছে...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
     <!-- Payment Collection Modal -->
     <div class="modal" id="loanPayModal">
         <div class="modal-content">
-            <button class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <button class="close-modal" onclick="closeModal('loanPayModal')"><i class="fas fa-times"></i></button>
             
             <div class="modal-header">
-                <h3><i class="fas fa-hand-holding-usd"></i> ঋণ আদায় (জমা নিন)</h3>
+                <h3><i class="fas fa-hand-holding-usd"></i> ঋণ আদায় (জমা)</h3>
                 <p id="payMemberName" style="color: var(--primary-blue);">সদস্য: Name (ID)</p>
             </div>
 
             <form id="loanPayForm">
-                <!-- Hidden inputs for Database tracking -->
                 <input type="hidden" id="payMemberId">
                 
                 <div class="input-group">
                     <label>সর্বমোট বকেয়া আছে (৳)</label>
-                    <input type="text" id="payCurrentDue" readonly>
+                    <input type="text" id="payCurrentDue" readonly style="color: var(--primary-red);">
                 </div>
                 
                 <div class="input-group">
                     <label>জমাকৃত টাকার পরিমাণ (৳) *</label>
-                    <input type="number" id="payAmountInput" min="1" required placeholder="কত টাকা জমা দিচ্ছেন?">
+                    <input type="number" id="payAmountInput" min="1" step="any" required placeholder="কত টাকা জমা দিচ্ছেন?">
                 </div>
                 
-                <button type="submit" class="btn-submit" id="loanSubmitBtn"><i class="fas fa-check-circle"></i> ফান্ডে জমা দিন</button>
+                <button type="submit" class="btn-submit" id="loanSubmitBtn" style="background: linear-gradient(135deg, var(--primary-green), #68b32e);"><i class="fas fa-check-circle"></i> ফান্ডে জমা দিন</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Loan Modal -->
+    <div class="modal" id="loanEditModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('loanEditModal')"><i class="fas fa-times"></i></button>
+            
+            <div class="modal-header">
+                <h3><i class="fas fa-edit"></i> ঋণ সংশোধন করুন</h3>
+                <p id="editMemberName" style="color: var(--primary-blue);">সদস্য: Name (ID)</p>
+            </div>
+
+            <form id="loanEditForm">
+                <input type="hidden" id="editMemberId">
+                
+                <div class="input-group">
+                    <label>সর্বমোট প্রদানকৃত ঋণ (৳) *</label>
+                    <input type="number" id="editTotalAmount" min="0" step="any" required>
+                </div>
+
+                <div class="input-group">
+                    <label>মোট পরিশোধিত ঋণ (৳) *</label>
+                    <input type="number" id="editPaidAmount" min="0" step="any" required>
+                </div>
+                
+                <button type="submit" class="btn-submit" id="loanEditSubmitBtn"><i class="fas fa-save"></i> আপডেট সেভ করুন</button>
             </form>
         </div>
     </div>
@@ -238,7 +282,7 @@
             });
         });
 
-        function closeModal() { document.getElementById('loanPayModal').classList.remove('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     </script>
 
     <!-- Firebase Integration Logic -->
@@ -261,7 +305,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Security Check
+        // Auth Check
         onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
         document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
 
@@ -273,13 +317,12 @@
             tbody.innerHTML = '';
             
             let totalGiven = 0, totalPaid = 0, totalDue = 0;
-            allLoans = {}; // Reset global object
+            allLoans = {}; 
 
             if (snapshot.exists()) {
                 snapshot.forEach(childSnap => {
                     let member = childSnap.val();
                     
-                    // Check if member has loan data
                     if(member.loan && member.loan.totalAmount > 0) {
                         let totalLoan = parseFloat(member.loan.totalAmount || 0);
                         let paid = parseFloat(member.loan.paidAmount || 0);
@@ -290,12 +333,13 @@
                         totalPaid += paid;
                         totalDue += due;
 
-                        allLoans[member.id] = { name: member.name, due: due }; // Store for modal
+                        allLoans[member.id] = { name: member.name, total: totalLoan, paid: paid, due: due }; 
 
-                        let dueBadge = due > 0 ? `<span class="badge b-due">${due.toFixed(2)}</span>` : `<span class="badge b-paid">পরিশোধিত</span>`;
-                        let btnHtml = due > 0 
-                            ? `<button class="btn-pay" onclick="window.openPayModal('${member.id}')"><i class="fas fa-hand-holding-usd"></i> জমা নিন</button>` 
-                            : `<button class="btn-pay disabled" disabled><i class="fas fa-check"></i> সম্পন্ন</button>`;
+                        let dueBadge = due > 0 ? `<span class="badge b-due">৳ ${due.toFixed(2)}</span>` : `<span class="badge b-paid"><i class="fas fa-check"></i> পরিশোধিত</span>`;
+                        
+                        let payBtn = due > 0 
+                            ? `<button class="btn-pay" onclick="window.openPayModal('${member.id}')" title="জমা নিন">জমা</button>` 
+                            : `<button class="btn-pay disabled" disabled title="সম্পন্ন"><i class="fas fa-check"></i></button>`;
 
                         tbody.innerHTML += `<tr>
                             <td>
@@ -305,10 +349,16 @@
                                 </div>
                             </td>
                             <td>${date}</td>
-                            <td>${totalLoan.toFixed(2)}</td>
+                            <td style="font-weight: 700;">${totalLoan.toFixed(2)}</td>
                             <td>${paid.toFixed(2)}</td>
                             <td>${dueBadge}</td>
-                            <td style="text-align: center;">${btnHtml}</td>
+                            <td>
+                                <div class="actions-group">
+                                    ${payBtn}
+                                    <button class="btn-action btn-edit" title="এডিট করুন" onclick="window.openEditModal('${member.id}')"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-action btn-delete" title="ডিলিট করুন" onclick="window.deleteLoan('${member.id}')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
                         </tr>`;
                     }
                 });
@@ -324,7 +374,7 @@
             document.getElementById('totalLoanDue').innerText = "৳ " + totalDue.toFixed(2);
         });
 
-        // --- Open Modal (Global Function) ---
+        // --- Open Modals ---
         window.openPayModal = function(memberId) {
             let loanData = allLoans[memberId];
             if(!loanData) return;
@@ -335,9 +385,22 @@
             
             let input = document.getElementById('payAmountInput');
             input.value = '';
-            input.max = loanData.due; // Cannot pay more than due
+            input.max = loanData.due; 
             
             document.getElementById('loanPayModal').classList.add('active');
+        }
+
+        window.openEditModal = function(memberId) {
+            let loanData = allLoans[memberId];
+            if(!loanData) return;
+
+            document.getElementById('editMemberId').value = memberId;
+            document.getElementById('editMemberName').innerText = `${loanData.name} (${memberId})`;
+            
+            document.getElementById('editTotalAmount').value = loanData.total;
+            document.getElementById('editPaidAmount').value = loanData.paid;
+            
+            document.getElementById('loanEditModal').classList.add('active');
         }
 
         // --- Process Loan Repayment ---
@@ -357,46 +420,74 @@
             try {
                 let updates = {};
                 
-                // 1. Update Member's Loan Paid Amount directly
-                // To do this safely without overriding, we first get the current paidAmount.
-                // However, since we are fetching snapshot real-time above, but to be 100% atomic in Firebase:
-                const dbPath = `members/${memberId}/loan/paidAmount`;
-                // Simple trick: We just use the known math (since this form prevents concurrent changes realistically)
-                // BUT for safety, we'll fetch exact current paid:
                 import { get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
-                const snap = await get(ref(db, dbPath));
+                const snap = await get(ref(db, `members/${memberId}/loan/paidAmount`));
                 const currentPaid = snap.exists() ? parseFloat(snap.val()) : 0;
                 
-                updates[dbPath] = currentPaid + payAmount;
+                updates[`members/${memberId}/loan/paidAmount`] = currentPaid + payAmount;
 
-                // 2. Add to Transactions History (So it shows in Reports & transaction page)
                 const newTrxKey = push(child(ref(db), 'transactions')).key;
                 const today = new Date().toLocaleDateString('en-CA');
                 
                 updates['/transactions/' + newTrxKey] = {
-                    id: newTrxKey, 
-                    memberId: memberId, 
-                    memberName: allLoans[memberId].name,
-                    date: today, 
-                    timestamp: Date.now(), 
-                    type: 'deposit_loan', // Specific type for loan return
-                    details: 'ঋণের কিস্তি আদায়', 
-                    totalAmount: payAmount
+                    id: newTrxKey, memberId: memberId, memberName: allLoans[memberId].name,
+                    date: today, timestamp: Date.now(), type: 'deposit_loan', 
+                    details: 'ঋণের কিস্তি আদায়', totalAmount: payAmount
                 };
 
-                // Execute Updates
                 await update(ref(db), updates);
-                
                 alert("আলহামদুলিল্লাহ! ঋণের কিস্তি সফলভাবে জমা নেওয়া হয়েছে!");
-                closeModal();
+                closeModal('loanPayModal');
 
             } catch(error) {
                 console.error(error); alert("জমা নিতে সমস্যা হয়েছে: " + error.message);
             } finally {
-                btn.innerHTML = '<i class="fas fa-check-circle"></i> অ্যাকাউন্টে জমা দিন';
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> ফান্ডে জমা দিন';
                 btn.disabled = false;
             }
         });
+
+        // --- Process Loan Edit ---
+        document.getElementById('loanEditForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('loanEditSubmitBtn');
+            const memberId = document.getElementById('editMemberId').value;
+            const tAmount = parseFloat(document.getElementById('editTotalAmount').value);
+            const pAmount = parseFloat(document.getElementById('editPaidAmount').value);
+
+            if (pAmount > tAmount) return alert("পরিশোধিত ঋণ কখনো মোট ঋণের বেশি হতে পারে না!");
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...'; btn.disabled = true;
+
+            try {
+                let updates = {};
+                updates[`members/${memberId}/loan/totalAmount`] = tAmount;
+                updates[`members/${memberId}/loan/paidAmount`] = pAmount;
+
+                await update(ref(db), updates);
+                alert("ঋণের হিসাব সফলভাবে আপডেট হয়েছে!");
+                closeModal('loanEditModal');
+            } catch(error) {
+                alert("আপডেট করতে সমস্যা হয়েছে!");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-save"></i> আপডেট সেভ করুন'; btn.disabled = false;
+            }
+        });
+
+        // --- Process Loan Delete ---
+        window.deleteLoan = async function(memberId) {
+            if(confirm("সতর্কতা! আপনি কি নিশ্চিত যে এই সদস্যের ঋণের সমস্ত হিসাব মুছে ফেলতে চান? এটি আর ফিরিয়ে আনা সম্ভব নয়।")) {
+                try {
+                    let updates = {};
+                    updates[`members/${memberId}/loan`] = null; // Completely removes the loan object from member
+                    await update(ref(db), updates);
+                    alert("সদস্যের ঋণ সফলভাবে মুছে ফেলা হয়েছে।");
+                } catch(error) {
+                    alert("ডিলিট করতে সমস্যা হয়েছে!");
+                    console.error(error);
+                }
+            }
+        };
 
     </script>
 </body>
