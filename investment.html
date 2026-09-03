@@ -124,7 +124,8 @@
         .r-details p { margin-bottom: 8px; font-size: 15px; }
         .r-details strong { display: inline-block; width: 130px; color: #555; }
 
-        .r-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
+        .r-table-wrap { overflow-x: auto; }
+        .r-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; min-width: 400px; }
         .r-table th, .r-table td { padding: 12px; border: 1px solid #eee; text-align: left; }
         .r-table th { background: #fafafa; color: #333; }
         
@@ -151,7 +152,7 @@
             body * { visibility: hidden; }
             #receiptModal, #receiptModal * { visibility: visible; }
             #receiptModal { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 0; }
-            .receipt-wrapper { box-shadow: none; max-width: 100%; border-radius: 0; transform: none !important; }
+            .receipt-wrapper { box-shadow: none; max-width: 100%; border-radius: 0; transform: none !important; margin: 0; }
             .receipt-print-area { padding: 0; }
             .close-modal, .print-btn-wrap { display: none !important; }
             .r-table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
@@ -192,11 +193,11 @@
         <div class="summary-grid">
             <div class="summary-card">
                 <i class="fas fa-chart-pie"></i>
-                <div class="info"><h4>বর্তমান মোট বিনিয়োগ</h4><h2 id="currentInvestmentText">৳ 0</h2></div>
+                <div class="info"><h4>বর্তমান মোট বিনিয়োগ</h4><h2 id="currentInvestmentText">৳ 0.00</h2></div>
             </div>
             <div class="summary-card card-green">
                 <i class="fas fa-hand-holding-dollar"></i>
-                <div class="info"><h4>সর্বমোট অর্জিত মুনাফা</h4><h2 id="totalProfitText" style="color: var(--primary-green);">৳ 0</h2></div>
+                <div class="info"><h4>সর্বমোট অর্জিত মুনাফা</h4><h2 id="totalProfitText" style="color: var(--primary-green);">৳ 0.00</h2></div>
             </div>
         </div>
 
@@ -241,14 +242,14 @@
                     
                     <!-- Detail Field (Profit only) -->
                     <div class="input-group sec-prof" style="display: none;">
-                        <label>বিবরণ</label>
+                        <label>বিবরণ (ঐচ্ছিক)</label>
                         <input type="text" id="profDetails" placeholder="মুনাফার বিবরণ">
                     </div>
 
                     <!-- Common Amount -->
                     <div class="input-group">
                         <label>টাকার পরিমাণ (৳)</label>
-                        <input type="number" id="entryAmount" required min="1" placeholder="Amount">
+                        <input type="number" id="entryAmount" required min="0" step="any" placeholder="Amount">
                     </div>
                 </div>
 
@@ -264,7 +265,7 @@
         <div class="table-responsive">
             <table class="tbl-inv">
                 <thead><tr><th>তারিখ</th><th>খাত / প্রতিষ্ঠান</th><th>ঠিকানা</th><th>পরিমাণ (৳)</th><th style="text-align: center;">অ্যাকশন</th></tr></thead>
-                <tbody id="investmentTableBody"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                <tbody id="investmentTableBody"><tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...</td></tr></tbody>
             </table>
         </div>
 
@@ -273,7 +274,7 @@
         <div class="table-responsive">
             <table class="tbl-prof">
                 <thead><tr><th>তারিখ</th><th>উৎস (খাত)</th><th>বিবরণ</th><th>পরিমাণ (৳)</th><th style="text-align: center;">অ্যাকশন</th></tr></thead>
-                <tbody id="profitTableBody"><tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                <tbody id="profitTableBody"><tr><td colspan="5" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...</td></tr></tbody>
             </table>
         </div>
 
@@ -282,7 +283,7 @@
         <div class="table-responsive">
             <table class="tbl-ret">
                 <thead><tr><th>তারিখ</th><th>উৎস (খাত)</th><th>পরিমাণ (৳)</th><th style="text-align: center;">অ্যাকশন</th></tr></thead>
-                <tbody id="returnTableBody"><tr><td colspan="4" style="text-align:center;">লোড হচ্ছে...</td></tr></tbody>
+                <tbody id="returnTableBody"><tr><td colspan="4" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে...</td></tr></tbody>
             </table>
         </div>
 
@@ -310,14 +311,16 @@
                     <!-- Dynamic Details Injected Here -->
                 </div>
                 
-                <table class="r-table">
-                    <thead><tr><th style="text-align:center; width: 10%;">ক্রঃ</th><th>বিবরণ</th><th style="text-align:right;">টাকার পরিমাণ (৳)</th></tr></thead>
-                    <tbody id="rTableBody"></tbody>
-                </table>
+                <div class="r-table-wrap">
+                    <table class="r-table">
+                        <thead><tr><th style="text-align:center; width: 10%;">ক্রঃ</th><th>বিবরণ</th><th style="text-align:right;">টাকার পরিমাণ (৳)</th></tr></thead>
+                        <tbody id="rTableBody"></tbody>
+                    </table>
+                </div>
 
                 <div class="r-total">
                     <span>সর্বমোট:</span>
-                    <span id="rTotalAmt" style="font-size: 20px;">0</span>
+                    <span id="rTotalAmt" style="font-size: 20px;">0.00</span>
                 </div>
                 <div class="r-words" id="rWords">কথায়: শূন্য টাকা মাত্র</div>
                 
@@ -393,6 +396,7 @@
     <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
         import { getDatabase, ref, onValue, push, set, remove, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         // Current Project Config
@@ -407,7 +411,12 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
+
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
+        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+
 
         let investments = [], profits = [], returns = [];
 
@@ -424,7 +433,7 @@
                             <td>${new Date(inv.date).toLocaleDateString('en-GB')}</td>
                             <td><strong>${inv.name}</strong></td>
                             <td>${inv.address || '-'}</td>
-                            <td>${inv.amount.toFixed(2)}</td>
+                            <td style="font-weight:700;">${inv.amount.toFixed(2)}</td>
                             <td>
                                 <div class="actions-group">
                                     <button class="btn-action btn-view" onclick="window.showReceipt('${inv.id}', 'investment')"><i class="fas fa-receipt"></i></button>
@@ -434,7 +443,7 @@
                             </td>
                         </tr>`;
                     });
-                } else html = '<tr><td colspan="5" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                } else html = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো ডাটা নেই</td></tr>';
                 document.getElementById('investmentTableBody').innerHTML = html;
                 updateSummaries();
             });
@@ -448,9 +457,9 @@
                     profits.sort((a,b) => b.timestamp - a.timestamp).forEach(prof => {
                         html += `<tr>
                             <td>${new Date(prof.date).toLocaleDateString('en-GB')}</td>
-                            <td><strong>${prof.sourceName}</strong></td>
+                            <td style="color:var(--primary-green);"><strong>${prof.sourceName}</strong></td>
                             <td>${prof.details || '-'}</td>
-                            <td>${prof.amount.toFixed(2)}</td>
+                            <td style="font-weight:700;">${prof.amount.toFixed(2)}</td>
                             <td>
                                 <div class="actions-group">
                                     <button class="btn-action btn-view" onclick="window.showReceipt('${prof.id}', 'profit')"><i class="fas fa-receipt"></i></button>
@@ -460,7 +469,7 @@
                             </td>
                         </tr>`;
                     });
-                } else html = '<tr><td colspan="5" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                } else html = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো ডাটা নেই</td></tr>';
                 document.getElementById('profitTableBody').innerHTML = html;
                 updateSummaries();
             });
@@ -474,8 +483,8 @@
                     returns.sort((a,b) => b.timestamp - a.timestamp).forEach(ret => {
                         html += `<tr>
                             <td>${new Date(ret.date).toLocaleDateString('en-GB')}</td>
-                            <td><strong>${ret.sourceName}</strong></td>
-                            <td>${ret.amount.toFixed(2)}</td>
+                            <td style="color:var(--primary-orange);"><strong>${ret.sourceName}</strong></td>
+                            <td style="font-weight:700;">${ret.amount.toFixed(2)}</td>
                             <td>
                                 <div class="actions-group">
                                     <button class="btn-action btn-view" onclick="window.showReceipt('${ret.id}', 'return')"><i class="fas fa-receipt"></i></button>
@@ -485,7 +494,7 @@
                             </td>
                         </tr>`;
                     });
-                } else html = '<tr><td colspan="4" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                } else html = '<tr><td colspan="4" style="text-align:center; color:#999;">কোনো ডাটা নেই</td></tr>';
                 document.getElementById('returnTableBody').innerHTML = html;
                 updateSummaries();
             });
@@ -580,7 +589,7 @@
             if(type === 'investment') {
                 dataObj = investments.find(i => i.id === id);
                 document.getElementById('invName').value = dataObj.name;
-                document.getElementById('invAddress').value = dataObj.address;
+                document.getElementById('invAddress').value = dataObj.address || '';
             } else {
                 dataObj = type === 'profit' ? profits.find(p => p.id === id) : returns.find(r => r.id === id);
                 
