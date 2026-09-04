@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>সেটিংস - বন্ধু কল্যাণ সংস্থা</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +23,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
 
         /* --- Loader --- */
         #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
@@ -33,24 +33,19 @@
 
         /* --- Sidebar --- */
         .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
-        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center;}
+        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
-        .sidebar-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px;}
-        
+        .sidebar-header h2 { font-size: 20px; font-weight: 700; }
         .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; list-style: none; }
-        .nav-menu::-webkit-scrollbar { width: 5px; } .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
         .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
         .nav-item i { width: 20px; text-align: center; font-size: 18px; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
-        
-        /* Updated Logout Button Position */
-        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; transition: var(--transition);}
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; transition: var(--transition); }
         .logout-btn:hover { background: #ff4757; color: white;}
-
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content --- */
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; animation: fadeInUp 0.6s ease-out; }
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
@@ -138,8 +133,7 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
         
-        <!-- Modified: ul inside nav-menu -->
-        <ul class="nav-menu" style="list-style: none;">
+        <ul class="nav-menu">
             <li><a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a></li>
             <li><a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a></li>
             <li><a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a></li>
@@ -263,11 +257,11 @@
                         <strong>সতর্কতা:</strong> নিচের বাটনগুলোতে ক্লিক করে ডেটা মুছে ফেললে তা আর পুনরায় ফিরিয়ে আনা সম্ভব নয়। 
                     </p>
                     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                        <button class="danger-btn" onclick="window.eraseData('members')">
-                            <i class="fas fa-users-slash"></i> সকল সদস্য ডিলিট করুন
+                        <button class="danger-btn" onclick="window.eraseData('all')">
+                            <i class="fas fa-dumpster-fire"></i> সম্পূর্ণ সিস্টেম ডেটা রিসেট করুন
                         </button>
-                        <button class="danger-btn" onclick="window.eraseData('transactions')">
-                            <i class="fas fa-money-bill-transfer"></i> সকল লেনদেন ডিলিট করুন
+                        <button class="danger-btn" onclick="window.eraseData('members')">
+                            <i class="fas fa-users-slash"></i> সকল সদস্য ও তাদের লেনদেন মুছুন
                         </button>
                     </div>
                 </div>
@@ -311,7 +305,7 @@
     <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, push, remove, update, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
         import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -480,21 +474,56 @@
             window.closeFormPanel('bankForm', 'toggleBankBtn', 'নতুন ব্যাংক যুক্ত করুন');
         };
 
-        // --- Danger Zone ---
+        // --- Danger Zone Data Eraser Logic ---
         window.eraseData = async (type) => {
-            let typeName = type === 'members' ? 'সকল সদস্যের ডেটা' : 'সকল লেনদেনের ডেটা';
+            let typeName = type === 'all' ? 'পুরো ওয়েবসাইটের সকল ডেটা' : 'সকল সদস্য ও তাদের লেনদেন';
             const user = auth.currentUser;
             
-            if (confirm(`সতর্কতা! আপনি কি নিশ্চিত যে ${typeName} মুছে ফেলতে চান?`)) {
+            if (confirm(`সতর্কতা! আপনি কি নিশ্চিত যে ${typeName} মুছে ফেলতে চান? এটি আর পুনরায় ফিরিয়ে আনা যাবে না!`)) {
                 let adminPass = prompt("নিশ্চিত করতে আপনার বর্তমান অ্যাডমিন পাসওয়ার্ড দিন:");
                 if (adminPass && user) {
                     try {
                         const credential = EmailAuthProvider.credential(user.email, adminPass);
                         await reauthenticateWithCredential(user, credential);
-                        await remove(ref(db, type));
+                        
+                        let updates = {};
+                        
+                        if (type === 'all') {
+                            // Wipe everything
+                            updates = {
+                                'members': null,
+                                'transactions': null,
+                                'products': null,
+                                'sales': null,
+                                'investments': null,
+                                'profits': null,
+                                'returns': null,
+                                'org_funds': null,
+                                'notices': null,
+                                'bank_accounts': null
+                            };
+                        } else if (type === 'members') {
+                            // Wipe members and their related transactions
+                            updates['members'] = null;
+                            
+                            // Fetch transactions to delete only member-related transactions
+                            const snap = await get(ref(db, 'transactions'));
+                            if(snap.exists()) {
+                                snap.forEach(child => {
+                                    // If the transaction has a memberId, delete it
+                                    if(child.val().memberId) {
+                                        updates[`transactions/${child.key}`] = null;
+                                    }
+                                });
+                            }
+                        }
+                        
+                        await update(ref(db), updates);
                         alert(`সফলভাবে ${typeName} মুছে ফেলা হয়েছে!`);
+                        
                     } catch (error) {
-                        alert("পাসওয়ার্ড ভুল হয়েছে অথবা সমস্যা হয়েছে!");
+                        alert("পাসওয়ার্ড ভুল হয়েছে অথবা ডেটা মুছতে সমস্যা হয়েছে!");
+                        console.error(error);
                     }
                 }
             }
