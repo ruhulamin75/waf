@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>রিপোর্টস - বন্ধু কল্যাণ সংস্থা</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw; }
 
         /* --- Loader --- */
         #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
@@ -42,7 +42,7 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content --- */
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; animation: fadeInUp 0.6s ease-out; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
@@ -75,9 +75,9 @@
         .report-header p { font-size: 14px; color: #666; }
 
         /* Table */
-        .table-responsive { overflow-x: auto; margin-bottom: 20px; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 12px 15px; text-align: left; border: 1px solid #ddd; }
+        th, td { padding: 12px 15px; text-align: left; border: 1px solid #ddd; white-space: nowrap;}
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tbody tr:nth-child(even) { background: #fafafa; }
         .total-row { background: rgba(124, 208, 58, 0.1) !important; font-weight: 700; color: var(--primary-green); }
@@ -90,9 +90,14 @@
 
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 15px; max-width: 100vw;} .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
             .btn-print { position: relative; top: 0; right: 0; width: 100%; justify-content: center; margin-bottom: 20px; }
+            
+            .table-responsive::before {
+                content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
+                font-size: 12px; color: #999; padding-bottom: 10px; background: #fff; position: sticky; left: 0;
+            }
         }
 
         /* --- Print CSS --- */
@@ -104,6 +109,7 @@
             table, th, td { border: 1px solid #333 !important; }
             th { background: #eee !important; color: #000 !important; -webkit-print-color-adjust: exact; }
             .total-row { background: #f0f0f0 !important; color: #000 !important; -webkit-print-color-adjust: exact; }
+            .table-responsive::before { display: none !important; }
         }
     </style>
 </head>
@@ -212,7 +218,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-        import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -280,45 +286,79 @@
                     if(snap.exists()) {
                         let trxs = [];
                         snap.forEach(c => trxs.push(c.val()));
+                        
                         trxs.sort((a,b) => a.timestamp - b.timestamp).forEach(t => {
-                            let isDep = t.type.includes('deposit');
-                            let depAmt = isDep ? t.totalAmount : 0;
-                            let wdAmt = !isDep ? t.totalAmount : 0;
-                            totalDep += depAmt; totalWd += wdAmt;
-                            let name = t.memberName ? `${t.memberName} (${t.memberId})` : 'সাধারণ খাত';
+                            // Filter: Only include deposits and general expenses (Exclude loan entries)
+                            if (t.type === 'deposit' || t.type === 'withdraw_expense') {
+                                let isDep = t.type === 'deposit';
+                                let depAmt = isDep ? t.totalAmount : 0;
+                                let wdAmt = !isDep ? t.totalAmount : 0;
+                                totalDep += depAmt; totalWd += wdAmt;
+                                let name = t.memberName ? `${t.memberName} (${t.memberId})` : 'সাধারণ খাত';
 
-                            tbody.innerHTML += `<tr>
-                                <td>${t.date}</td><td>${name}</td><td>${t.details}</td>
-                                <td>${depAmt > 0 ? depAmt.toFixed(2) : '-'}</td>
-                                <td style="color:#e74c3c;">${wdAmt > 0 ? wdAmt.toFixed(2) : '-'}</td>
-                            </tr>`;
-                        });
-                    }
-                    tbody.innerHTML += `<tr class="total-row"><td colspan="3" style="text-align:right;">সর্বমোট:</td><td>${totalDep.toFixed(2)}</td><td style="color:#e74c3c;">${totalWd.toFixed(2)}</td></tr>`;
-                } 
-                
-                else if (type === 'loanRep') {
-                    // Fetch Members Loan
-                    const snap = await get(ref(db, 'members'));
-                    title.innerText = 'বর্তমান ঋণ গ্রহীতাদের বিস্তারিত রিপোর্ট';
-                    thead.innerHTML = `<tr><th>সদস্যের নাম ও আইডি</th><th>যোগাযোগ</th><th>মোট ঋণ (৳)</th><th>পরিশোধিত (৳)</th><th>বর্তমান বকেয়া (৳)</th></tr>`;
-                    
-                    let totalL = 0, totalP = 0, totalD = 0;
-                    if(snap.exists()) {
-                        snap.forEach(c => {
-                            let m = c.val();
-                            if(m.loan && m.loan.totalAmount > 0) {
-                                let due = m.loan.totalAmount - (m.loan.paidAmount || 0);
-                                totalL += m.loan.totalAmount; totalP += (m.loan.paidAmount || 0); totalD += due;
                                 tbody.innerHTML += `<tr>
-                                    <td>${m.name} (${m.id})</td><td>${m.phone}</td>
-                                    <td>${m.loan.totalAmount.toFixed(2)}</td>
-                                    <td>${(m.loan.paidAmount || 0).toFixed(2)}</td>
-                                    <td style="color:#e74c3c; font-weight:bold;">${due.toFixed(2)}</td>
+                                    <td>${t.date}</td><td>${name}</td><td>${t.details}</td>
+                                    <td>${depAmt > 0 ? depAmt.toFixed(2) : '-'}</td>
+                                    <td style="color:#e74c3c;">${wdAmt > 0 ? wdAmt.toFixed(2) : '-'}</td>
                                 </tr>`;
                             }
                         });
                     }
+                    if(tbody.innerHTML === '') tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো রেকর্ড নেই</td></tr>';
+                    else tbody.innerHTML += `<tr class="total-row"><td colspan="3" style="text-align:right;">সর্বমোট:</td><td>${totalDep.toFixed(2)}</td><td style="color:#e74c3c;">${totalWd.toFixed(2)}</td></tr>`;
+                } 
+                
+                else if (type === 'loanRep') {
+                    // Fetch Members and Transactions to build dynamic Loan Report
+                    const [memSnap, trxSnap] = await Promise.all([
+                        get(ref(db, 'members')),
+                        get(ref(db, 'transactions'))
+                    ]);
+                    
+                    title.innerText = 'বর্তমান ঋণ গ্রহীতাদের বিস্তারিত রিপোর্ট';
+                    thead.innerHTML = `<tr><th>সদস্যের নাম ও আইডি</th><th>যোগাযোগ</th><th>মোট ঋণ (৳)</th><th>পরিশোধিত (৳)</th><th>বর্তমান বকেয়া (৳)</th></tr>`;
+                    
+                    let membersData = {};
+                    if(memSnap.exists()) { memSnap.forEach(m => { membersData[m.key] = m.val(); }); }
+
+                    let memberLoans = {};
+                    if(trxSnap.exists()) {
+                        trxSnap.forEach(t => {
+                            let trx = t.val();
+                            let mid = trx.memberId;
+                            if(!mid) return;
+
+                            if(!memberLoans[mid]) {
+                                memberLoans[mid] = { totalAmount: 0, paidAmount: 0 };
+                            }
+
+                            if(trx.type === 'withdraw_loan') {
+                                memberLoans[mid].totalAmount += parseFloat(trx.totalAmount || 0);
+                            } 
+                            else if(trx.type === 'deposit_loan') {
+                                memberLoans[mid].paidAmount += parseFloat(trx.totalAmount || 0);
+                            }
+                        });
+                    }
+
+                    let totalL = 0, totalP = 0, totalD = 0;
+                    
+                    for (let mid in memberLoans) {
+                        let l = memberLoans[mid];
+                        if(l.totalAmount > 0) {
+                            let due = l.totalAmount - l.paidAmount;
+                            let m = membersData[mid] || { name: 'অজ্ঞাত সদস্য', phone: 'N/A' };
+                            
+                            totalL += l.totalAmount; totalP += l.paidAmount; totalD += due;
+                            tbody.innerHTML += `<tr>
+                                <td>${m.name} (${mid})</td><td>${m.phone}</td>
+                                <td>${l.totalAmount.toFixed(2)}</td>
+                                <td>${l.paidAmount.toFixed(2)}</td>
+                                <td style="color:#e74c3c; font-weight:bold;">${due.toFixed(2)}</td>
+                            </tr>`;
+                        }
+                    }
+
                     if(totalL === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো ঋণের ডাটা নেই</td></tr>';
                     else tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট:</td><td>${totalL.toFixed(2)}</td><td>${totalP.toFixed(2)}</td><td style="color:#e74c3c;">${totalD.toFixed(2)}</td></tr>`;
                 } 
@@ -332,15 +372,21 @@
                     const snap = await get(ref(db, 'transactions'));
                     
                     title.innerText = `ব্যক্তিগত লেনদেন রিপোর্ট: ${mName}`;
-                    thead.innerHTML = `<tr><th>তারিখ</th><th>বিবরণ (খাত)</th><th>জমা (৳)</th><th>উত্তোলন/লোন (৳)</th></tr>`;
+                    thead.innerHTML = `<tr><th>তারিখ</th><th>বিবরণ (খাত)</th><th>জমা (৳)</th><th>উত্তোলন (৳)</th></tr>`;
                     
                     let tDep = 0, tWd = 0;
                     if(snap.exists()) {
                         let myTrxs = [];
-                        snap.forEach(c => { if(c.val().memberId === mId) myTrxs.push(c.val()); });
+                        snap.forEach(c => { 
+                            let t = c.val();
+                            // Only match member and exclude loan entries
+                            if(t.memberId === mId && (t.type === 'deposit' || t.type === 'withdraw_expense')) {
+                                myTrxs.push(t);
+                            }
+                        });
                         
                         myTrxs.sort((a,b) => a.timestamp - b.timestamp).forEach(t => {
-                            let isDep = t.type.includes('deposit');
+                            let isDep = t.type === 'deposit';
                             let depAmt = isDep ? t.totalAmount : 0;
                             let wdAmt = !isDep ? t.totalAmount : 0;
                             tDep += depAmt; tWd += wdAmt;
@@ -353,7 +399,7 @@
                         });
                         if(myTrxs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">কোনো লেনদেনের রেকর্ড নেই</td></tr>';
                     }
-                    tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট:</td><td>${tDep.toFixed(2)}</td><td style="color:#e74c3c;">${tWd.toFixed(2)}</td></tr>`;
+                    if(tDep > 0 || tWd > 0) tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট:</td><td>${tDep.toFixed(2)}</td><td style="color:#e74c3c;">${tWd.toFixed(2)}</td></tr>`;
                 } 
                 
                 else if (type === 'totalMemberDep') {
@@ -390,11 +436,14 @@
                     let tBuy = 0, tSell = 0;
                     combined.sort((a,b) => a.ts - b.ts).forEach(item => {
                         if(item.type === 'ক্রয়') { tBuy += item.amount; tbody.innerHTML += `<tr><td>${item.date}</td><td style="color:#e74c3c; font-weight:600;">পণ্য ক্রয়</td><td>${item.name}</td><td>${item.qty}</td><td>${item.amount.toFixed(2)}</td></tr>`; }
-                        else { tSell += item.amount; tbody.innerHTML += `<tr><td>${item.date}</td><td style="color:#7CD03A; font-weight:600;">পণ্য বিক্রয়</td><td>${item.name}</td><td>${item.qty}</td><td>${item.amount.toFixed(2)}</td></tr>`; }
+                        else { tSell += item.amount; tbody.innerHTML += `<tr><td>${item.date}</td><td style="color:var(--primary-green); font-weight:600;">পণ্য বিক্রয়</td><td>${item.name}</td><td>${item.qty}</td><td>${item.amount.toFixed(2)}</td></tr>`; }
                     });
                     
-                    tbody.innerHTML += `<tr class="total-row"><td colspan="4" style="text-align:right;">মোট ক্রয়:</td><td>${tBuy.toFixed(2)}</td></tr>`;
-                    tbody.innerHTML += `<tr class="total-row"><td colspan="4" style="text-align:right; color:var(--primary-blue);">মোট বিক্রয়:</td><td style="color:var(--primary-blue);">${tSell.toFixed(2)}</td></tr>`;
+                    if(combined.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
+                    else {
+                        tbody.innerHTML += `<tr class="total-row"><td colspan="4" style="text-align:right;">মোট ক্রয়:</td><td>${tBuy.toFixed(2)}</td></tr>`;
+                        tbody.innerHTML += `<tr class="total-row"><td colspan="4" style="text-align:right; color:var(--primary-blue);">মোট বিক্রয়:</td><td style="color:var(--primary-blue);">${tSell.toFixed(2)}</td></tr>`;
+                    }
                 }
 
                 // Show Report
