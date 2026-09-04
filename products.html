@@ -55,7 +55,7 @@
         .summary-card .info h4 { font-size: 14px; color: #777; margin-bottom: 5px; }
         .summary-card .info h2 { font-size: 22px; color: var(--text-dark); font-weight: 700; }
         .card-green { border-left-color: var(--primary-green); } .card-green i { color: var(--primary-green); }
-        .card-red { border-left-color: var(--primary-red); } .card-red i { color: var(--primary-red); }
+        .card-red { border-left-color: #e74c3c; } .card-red i { color: #e74c3c; }
 
         /* --- Action Selector --- */
         .controls-wrapper { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 25px; background: #fff; padding: 15px 20px; border-radius: 12px; box-shadow: var(--card-shadow); flex-wrap: wrap; }
@@ -75,7 +75,7 @@
         
         .hidden-field { display: none; margin-top: 8px; }
         
-        .btn-submit { background: var(--primary-blue); color: #fff; padding: 15px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn-submit { background: linear-gradient(135deg, var(--primary-blue), #082d85); color: #fff; padding: 15px; width: 100%; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(10,54,157,0.2); }
         .btn-submit:disabled { background: #999; cursor: not-allowed; transform: none; box-shadow: none;}
 
@@ -87,15 +87,15 @@
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block; }
         
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 15px; white-space: nowrap;}
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 15px; white-space: nowrap;}
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tbody tr:hover { background: #fafafa; }
         
         .badge { padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
-        .b-due { background: rgba(231, 76, 60, 0.1); color: var(--primary-red); }
+        .b-due { background: rgba(231, 76, 60, 0.1); color: #e74c3c; }
         .b-paid { background: rgba(124, 208, 58, 0.1); color: #5a9e26; }
 
-        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;}
+        .btn-pay { background: var(--primary-green); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.3s;}
         .btn-pay:hover { background: #68b32e; transform: translateY(-2px); box-shadow: 0 3px 8px rgba(124, 208, 58, 0.3);}
 
         .actions-group { display: flex; gap: 8px; align-items: center;}
@@ -108,7 +108,7 @@
         .modal-content { background: #fff; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; text-align: center; position: relative; }
         .modal-content h3 { color: var(--primary-blue); margin-bottom: 15px; font-size: 22px; }
         .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.05); color: #555; width: 35px; height: 35px; border-radius: 50%; border: none; font-size: 18px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center;}
-        .close-modal:hover { background: var(--primary-red); color: #fff; }
+        .close-modal:hover { background: #e74c3c; color: #fff; }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -182,7 +182,9 @@
 
         <!-- FORM 1: Add / Update Product -->
         <div class="form-section active" id="form-add">
-            <h3><i class="fas fa-plus-circle"></i> পণ্য মজুদ করুন</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f1f1; padding-bottom: 10px;">
+                <h3 style="margin-bottom: 0; border: none; padding: 0;"><i class="fas fa-plus-circle"></i> পণ্য মজুদ করুন</h3>
+            </div>
             <p style="font-size: 13px; color: #666; margin-bottom: 15px; margin-top: -15px;">আগের কোনো পণ্যের নাম লিখলে সেটি অটোমেটিক নিচে আপডেট হয়ে যাবে।</p>
             
             <form id="addProductForm">
@@ -190,9 +192,7 @@
                     <div class="input-group">
                         <label>পণ্যের নাম</label>
                         <input type="text" id="addName" list="productList" required placeholder="যেমন: খাতা">
-                        <datalist id="productList">
-                            <!-- JS Will Populate -->
-                        </datalist>
+                        <datalist id="productList"></datalist>
                     </div>
                     <div class="input-group">
                         <label>পণ্যের ধরণ</label>
@@ -224,6 +224,10 @@
                     <div class="input-group">
                         <label>সর্বমোট ক্রয়মূল্য (Total Cost)</label>
                         <input type="number" id="addCost" min="1" step="any" required placeholder="Total Cost (৳)">
+                        <!-- Live Balance Indicator -->
+                        <small id="availableBalanceDisplay" style="color: var(--primary-green); font-weight: 700; margin-top: 5px; font-size: 13px;">
+                            <i class="fas fa-wallet"></i> বর্তমান ক্যাশ ব্যালেন্স: লোড হচ্ছে...
+                        </small>
                     </div>
                 </div>
                 <button type="submit" class="btn-submit" id="addSubmitBtn"><i class="fas fa-save"></i> পণ্য মজুদ করুন</button>
@@ -365,7 +369,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, push, set, update, get, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, set, update, get, remove, child } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -381,14 +385,68 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Auth Check
         onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
         document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
 
         let allProducts = [];
         let allSales = [];
+        let globalCurrentBalance = 0;
 
-        // Fetch Inventory
+        // --- Live Balance Tracker Function ---
+        async function updateCurrentBalance() {
+            try {
+                const [
+                    membersSnap, orgFundsSnap, productsSnap, salesSnap, 
+                    invSnap, profSnap, retSnap, trxSnap
+                ] = await Promise.all([
+                    get(ref(db, 'members')), get(ref(db, 'org_funds')), get(ref(db, 'products')), get(ref(db, 'sales')),
+                    get(ref(db, 'investments')), get(ref(db, 'profits')), get(ref(db, 'returns')), get(ref(db, 'transactions'))
+                ]);
+
+                let memberMonthlyFunds = 0;
+                if (membersSnap.exists()) membersSnap.forEach(m => { if (m.val().funds && m.val().funds.monthly) memberMonthlyFunds += parseFloat(m.val().funds.monthly); });
+                
+                let orgFunds = 0;
+                if (orgFundsSnap.exists()) { let o = orgFundsSnap.val(); orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0); }
+
+                let invStockVal = 0, totalSalesProfit = 0;
+                if (productsSnap.exists()) productsSnap.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
+                if (salesSnap.exists()) salesSnap.forEach(s => totalSalesProfit += parseFloat(s.val().profit || 0));
+
+                let tInv = 0, tRet = 0, externalProfit = 0;
+                if (invSnap.exists()) invSnap.forEach(i => tInv += parseFloat(i.val().amount || 0));
+                if (retSnap.exists()) retSnap.forEach(r => tRet += parseFloat(r.val().amount || 0));
+                if (profSnap.exists()) profSnap.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
+                
+                let totalExpense = 0, totalLoanGiven = 0, totalLoanPaid = 0;
+                if (trxSnap.exists()) trxSnap.forEach(t => {
+                    let d = t.val();
+                    if (d.type === 'withdraw_expense' && !d.details.includes('পণ্য')) totalExpense += parseFloat(d.totalAmount || 0);
+                    if (d.type === 'withdraw_loan') totalLoanGiven += parseFloat(d.totalAmount || 0);
+                    if (d.type === 'deposit_loan') totalLoanPaid += parseFloat(d.totalAmount || 0);
+                });
+
+                let totalProfit = totalSalesProfit + externalProfit;
+                let totalFund = memberMonthlyFunds + orgFunds + totalProfit;
+                let activeInv = tInv - tRet;
+                let currentLoanDue = totalLoanGiven - totalLoanPaid;
+
+                globalCurrentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense);
+                
+                let balEl = document.getElementById('availableBalanceDisplay');
+                if(balEl) {
+                    balEl.innerHTML = `<i class="fas fa-wallet"></i> বর্তমান ক্যাশ ব্যালেন্স: ৳ ${globalCurrentBalance.toFixed(2)}`;
+                    balEl.style.color = globalCurrentBalance > 0 ? "var(--primary-green)" : "var(--primary-red)";
+                }
+            } catch (error) {
+                console.error("Balance fetch error", error);
+            }
+        }
+
+        // Initialize Balance Check
+        updateCurrentBalance();
+
+        // Fetch Inventory (Auto updates balance too since it listens live)
         onValue(ref(db, 'products'), (snapshot) => {
             const tbody = document.getElementById('inventoryTable');
             const dataList = document.getElementById('productList');
@@ -404,7 +462,6 @@
                     allProducts.push(p);
                     if(p.qty > 0) totalInvValue += p.totalCost;
 
-                    // Add to Datalist for Suggestion
                     dataList.innerHTML += `<option value="${p.name}">`;
 
                     tbody.innerHTML += `<tr>
@@ -423,15 +480,15 @@
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">কোনো পণ্য মজুদ নেই</td></tr>';
             }
             document.getElementById('totalInventoryValue').innerText = '৳ ' + totalInvValue.toFixed(2);
+            updateCurrentBalance(); // Keep balance live
         });
 
-        // Add Product: Auto-fill fields if product already exists
+        // Add Product Auto-fill
         document.getElementById('addName').addEventListener('input', function() {
             let typedName = this.value.toLowerCase().trim();
             let match = allProducts.find(p => p.name.toLowerCase() === typedName);
             
             if(match) {
-                // Auto Select category and unit based on previous save
                 let catSelect = document.getElementById('addCategory');
                 let unitSelect = document.getElementById('addUnit');
                 
@@ -453,11 +510,24 @@
             }
         });
 
-        // Add or Update Product Submit
+        // --- SUBMIT PRODUCT (With Live Balance Validation) ---
         document.getElementById('addProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('addSubmitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
+
+            let cost = parseFloat(document.getElementById('addCost').value);
+
+            // 1. Fetch fresh balance to ensure 100% accuracy before deduction
+            await updateCurrentBalance();
+
+            // 2. Validate against Current Balance
+            if (cost > globalCurrentBalance) {
+                alert(`সতর্কতা: আপনার বর্তমান ক্যাশ ব্যালেন্স (৳${globalCurrentBalance.toFixed(2)}) অপর্যাপ্ত!\nআপনি এর চেয়ে বেশি টাকার পণ্য কিনতে পারবেন না।`);
+                btn.innerHTML = '<i class="fas fa-save"></i> পণ্য মজুদ করুন';
+                btn.disabled = false;
+                return;
+            }
 
             let cat = document.getElementById('addCategory').value;
             if(cat === 'Other') cat = document.getElementById('addCategoryOther').value;
@@ -466,9 +536,7 @@
             
             let nameVal = document.getElementById('addName').value.trim();
             let qty = parseFloat(document.getElementById('addQty').value);
-            let cost = parseFloat(document.getElementById('addCost').value);
 
-            // Check if product already exists
             let match = allProducts.find(p => p.name.toLowerCase() === nameVal.toLowerCase());
 
             try {
@@ -482,10 +550,9 @@
                         qty: newQty,
                         totalCost: newCost,
                         unitPrice: newUnitPrice,
-                        timestamp: Date.now() // updates date to latest modification
+                        timestamp: Date.now() 
                     });
 
-                    // Add to transactions history
                     const trxKey = push(ref(db, 'transactions')).key;
                     await set(ref(db, `transactions/${trxKey}`), {
                         id: trxKey, date: new Date().toLocaleDateString('en-CA'),
@@ -516,6 +583,7 @@
                 }
 
                 this.reset();
+                updateCurrentBalance(); // Refresh balance UI
             } catch(e) { 
                 alert("সমস্যা হয়েছে!"); 
                 console.error(e);
@@ -536,7 +604,6 @@
                 let salesDataArr = [];
                 snapshot.forEach(child => { salesDataArr.push({id: child.key, ...child.val()}); });
                 
-                // Sort by latest
                 salesDataArr.sort((a,b) => b.timestamp - a.timestamp).forEach(s => {
                     allSales.push(s);
                     totalDue += s.due;
@@ -566,6 +633,7 @@
             
             document.getElementById('totalDueAmount').innerText = '৳ ' + totalDue.toFixed(2);
             document.getElementById('totalProfit').innerText = '৳ ' + totalProfit.toFixed(2);
+            updateCurrentBalance(); // Keep balance live
         });
 
         // --- Sell Calculations Logic ---
@@ -635,7 +703,6 @@
             let profit = parseFloat(document.getElementById('sellProfit').value);
             let due = price - paid;
             
-            // Validation: Cash paid cannot be less than profit (if profit is positive)
             if (profit > 0 && paid < profit) {
                 alert(`সতর্কতা: নগদ গ্রহণকৃত টাকা (৳${paid}) অবশ্যই লাভের (৳${profit}) সমান বা বেশি হতে হবে!`);
                 return;
@@ -658,16 +725,14 @@
             let remainingCost = selectedProduct.totalCost - (qty * selectedProduct.unitPrice);
 
             let updates = {};
-            const newSaleKey = push(ref(db, 'sales')).key; 
+            const newSaleKey = push(child(ref(db), 'sales')).key; 
             updates[`/sales/${newSaleKey}`] = salesData;
             updates[`/products/${selectedProduct.id}/qty`] = remainingQty;
             updates[`/products/${selectedProduct.id}/totalCost`] = remainingCost;
 
             try {
-                // Execute main updates
                 await update(ref(db), updates);
                 
-                // Add to transactions history
                 if(paid > 0) {
                     const trxKey = push(ref(db, 'transactions')).key;
                     await set(ref(db, `transactions/${trxKey}`), {
@@ -681,6 +746,7 @@
                 this.reset(); selectedProduct = null; 
                 document.getElementById('actionSelector').value = 'add'; 
                 document.getElementById('actionSelector').dispatchEvent(new Event('change'));
+                updateCurrentBalance();
             } catch(e) { 
                 alert("বিক্রয় সম্পন্ন করতে সমস্যা হয়েছে!"); 
                 console.error(e);
@@ -725,6 +791,7 @@
 
                 alert("পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে!");
                 document.getElementById('paymentModal').classList.remove('active');
+                updateCurrentBalance();
             } catch(e) { alert("পেমেন্ট নিতে সমস্যা হয়েছে!"); }
             finally { btn.innerHTML = '<i class="fas fa-check-circle"></i> অ্যাকাউন্টে জমা দিন'; btn.disabled = false; }
         });
@@ -735,6 +802,7 @@
                 try {
                     await remove(ref(db, 'products/' + id));
                     alert("পণ্যটি সফলভাবে মুছে ফেলা হয়েছে।");
+                    updateCurrentBalance();
                 } catch(error) {
                     alert("ডিলিট করতে সমস্যা হয়েছে!");
                     console.error(error);
@@ -747,6 +815,7 @@
                 try {
                     await remove(ref(db, 'sales/' + id));
                     alert("বিক্রয়ের রেকর্ডটি সফলভাবে মুছে ফেলা হয়েছে।");
+                    updateCurrentBalance();
                 } catch(error) {
                     alert("ডিলিট করতে সমস্যা হয়েছে!");
                     console.error(error);
