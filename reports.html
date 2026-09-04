@@ -120,7 +120,7 @@
         <div class="spinner"></div>
         <h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3>
     </div>
-    <div class="overlay" id="sidebarOverlay"></div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
@@ -141,7 +141,7 @@
 
     <main class="main-content">
         <div class="top-header">
-            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <h2>রিপোর্টস ও প্রিন্ট</h2>
             <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
         </div>
@@ -155,7 +155,6 @@
                 <option value="loanRep">বর্তমান ঋণের বিস্তারিত রিপোর্ট</option>
                 <option value="singleMemberDep">সদস্যের ব্যক্তিগত লেনদেন রিপোর্ট</option>
                 <option value="totalMemberDep">সকল সদস্যের সর্বমোট জমার রিপোর্ট</option>
-                <option value="productRep">পণ্য ক্রয়-বিক্রয়ের রিপোর্ট</option>
             </select>
 
             <div id="memberSelectContainer">
@@ -179,7 +178,7 @@
                 <i class="fas fa-handshake"></i>
                 <h1>বন্ধু কল্যাণ সংস্থা</h1>
                 <h3 id="printTitle">রিপোর্টের নাম</h3>
-                <p id="printDate">রিপোর্টের তারিখ: 03 Sep, 2026</p>
+                <p id="printDate">রিপোর্টের তারিখ: - </p>
             </div>
 
             <div class="table-responsive">
@@ -204,8 +203,10 @@
             document.getElementById('printTimestamp').innerText = new Date().toLocaleString("en-US", options);
         });
 
-        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
-        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
 
         document.getElementById('reportType').addEventListener('change', function() {
             const memberDiv = document.getElementById('memberSelectContainer');
@@ -277,7 +278,6 @@
 
             try {
                 if (type === 'monthlyDep') {
-                    // Fetch all Transactions
                     const snap = await get(ref(db, 'transactions'));
                     title.innerText = 'সকল জমা ও উত্তোলনের রিপোর্ট';
                     thead.innerHTML = `<tr><th>তারিখ</th><th>সদস্য / খাত</th><th>বিবরণ</th><th>জমা (৳)</th><th>উত্তোলন (৳)</th></tr>`;
@@ -290,17 +290,20 @@
                         trxs.sort((a,b) => a.timestamp - b.timestamp).forEach(t => {
                             // Filter: Only include deposits and general expenses (Exclude loan entries)
                             if (t.type === 'deposit' || t.type === 'withdraw_expense') {
-                                let isDep = t.type === 'deposit';
-                                let depAmt = isDep ? t.totalAmount : 0;
-                                let wdAmt = !isDep ? t.totalAmount : 0;
-                                totalDep += depAmt; totalWd += wdAmt;
-                                let name = t.memberName ? `${t.memberName} (${t.memberId})` : 'সাধারণ খাত';
+                                // Exclude product related
+                                if(!t.details.includes('পণ্য ক্রয়') && !t.details.includes('পণ্য বিক্রয়') && !t.details.includes('বকেয়া আদায়') && !t.details.includes('পণ্য মজুদ')) {
+                                    let isDep = t.type === 'deposit';
+                                    let depAmt = isDep ? t.totalAmount : 0;
+                                    let wdAmt = !isDep ? t.totalAmount : 0;
+                                    totalDep += depAmt; totalWd += wdAmt;
+                                    let name = t.memberName ? `${t.memberName} (${t.memberId})` : 'সাধারণ খাত';
 
-                                tbody.innerHTML += `<tr>
-                                    <td>${t.date}</td><td>${name}</td><td>${t.details}</td>
-                                    <td>${depAmt > 0 ? depAmt.toFixed(2) : '-'}</td>
-                                    <td style="color:#e74c3c;">${wdAmt > 0 ? wdAmt.toFixed(2) : '-'}</td>
-                                </tr>`;
+                                    tbody.innerHTML += `<tr>
+                                        <td>${t.date}</td><td>${name}</td><td>${t.details}</td>
+                                        <td>${depAmt > 0 ? depAmt.toFixed(2) : '-'}</td>
+                                        <td style="color:#e74c3c;">${wdAmt > 0 ? wdAmt.toFixed(2) : '-'}</td>
+                                    </tr>`;
+                                }
                             }
                         });
                     }
@@ -379,25 +382,28 @@
                         let myTrxs = [];
                         snap.forEach(c => { 
                             let t = c.val();
-                            // Only match member and exclude loan entries
+                            // Only match member and include only deposits and expenses (No loans)
                             if(t.memberId === mId && (t.type === 'deposit' || t.type === 'withdraw_expense')) {
                                 myTrxs.push(t);
                             }
                         });
                         
                         myTrxs.sort((a,b) => a.timestamp - b.timestamp).forEach(t => {
-                            let isDep = t.type === 'deposit';
-                            let depAmt = isDep ? t.totalAmount : 0;
-                            let wdAmt = !isDep ? t.totalAmount : 0;
-                            tDep += depAmt; tWd += wdAmt;
+                            // Filter product related
+                            if(!t.details.includes('পণ্য ক্রয়') && !t.details.includes('পণ্য বিক্রয়') && !t.details.includes('বকেয়া আদায়') && !t.details.includes('পণ্য মজুদ')) {
+                                let isDep = t.type === 'deposit';
+                                let depAmt = isDep ? t.totalAmount : 0;
+                                let wdAmt = !isDep ? t.totalAmount : 0;
+                                tDep += depAmt; tWd += wdAmt;
 
-                            tbody.innerHTML += `<tr>
-                                <td>${t.date}</td><td>${t.details}</td>
-                                <td>${depAmt > 0 ? depAmt.toFixed(2) : '-'}</td>
-                                <td style="color:#e74c3c;">${wdAmt > 0 ? wdAmt.toFixed(2) : '-'}</td>
-                            </tr>`;
+                                tbody.innerHTML += `<tr>
+                                    <td>${t.date}</td><td>${t.details}</td>
+                                    <td>${depAmt > 0 ? depAmt.toFixed(2) : '-'}</td>
+                                    <td style="color:#e74c3c;">${wdAmt > 0 ? wdAmt.toFixed(2) : '-'}</td>
+                                </tr>`;
+                            }
                         });
-                        if(myTrxs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">কোনো লেনদেনের রেকর্ড নেই</td></tr>';
+                        if(tbody.innerHTML === '') tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">কোনো লেনদেনের রেকর্ড নেই</td></tr>';
                     }
                     if(tDep > 0 || tWd > 0) tbody.innerHTML += `<tr class="total-row"><td colspan="2" style="text-align:right;">সর্বমোট:</td><td>${tDep.toFixed(2)}</td><td style="color:#e74c3c;">${tWd.toFixed(2)}</td></tr>`;
                 } 
@@ -420,30 +426,6 @@
                         });
                     }
                     tbody.innerHTML += `<tr class="total-row"><td colspan="3" style="text-align:right;">সংস্থার সর্বমোট মাসিক ফান্ড:</td><td>${gTotal.toFixed(2)}</td></tr>`;
-                } 
-                
-                else if (type === 'productRep') {
-                    const pSnap = await get(ref(db, 'products'));
-                    const sSnap = await get(ref(db, 'sales'));
-                    
-                    title.innerText = 'পণ্য ক্রয়-বিক্রয়ের সামগ্রিক রিপোর্ট';
-                    thead.innerHTML = `<tr><th>তারিখ</th><th>বিবরণ</th><th>পণ্য</th><th>পরিমাণ</th><th>মোট মূল্য (৳)</th></tr>`;
-                    
-                    let combined = [];
-                    if(pSnap.exists()) pSnap.forEach(c => { let p = c.val(); combined.push({ date: new Date(p.timestamp).toLocaleDateString('en-CA'), ts: p.timestamp, type: 'ক্রয়', name: p.name, qty: p.qty + ' ' + p.unit, amount: p.totalCost }); });
-                    if(sSnap.exists()) sSnap.forEach(c => { let s = c.val(); combined.push({ date: new Date(s.timestamp).toLocaleDateString('en-CA'), ts: s.timestamp, type: 'বিক্রয়', name: s.productName, qty: s.qty, amount: s.price }); });
-                    
-                    let tBuy = 0, tSell = 0;
-                    combined.sort((a,b) => a.ts - b.ts).forEach(item => {
-                        if(item.type === 'ক্রয়') { tBuy += item.amount; tbody.innerHTML += `<tr><td>${item.date}</td><td style="color:#e74c3c; font-weight:600;">পণ্য ক্রয়</td><td>${item.name}</td><td>${item.qty}</td><td>${item.amount.toFixed(2)}</td></tr>`; }
-                        else { tSell += item.amount; tbody.innerHTML += `<tr><td>${item.date}</td><td style="color:var(--primary-green); font-weight:600;">পণ্য বিক্রয়</td><td>${item.name}</td><td>${item.qty}</td><td>${item.amount.toFixed(2)}</td></tr>`; }
-                    });
-                    
-                    if(combined.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো ডাটা নেই</td></tr>';
-                    else {
-                        tbody.innerHTML += `<tr class="total-row"><td colspan="4" style="text-align:right;">মোট ক্রয়:</td><td>${tBuy.toFixed(2)}</td></tr>`;
-                        tbody.innerHTML += `<tr class="total-row"><td colspan="4" style="text-align:right; color:var(--primary-blue);">মোট বিক্রয়:</td><td style="color:var(--primary-blue);">${tSell.toFixed(2)}</td></tr>`;
-                    }
                 }
 
                 // Show Report
