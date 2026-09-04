@@ -239,10 +239,16 @@
             <h3 style="color: var(--primary-green);"><i class="fas fa-shopping-cart"></i> পণ্য বিক্রি করুন</h3>
             <form id="sellProductForm">
                 <div class="form-grid">
+                    <!-- NEW: Dropdown for Customer -->
                     <div class="input-group">
-                        <label>ক্রেতার নাম / আইডি</label>
-                        <input type="text" id="sellCustomer" required placeholder="ক্রেতার নাম লিখুন">
+                        <label>ক্রেতার নাম / সদস্য</label>
+                        <select id="sellCustomerSelect" required onchange="checkCustomerOther()">
+                            <option value="">ক্রেতা নির্বাচন করুন</option>
+                            <!-- Members will be loaded here dynamically -->
+                        </select>
+                        <input type="text" id="sellCustomerOther" class="hidden-field" placeholder="ম্যানুয়ালি ক্রেতার নাম লিখুন">
                     </div>
+
                     <div class="input-group">
                         <label>পণ্যের ধরণ</label>
                         <select id="sellCategory" required>
@@ -362,6 +368,20 @@
             inputField.required = selectObj.value === 'Other';
         }
 
+        // NEW: Check Customer Dropdown
+        function checkCustomerOther() {
+            const sel = document.getElementById('sellCustomerSelect').value;
+            const otherInput = document.getElementById('sellCustomerOther');
+            if (sel === 'Other') {
+                otherInput.style.display = 'block';
+                otherInput.required = true;
+            } else {
+                otherInput.style.display = 'none';
+                otherInput.required = false;
+                otherInput.value = '';
+            }
+        }
+
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     </script>
 
@@ -391,6 +411,20 @@
         let allProducts = [];
         let allSales = [];
         let globalCurrentBalance = 0;
+
+        // --- Fetch Members for Customer Dropdown ---
+        onValue(ref(db, 'members'), (snapshot) => {
+            const customerSelect = document.getElementById('sellCustomerSelect');
+            customerSelect.innerHTML = '<option value="">ক্রেতা নির্বাচন করুন</option>';
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    let m = child.val();
+                    customerSelect.innerHTML += `<option value="${m.name} (${m.id})">${m.name} (${m.id})</option>`;
+                });
+            }
+            customerSelect.innerHTML += `<option value="Other" style="font-weight:bold; color:var(--primary-blue);">+ অন্যান্য (ম্যানুয়ালি লিখুন)</option>`;
+        });
+
 
         // --- Live Balance Tracker Function ---
         async function updateCurrentBalance() {
@@ -443,10 +477,9 @@
             }
         }
 
-        // Initialize Balance Check
         updateCurrentBalance();
 
-        // Fetch Inventory (Auto updates balance too since it listens live)
+        // Fetch Inventory
         onValue(ref(db, 'products'), (snapshot) => {
             const tbody = document.getElementById('inventoryTable');
             const dataList = document.getElementById('productList');
@@ -480,7 +513,7 @@
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">কোনো পণ্য মজুদ নেই</td></tr>';
             }
             document.getElementById('totalInventoryValue').innerText = '৳ ' + totalInvValue.toFixed(2);
-            updateCurrentBalance(); // Keep balance live
+            updateCurrentBalance(); 
         });
 
         // Add Product Auto-fill
@@ -510,18 +543,15 @@
             }
         });
 
-        // --- SUBMIT PRODUCT (With Live Balance Validation) ---
+        // Add Product Submit
         document.getElementById('addProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const btn = document.getElementById('addSubmitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
 
             let cost = parseFloat(document.getElementById('addCost').value);
-
-            // 1. Fetch fresh balance to ensure 100% accuracy before deduction
             await updateCurrentBalance();
 
-            // 2. Validate against Current Balance
             if (cost > globalCurrentBalance) {
                 alert(`সতর্কতা: আপনার বর্তমান ক্যাশ ব্যালেন্স (৳${globalCurrentBalance.toFixed(2)}) অপর্যাপ্ত!\nআপনি এর চেয়ে বেশি টাকার পণ্য কিনতে পারবেন না।`);
                 btn.innerHTML = '<i class="fas fa-save"></i> পণ্য মজুদ করুন';
@@ -541,16 +571,12 @@
 
             try {
                 if(match) {
-                    // UPDATE Existing Product
                     let newQty = match.qty + qty;
                     let newCost = match.totalCost + cost;
                     let newUnitPrice = newCost / newQty;
 
                     await update(ref(db, `products/${match.id}`), {
-                        qty: newQty,
-                        totalCost: newCost,
-                        unitPrice: newUnitPrice,
-                        timestamp: Date.now() 
+                        qty: newQty, totalCost: newCost, unitPrice: newUnitPrice, timestamp: Date.now() 
                     });
 
                     const trxKey = push(ref(db, 'transactions')).key;
@@ -563,12 +589,9 @@
                     alert("বিদ্যমান পণ্যের মজুদ সফলভাবে আপডেট হয়েছে!");
 
                 } else {
-                    // PUSH New Product
                     let data = {
-                        name: nameVal,
-                        category: cat, unit: unit, qty: qty, 
-                        totalCost: cost, unitPrice: cost / qty,
-                        timestamp: Date.now()
+                        name: nameVal, category: cat, unit: unit, qty: qty, 
+                        totalCost: cost, unitPrice: cost / qty, timestamp: Date.now()
                     };
                     await set(push(ref(db, 'products')), data);
                     
@@ -583,7 +606,7 @@
                 }
 
                 this.reset();
-                updateCurrentBalance(); // Refresh balance UI
+                updateCurrentBalance(); 
             } catch(e) { 
                 alert("সমস্যা হয়েছে!"); 
                 console.error(e);
@@ -593,7 +616,7 @@
             }
         });
 
-        // --- Fetch Sales & Dues ---
+        // Fetch Sales & Dues
         onValue(ref(db, 'sales'), (snapshot) => {
             const tbody = document.getElementById('salesTable');
             tbody.innerHTML = '';
@@ -610,7 +633,17 @@
                     totalProfit += s.profit;
 
                     let dueBadge = s.due > 0 ? `<span class="badge b-due">৳ ${s.due.toFixed(2)}</span>` : `<span class="badge b-paid"><i class="fas fa-check"></i> পরিশোধিত</span>`;
-                    let actionBtn = s.due > 0 ? `<button class="btn-pay" onclick="window.openPaymentModal('${s.id}')"><i class="fas fa-hand-holding-usd"></i> জমা</button>` : `<span style="color:var(--primary-green); font-weight:bold; font-size:13px;"><i class="fas fa-check-double"></i> সম্পন্ন</span>`;
+                    
+                    let actionBtn = "";
+                    let deleteBtn = "";
+
+                    if(s.due > 0) {
+                        actionBtn = `<button class="btn-pay" onclick="window.openPaymentModal('${s.id}')"><i class="fas fa-hand-holding-usd"></i> জমা</button>`;
+                        deleteBtn = `<button class="btn-action btn-delete" onclick="window.deleteSale('${s.id}')" title="ডিলিট করুন"><i class="fas fa-trash"></i></button>`;
+                    } else {
+                        actionBtn = `<span style="color:var(--primary-green); font-weight:bold; font-size:13px;"><i class="fas fa-check-double"></i> সম্পন্ন</span>`;
+                        // No delete button if fully paid
+                    }
 
                     tbody.innerHTML += `<tr>
                         <td>${new Date(s.timestamp).toLocaleDateString('en-GB')}</td>
@@ -622,7 +655,7 @@
                         <td>
                             <div class="actions-group">
                                 ${actionBtn}
-                                <button class="btn-action btn-delete" onclick="window.deleteSale('${s.id}')" title="ডিলিট করুন"><i class="fas fa-trash"></i></button>
+                                ${deleteBtn}
                             </div>
                         </td>
                     </tr>`;
@@ -633,10 +666,10 @@
             
             document.getElementById('totalDueAmount').innerText = '৳ ' + totalDue.toFixed(2);
             document.getElementById('totalProfit').innerText = '৳ ' + totalProfit.toFixed(2);
-            updateCurrentBalance(); // Keep balance live
+            updateCurrentBalance(); 
         });
 
-        // --- Sell Calculations Logic ---
+        // Sell Calculations Logic
         let selectedProduct = null;
         function populateSellDropdowns() {
             const catSelect = document.getElementById('sellCategory');
@@ -692,7 +725,7 @@
             document.getElementById('sellDue').value = due > 0 ? due.toFixed(2) : 0;
         }
 
-        // --- Sell Form Submit ---
+        // Sell Form Submit
         document.getElementById('sellProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if(!selectedProduct) return alert('পণ্য নির্বাচন করুন');
@@ -711,7 +744,11 @@
             const btn = document.getElementById('sellSubmitBtn');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
 
-            let customerName = document.getElementById('sellCustomer').value;
+            // Handle Customer Name (Dropdown or Custom)
+            let customerName = document.getElementById('sellCustomerSelect').value;
+            if (customerName === 'Other') {
+                customerName = document.getElementById('sellCustomerOther').value.trim();
+            }
 
             let salesData = {
                 customer: customerName,
@@ -744,6 +781,7 @@
 
                 alert("পণ্য বিক্রয় সফলভাবে সম্পন্ন হয়েছে!");
                 this.reset(); selectedProduct = null; 
+                document.getElementById('sellCustomerOther').style.display = 'none'; // reset custom input
                 document.getElementById('actionSelector').value = 'add'; 
                 document.getElementById('actionSelector').dispatchEvent(new Event('change'));
                 updateCurrentBalance();
@@ -756,7 +794,7 @@
             }
         });
 
-        // --- Pay Due Logic ---
+        // Pay Due Logic
         window.openPaymentModal = function(saleId) {
             let sale = allSales.find(s => s.id === saleId);
             if(!sale) return;
@@ -796,7 +834,7 @@
             finally { btn.innerHTML = '<i class="fas fa-check-circle"></i> অ্যাকাউন্টে জমা দিন'; btn.disabled = false; }
         });
 
-        // --- Delete Functions ---
+        // Delete Functions
         window.deleteProduct = async function(id) {
             if(confirm("সতর্কতা! আপনি কি নিশ্চিত যে এই পণ্যটি ডাটাবেস থেকে মুছে ফেলতে চান?")) {
                 try {
