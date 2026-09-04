@@ -143,6 +143,9 @@
         .badge.deposit { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); }
         .badge.withdraw { background: rgba(255, 71, 87, 0.15); color: var(--primary-red); }
 
+        .btn-show-more { background: rgba(10,54,157,0.1); color: var(--primary-blue); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px auto 5px auto; transition: 0.3s; font-size: 15px; }
+        .btn-show-more:hover { background: var(--primary-blue); color: #fff; }
+
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- Mobile Responsive Fixes --- */
@@ -259,6 +262,10 @@
                     </tbody>
                 </table>
             </div>
+            
+            <button id="showMoreBtn" class="btn-show-more" style="display: none;" onclick="showMoreTransactions()">
+                আরও দেখুন <i class="fas fa-chevron-down"></i>
+            </button>
         </div>
     </main>
 
@@ -324,6 +331,10 @@
 
         let initialLoadCount = 0;
         const requiredNodes = Object.keys(dbData);
+        
+        // Limit logic
+        let transactionsToShow = 5;
+        window.allTransactions = [];
 
         // Setup real-time listeners for all nodes
         requiredNodes.forEach(node => {
@@ -439,26 +450,49 @@
             updateCounterUI('tExpense', totalExpense);
             updateCounterUI('tBalance', currentBalance, '৳ ');
 
-            // --- Render Recent Transactions Table ---
+            // Prepare transactions globally for show more
+            window.allTransactions = trxs.sort((a,b) => b.timestamp - a.timestamp);
+            window.renderTransactionsTable();
+        }
+
+        // --- Render Recent Transactions Table ---
+        window.renderTransactionsTable = function() {
             const tbody = document.getElementById('recentTransactionsTable');
             tbody.innerHTML = '';
             
-            // Shows the updated list live!
-            trxs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(t => {
-                let d = new Date(t.timestamp).toLocaleDateString('en-GB');
-                let isDep = t.type.includes('deposit');
-                let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">উত্তোলন</span>`;
-                let entity = t.memberName ? t.memberName : 'সাধারণ খাত';
-                
-                tbody.innerHTML += `<tr>
-                    <td>${d}</td>
-                    <td style="font-weight:600;">${entity}</td>
-                    <td style="font-size:14px; color:#555;">${t.details}</td>
-                    <td style="font-weight:700;">${t.totalAmount.toFixed(2)}</td>
-                    <td>${badge}</td>
-                </tr>`;
-            });
-            if(trxs.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো লেনদেন নেই</td></tr>';
+            const visibleTrxs = window.allTransactions.slice(0, transactionsToShow);
+
+            if(visibleTrxs.length > 0) {
+                visibleTrxs.forEach(t => {
+                    let d = new Date(t.timestamp).toLocaleDateString('en-GB');
+                    let isDep = t.type.includes('deposit');
+                    let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">উত্তোলন</span>`;
+                    let entity = t.memberName ? t.memberName : 'সাধারণ খাত';
+                    
+                    tbody.innerHTML += `<tr>
+                        <td>${d}</td>
+                        <td style="font-weight:600;">${entity}</td>
+                        <td style="font-size:14px; color:#555;">${t.details}</td>
+                        <td style="font-weight:700;">${parseFloat(t.totalAmount).toFixed(2)}</td>
+                        <td>${badge}</td>
+                    </tr>`;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো লেনদেন নেই</td></tr>';
+            }
+
+            // Show More Button Logic
+            const btn = document.getElementById('showMoreBtn');
+            if (window.allTransactions.length > transactionsToShow) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        }
+
+        window.showMoreTransactions = function() {
+            transactionsToShow += 10;
+            window.renderTransactionsTable();
         }
     </script>
 </body>
