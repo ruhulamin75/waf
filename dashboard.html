@@ -209,11 +209,11 @@
             </div>
             <div class="dash-card green-theme">
                 <div class="card-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                <div class="card-info"><p>সর্বমোট মুনাফা</p><h3 id="tProfit">0.00</h3></div>
+                <div class="card-info"><p>সর্বমোট অর্জিত মুনাফা</p><h3 id="tProfit">0.00</h3></div>
             </div>
             <div class="dash-card orange-theme">
                 <div class="card-icon"><i class="fas fa-boxes"></i></div>
-                <div class="card-info"><p>পণ্য মজুদ (মূল্য)</p><h3 id="tInventory">0.00</h3></div>
+                <div class="card-info"><p>পণ্য মজুদ (বর্তমান মূল্য)</p><h3 id="tInventory">0.00</h3></div>
             </div>
             <div class="dash-card orange-theme">
                 <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
@@ -229,7 +229,7 @@
             </div>
         </div>
 
-        <!-- Master Balance Card positioned below the grid -->
+        <!-- Master Balance Card -->
         <div class="balance-container">
             <div class="balance-info">
                 <p>সংস্থার ক্যাশ / বর্তমান ব্যালেন্স</p>
@@ -312,10 +312,9 @@
         onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
         document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
 
-        // --- Fetch & Calculate Dashboard Data (Concurrent fetching) ---
+        // --- Fetch & Calculate Dashboard Data ---
         async function fetchDashboardData() {
             try {
-                // Promise.all ব্যবহার করে সবগুলো ডাটা একসাথে লোড করা হচ্ছে (Faster Loading)
                 const [
                     membersSnap, orgFundsSnap, productsSnap, salesSnap, 
                     invSnap, profSnap, retSnap, trxSnap
@@ -332,7 +331,8 @@
 
                 // Variables
                 let totalMembers = 0, memberMonthlyFunds = 0;
-                let orgFunds = 0, totalLoanGiven = 0, totalLoanPaid = 0;
+                let orgFunds = 0;
+                let totalLoanGiven = 0, totalLoanPaid = 0;
                 let invStockVal = 0, totalSalesProfit = 0;
                 let activeInv = 0, externalProfit = 0;
                 let totalExpense = 0, todayDep = 0;
@@ -344,10 +344,7 @@
                         totalMembers++;
                         let d = m.val();
                         if (d.funds && d.funds.monthly) memberMonthlyFunds += parseFloat(d.funds.monthly);
-                        if (d.loan) {
-                            totalLoanGiven += parseFloat(d.loan.totalAmount || 0);
-                            totalLoanPaid += parseFloat(d.loan.paidAmount || 0);
-                        }
+                        // ঋণের পুরানো লজিক এখান থেকে বাদ দেওয়া হয়েছে। এখন ট্রানজেকশন থেকে লাইভ ক্যালকুলেট হবে।
                     });
                 }
                 
@@ -361,7 +358,7 @@
                 if (productsSnap.exists()) productsSnap.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
                 if (salesSnap.exists()) salesSnap.forEach(s => totalSalesProfit += parseFloat(s.val().profit || 0));
 
-                // 4. Investments & Profits
+                // 4. Investments & External Profits
                 let tInv = 0, tRet = 0;
                 if (invSnap.exists()) invSnap.forEach(i => tInv += parseFloat(i.val().amount || 0));
                 if (retSnap.exists()) retSnap.forEach(r => tRet += parseFloat(r.val().amount || 0));
@@ -369,28 +366,38 @@
 
                 if (profSnap.exists()) profSnap.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
                 
-                // --- Math Logic ---
-                let totalProfit = totalSalesProfit + externalProfit;
+                // --- Math Logic for Profits ---
+                // পণ্য বিক্রি থেকে পাওয়া লাভ + অন্য খাত থেকে পাওয়া লাভ
+                let totalProfit = totalSalesProfit + externalProfit; 
                 let baseFund = memberMonthlyFunds + orgFunds;
-                let totalFund = baseFund + totalProfit; // সর্বমোট ফান্ড (মুনাফাসহ)
+                let totalFund = baseFund + totalProfit; 
 
-                // 5. Transactions (Expenses Calculation Fixed)
+                // 5. Transactions (True Ledger for Loan and Expenses)
                 let trxs = [];
                 if (trxSnap.exists()) {
                     trxSnap.forEach(t => {
                         let data = t.val();
                         trxs.push(data);
                         
-                        // Strict filter: Calculate Expense ONLY if it is a general expense (not product purchase)
+                        // Expense Filter: Exclude product purchases
                         if (data.type === 'withdraw_expense' && !data.details.includes('পণ্য')) {
                             totalExpense += parseFloat(data.totalAmount || 0);
                         }
                         
-                        // Today's Deposit
+                        // Live Loan Calculation from Transactions (Fix for phantom loan)
+                        if (data.type === 'withdraw_loan') {
+                            totalLoanGiven += parseFloat(data.totalAmount || 0);
+                        }
+                        if (data.type === 'deposit_loan') {
+                            totalLoanPaid += parseFloat(data.totalAmount || 0);
+                        }
+
+                        // Today's General Deposit
                         if (data.type === 'deposit' && data.date === todayStr) todayDep += parseFloat(data.totalAmount || 0);
                     });
                 }
 
+                // Calculate Current Accurate Due Loan
                 let currentLoanDue = totalLoanGiven - totalLoanPaid;
                 
                 // --- MASTER BALANCE FORMULA ---
@@ -401,10 +408,10 @@
                 animateCounter(document.getElementById('tTodayDep'), todayDep);
                 
                 animateCounter(document.getElementById('tFund'), totalFund);
-                animateCounter(document.getElementById('tProfit'), totalProfit);
+                animateCounter(document.getElementById('tProfit'), totalProfit); // Fixed: Shows combined profit
                 animateCounter(document.getElementById('tInventory'), invStockVal);
                 animateCounter(document.getElementById('tInvestment'), activeInv);
-                animateCounter(document.getElementById('tLoan'), currentLoanDue);
+                animateCounter(document.getElementById('tLoan'), currentLoanDue); // Fixed: Live loan calculation
                 animateCounter(document.getElementById('tExpense'), totalExpense);
                 animateCounter(document.getElementById('tBalance'), currentBalance, '৳ ');
 
