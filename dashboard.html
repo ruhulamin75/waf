@@ -59,11 +59,12 @@
         .nav-menu::-webkit-scrollbar { width: 5px; }
         .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
 
-        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); }
+        /* Font size increased to 17px */
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 17px; font-weight: 600; transition: var(--transition); }
         .nav-item i { width: 20px; text-align: center; font-size: 18px; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
 
-        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); transition: var(--transition); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); transition: var(--transition); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 17px; }
         .logout-btn:hover { background: #ff4757; color: #fff; }
 
         /* --- Overlay for Mobile --- */
@@ -81,13 +82,13 @@
 
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
-        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
-        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); }
+        .top-header h2 { color: var(--primary-blue); font-size: 26px; font-weight: 700; } /* Increased */
+        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 18px; border-radius: 20px; box-shadow: var(--card-shadow); }
         .user-profile i { color: var(--primary-green); font-size: 20px; }
-        .user-profile span { font-weight: 600; color: #555; }
+        .user-profile span { font-weight: 600; color: #555; font-size: 16px;}
 
         /* --- Compact Dashboard Grid Cards --- */
-        .section-title { font-size: 18px; color: #444; margin-bottom: 15px; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 5px; display: inline-block; }
+        .section-title { font-size: 20px; color: #444; margin-bottom: 15px; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 5px; display: inline-block; } /* Increased */
         
         .dashboard-grid {
             display: grid;
@@ -111,10 +112,11 @@
 
         .dash-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
         
-        .card-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(10, 54, 157, 0.1); color: var(--primary-blue); flex-shrink: 0; }
+        .card-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(10, 54, 157, 0.1); color: var(--primary-blue); flex-shrink: 0; }
         .card-info { flex: 1; }
-        .card-info p { color: #777; font-size: 13px; font-weight: 600; margin-bottom: 2px; line-height: 1.3;}
-        .card-info h3 { color: var(--primary-blue); font-size: 20px; font-weight: 700; font-family: sans-serif; word-wrap: break-word;}
+        /* Fonts increased for better visibility */
+        .card-info p { color: #777; font-size: 15px; font-weight: 600; margin-bottom: 2px; line-height: 1.3;} 
+        .card-info h3 { color: var(--primary-blue); font-size: 22px; font-weight: 700; font-family: sans-serif; word-wrap: break-word;} 
 
         /* Themes */
         .green-theme { border-bottom-color: var(--primary-green); } .green-theme .card-icon { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); } .green-theme h3 { color: var(--primary-green); }
@@ -123,8 +125,8 @@
         
         /* Highlight Balance Card */
         .balance-container { background: linear-gradient(135deg, var(--primary-blue), #06236b); border-radius: 15px; padding: 25px; color: #fff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 20px rgba(10,54,157,0.3); margin-bottom: 30px; animation: fadeInUp 0.8s ease-out; }
-        .balance-info h2 { font-size: 32px; font-weight: 700; margin-top: 5px; font-family: sans-serif;}
-        .balance-info p { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.8); }
+        .balance-info h2 { font-size: 36px; font-weight: 700; margin-top: 5px; font-family: sans-serif;} /* Increased */
+        .balance-info p { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.8); } /* Increased */
         .balance-icon { font-size: 50px; color: rgba(255,255,255,0.2); }
 
         /* --- Recent Transactions Table --- */
@@ -132,11 +134,12 @@
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block;}
         
         table { width: 100%; border-collapse: collapse; min-width: 550px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 14px; white-space: nowrap; }
+        /* Font size increased for table text */
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 16px; white-space: nowrap; } 
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tr:hover { background: rgba(0,0,0,0.01); }
         
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
         .badge.deposit { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); }
         .badge.withdraw { background: rgba(255, 71, 87, 0.15); color: var(--primary-red); }
 
@@ -151,23 +154,17 @@
             .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;}
             .dash-card { padding: 15px 10px; flex-direction: column; text-align: center; gap: 8px; border-bottom-width: 3px;}
             .card-icon { width: 40px; height: 40px; font-size: 18px; margin: 0 auto; }
-            .card-info h3 { font-size: 17px; }
-            .card-info p { font-size: 12px; }
+            .card-info h3 { font-size: 18px; }
+            .card-info p { font-size: 13px; }
             
             .balance-container { flex-direction: column; text-align: center; gap: 15px; padding: 20px; margin-bottom: 20px;}
             .balance-icon { display: none; }
-            .balance-info h2 { font-size: 28px; }
+            .balance-info h2 { font-size: 30px; }
             
             .table-container::before {
                 content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
                 font-size: 12px; color: #999; padding-bottom: 10px; background: #fff;
             }
-        }
-        
-        @media (max-width: 400px) {
-            .dash-card { padding: 12px 5px; }
-            .card-info p { font-size: 11px; }
-            .card-info h3 { font-size: 15px; }
         }
     </style>
 </head>
@@ -270,29 +267,36 @@
         document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
         document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
         
-        // Counter Animation
-        function animateCounter(element, targetValue, prefix = '') {
-            let startValue = 0; let startTimestamp = null;
-            const duration = 1500;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const easeProgress = 1 - Math.pow(1 - progress, 4); 
-                let currentVal = easeProgress * (targetValue - startValue) + startValue;
-                
-                element.innerText = prefix + currentVal.toFixed(2);
-                if (progress < 1) window.requestAnimationFrame(step);
-                else element.innerText = prefix + targetValue.toFixed(2);
-            };
-            window.requestAnimationFrame(step);
+        // Counter Animation Setup
+        let isFirstLoad = true;
+        function updateCounterUI(elementId, targetValue, prefix = '') {
+            const el = document.getElementById(elementId);
+            if(isFirstLoad) {
+                let startValue = 0; let startTimestamp = null;
+                const duration = 1500;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const easeProgress = 1 - Math.pow(1 - progress, 4); 
+                    let currentVal = easeProgress * (targetValue - startValue) + startValue;
+                    
+                    el.innerText = prefix + currentVal.toFixed(2);
+                    if (progress < 1) window.requestAnimationFrame(step);
+                    else el.innerText = prefix + targetValue.toFixed(2);
+                };
+                window.requestAnimationFrame(step);
+            } else {
+                // If it's a live update (after first load), update instantly without animation to avoid jitter
+                el.innerText = prefix + targetValue.toFixed(2);
+            }
         }
     </script>
 
-    <!-- Optimized Firebase Integration Logic -->
+    <!-- Fully Reactive Real-Time Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-        import { getDatabase, ref, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -312,150 +316,150 @@
         onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
         document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
 
-        // --- Fetch & Calculate Dashboard Data ---
-        async function fetchDashboardData() {
-            try {
-                // Fetching data concurrently (Optimized Queries)
-                const [
-                    membersSnap, orgFundsSnap, productsSnap, salesSnap, 
-                    invSnap, profSnap, retSnap, trxSnap
-                ] = await Promise.all([
-                    get(ref(db, 'members')),
-                    get(ref(db, 'org_funds')),
-                    get(ref(db, 'products')),
-                    get(ref(db, 'sales')),
-                    get(ref(db, 'investments')),
-                    get(ref(db, 'profits')),
-                    get(ref(db, 'returns')),
-                    get(ref(db, 'transactions')) // Fetch all to calculate totals accurately
-                ]);
+        // Storage for Real-time DB State
+        let dbData = {
+            members: null, org_funds: null, products: null, sales: null,
+            investments: null, profits: null, returns: null, transactions: null
+        };
 
-                // Variables
-                let totalMembers = 0, memberMonthlyFunds = 0;
-                let orgFunds = 0;
-                let totalLoanGiven = 0, totalLoanPaid = 0;
-                let invStockVal = 0, totalSalesProfit = 0, totalSalesDue = 0; // Added Sales Due
-                let activeInv = 0, externalProfit = 0;
-                let totalExpense = 0, todayDep = 0;
-                const todayStr = new Date().toLocaleDateString('en-CA');
+        let initialLoadCount = 0;
+        const requiredNodes = Object.keys(dbData);
 
-                // 1. Members Data
-                if (membersSnap.exists()) {
-                    membersSnap.forEach(m => {
-                        totalMembers++;
-                        let d = m.val();
-                        if (d.funds && d.funds.monthly) memberMonthlyFunds += parseFloat(d.funds.monthly);
-                    });
+        // Setup real-time listeners for all nodes
+        requiredNodes.forEach(node => {
+            onValue(ref(db, node), (snapshot) => {
+                dbData[node] = snapshot;
+                
+                // Ensure all nodes load at least once before calculating
+                if (initialLoadCount < requiredNodes.length) {
+                    initialLoadCount++;
+                    if (initialLoadCount === requiredNodes.length) {
+                        processDashboardData();
+                        isFirstLoad = false; // Turn off animation for subsequent instant updates
+                        document.getElementById('pageLoader').classList.add('hide-loader');
+                    }
+                } else {
+                    // This runs whenever ANY data changes on other pages (Live Sync)
+                    processDashboardData();
                 }
-                
-                // 2. Organization Funds
-                if (orgFundsSnap.exists()) {
-                    let o = orgFundsSnap.val();
-                    orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0);
-                }
+            });
+        });
 
-                // 3. Products & Sales
-                if (productsSnap.exists()) productsSnap.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
-                if (salesSnap.exists()) {
-                    salesSnap.forEach(s => {
-                        let sd = s.val();
-                        totalSalesProfit += parseFloat(sd.profit || 0);
-                        totalSalesDue += parseFloat(sd.due || 0); // Capture the due amount
-                    });
-                }
+        // Main Calculation Engine
+        function processDashboardData() {
+            let totalMembers = 0, memberMonthlyFunds = 0;
+            let orgFunds = 0;
+            let totalLoanGiven = 0, totalLoanPaid = 0;
+            let invStockVal = 0, totalSalesProfit = 0, totalSalesDue = 0;
+            let activeInv = 0, externalProfit = 0;
+            let totalExpense = 0, todayDep = 0;
+            const todayStr = new Date().toLocaleDateString('en-CA');
 
-                // 4. Investments & External Profits
-                let tInv = 0, tRet = 0;
-                if (invSnap.exists()) invSnap.forEach(i => tInv += parseFloat(i.val().amount || 0));
-                if (retSnap.exists()) retSnap.forEach(r => tRet += parseFloat(r.val().amount || 0));
-                activeInv = tInv - tRet;
-
-                if (profSnap.exists()) profSnap.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
-                
-                // --- Math Logic for Profits ---
-                let totalProfit = totalSalesProfit + externalProfit; 
-                let baseFund = memberMonthlyFunds + orgFunds;
-                let totalFund = baseFund + totalProfit; 
-
-                // 5. Transactions (True Ledger for Loan and General Expenses)
-                let trxs = [];
-                if (trxSnap.exists()) {
-                    trxSnap.forEach(t => {
-                        let data = t.val();
-                        trxs.push(data);
-                        
-                        // NEW Expense Filter: Only count general expenses made from transactions.html
-                        if (data.type === 'withdraw_expense' && !data.source) { // source is not set for general expenses
-                            // To be absolutely safe, check keywords just in case
-                            if (!data.details.includes('পণ্য')) {
-                                totalExpense += parseFloat(data.totalAmount || 0);
-                            }
-                        }
-                        
-                        // Live Loan Calculation
-                        if (data.type === 'withdraw_loan') {
-                            totalLoanGiven += parseFloat(data.totalAmount || 0);
-                        }
-                        if (data.type === 'deposit_loan') {
-                            totalLoanPaid += parseFloat(data.totalAmount || 0);
-                        }
-
-                        // Today's General Deposit
-                        if (data.type === 'deposit' && data.date === todayStr) {
-                            todayDep += parseFloat(data.totalAmount || 0);
-                        }
-                    });
-                }
-
-                let currentLoanDue = totalLoanGiven - totalLoanPaid;
-                
-                // --- MASTER BALANCE FORMULA (Fully Fixed) ---
-                // Fund - (Asset Value + Blocked Money + Active Inv + Dead Expense)
-                let currentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense + totalSalesDue);
-
-                // --- Update UI ---
-                document.getElementById('tMembers').innerText = totalMembers + " জন";
-                animateCounter(document.getElementById('tTodayDep'), todayDep);
-                
-                animateCounter(document.getElementById('tFund'), totalFund);
-                animateCounter(document.getElementById('tProfit'), totalProfit); 
-                animateCounter(document.getElementById('tInventory'), invStockVal);
-                animateCounter(document.getElementById('tInvestment'), activeInv);
-                animateCounter(document.getElementById('tLoan'), currentLoanDue); 
-                animateCounter(document.getElementById('tExpense'), totalExpense);
-                animateCounter(document.getElementById('tBalance'), currentBalance, '৳ ');
-
-                // --- Render Recent Transactions Table (Show only latest 5 for performance) ---
-                const tbody = document.getElementById('recentTransactionsTable');
-                tbody.innerHTML = '';
-                
-                // Optimized Array Slicing
-                trxs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(t => {
-                    let d = new Date(t.timestamp).toLocaleDateString('en-GB');
-                    let isDep = t.type.includes('deposit');
-                    let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">উত্তোলন</span>`;
-                    let entity = t.memberName ? t.memberName : 'সাধারণ খাত';
-                    
-                    tbody.innerHTML += `<tr>
-                        <td>${d}</td>
-                        <td style="font-weight:600;">${entity}</td>
-                        <td style="font-size:13px; color:#555;">${t.details}</td>
-                        <td style="font-weight:700;">${t.totalAmount.toFixed(2)}</td>
-                        <td>${badge}</td>
-                    </tr>`;
+            // 1. Members Data
+            if (dbData.members && dbData.members.exists()) {
+                dbData.members.forEach(m => {
+                    totalMembers++;
+                    let d = m.val();
+                    if (d.funds && d.funds.monthly) memberMonthlyFunds += parseFloat(d.funds.monthly);
                 });
-                if(trxs.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো লেনদেন নেই</td></tr>';
-
-                document.getElementById('pageLoader').classList.add('hide-loader');
-
-            } catch (error) {
-                console.error("Dashboard Load Error:", error);
-                alert("ডাটা লোড হতে সমস্যা হচ্ছে। ইন্টারনেট চেক করুন।");
             }
+            
+            // 2. Organization Funds
+            if (dbData.org_funds && dbData.org_funds.exists()) {
+                let o = dbData.org_funds.val();
+                orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0);
+            }
+
+            // 3. Products & Sales
+            if (dbData.products && dbData.products.exists()) {
+                dbData.products.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
+            }
+            if (dbData.sales && dbData.sales.exists()) {
+                dbData.sales.forEach(s => {
+                    let sd = s.val();
+                    totalSalesProfit += parseFloat(sd.profit || 0);
+                    totalSalesDue += parseFloat(sd.due || 0);
+                });
+            }
+
+            // 4. Investments & External Profits
+            let tInv = 0, tRet = 0;
+            if (dbData.investments && dbData.investments.exists()) dbData.investments.forEach(i => tInv += parseFloat(i.val().amount || 0));
+            if (dbData.returns && dbData.returns.exists()) dbData.returns.forEach(r => tRet += parseFloat(r.val().amount || 0));
+            activeInv = tInv - tRet;
+
+            if (dbData.profits && dbData.profits.exists()) dbData.profits.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
+            
+            // --- Math Logic for Profits ---
+            let totalProfit = totalSalesProfit + externalProfit; 
+            let baseFund = memberMonthlyFunds + orgFunds;
+            let totalFund = baseFund + totalProfit; 
+
+            // 5. Transactions (True Ledger for Loan and General Expenses)
+            let trxs = [];
+            if (dbData.transactions && dbData.transactions.exists()) {
+                dbData.transactions.forEach(t => {
+                    let data = t.val();
+                    trxs.push(data); // If a transaction is deleted, it won't be pushed here!
+                    
+                    // Expense Filter
+                    if (data.type === 'withdraw_expense' && !data.source) { 
+                        if (!data.details.includes('পণ্য')) {
+                            totalExpense += parseFloat(data.totalAmount || 0);
+                        }
+                    }
+                    
+                    // Live Loan Calculation
+                    if (data.type === 'withdraw_loan') {
+                        totalLoanGiven += parseFloat(data.totalAmount || 0);
+                    }
+                    if (data.type === 'deposit_loan') {
+                        totalLoanPaid += parseFloat(data.totalAmount || 0);
+                    }
+
+                    // Today's General Deposit (If transaction is deleted, this naturally won't count it)
+                    if (data.type === 'deposit' && data.date === todayStr) {
+                        todayDep += parseFloat(data.totalAmount || 0);
+                    }
+                });
+            }
+
+            let currentLoanDue = totalLoanGiven - totalLoanPaid;
+            let currentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense + totalSalesDue);
+
+            // --- Update UI ---
+            document.getElementById('tMembers').innerText = totalMembers + " জন";
+            updateCounterUI('tTodayDep', todayDep);
+            
+            updateCounterUI('tFund', totalFund);
+            updateCounterUI('tProfit', totalProfit); 
+            updateCounterUI('tInventory', invStockVal);
+            updateCounterUI('tInvestment', activeInv);
+            updateCounterUI('tLoan', currentLoanDue); 
+            updateCounterUI('tExpense', totalExpense);
+            updateCounterUI('tBalance', currentBalance, '৳ ');
+
+            // --- Render Recent Transactions Table ---
+            const tbody = document.getElementById('recentTransactionsTable');
+            tbody.innerHTML = '';
+            
+            // Shows the updated list live!
+            trxs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(t => {
+                let d = new Date(t.timestamp).toLocaleDateString('en-GB');
+                let isDep = t.type.includes('deposit');
+                let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">উত্তোলন</span>`;
+                let entity = t.memberName ? t.memberName : 'সাধারণ খাত';
+                
+                tbody.innerHTML += `<tr>
+                    <td>${d}</td>
+                    <td style="font-weight:600;">${entity}</td>
+                    <td style="font-size:14px; color:#555;">${t.details}</td>
+                    <td style="font-weight:700;">${t.totalAmount.toFixed(2)}</td>
+                    <td>${badge}</td>
+                </tr>`;
+            });
+            if(trxs.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">কোনো লেনদেন নেই</td></tr>';
         }
-
-        fetchDashboardData();
-
     </script>
 </body>
 </html>
