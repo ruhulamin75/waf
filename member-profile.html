@@ -182,7 +182,7 @@
         <!-- Summary Cards -->
         <div class="summary-grid">
             <div class="summary-card card-blue">
-                <i class="fas fa-sack-dollar"></i> <!-- Modified Icon -->
+                <i class="fas fa-sack-dollar"></i> <!-- Modified Icon to Sack Dollar -->
                 <div class="info">
                     <h4>মোট মাসিক জমা</h4>
                     <h2 id="cMonthlyDeposit">৳ 0.00</h2>
@@ -391,14 +391,14 @@
 
         if (!loggedInMemberId) {
             alert("অনুগ্রহ করে লগইন করুন।");
-            window.location.href = "login.html";
+            window.location.href = "index.html"; // Changed to index.html
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("লগআউট করতে চান?")) {
                 localStorage.removeItem("loggedInMemberId");
                 localStorage.removeItem("memberPhone");
-                window.location.href = 'login.html';
+                window.location.href = 'index.html'; // Changed to index.html
             }
         });
 
@@ -442,7 +442,7 @@
                 document.getElementById('pageLoader').classList.add('hide-loader');
             } else {
                 alert("সদস্যের ডাটা ডাটাবেসে পাওয়া যায়নি!");
-                window.location.href = "login.html";
+                window.location.href = "index.html"; // Changed to index.html
             }
         });
 
