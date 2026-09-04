@@ -257,11 +257,11 @@
                         <strong>সতর্কতা:</strong> নিচের বাটনগুলোতে ক্লিক করে ডেটা মুছে ফেললে তা আর পুনরায় ফিরিয়ে আনা সম্ভব নয়। 
                     </p>
                     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                        <button class="danger-btn" onclick="window.eraseData('all')">
-                            <i class="fas fa-dumpster-fire"></i> সম্পূর্ণ সিস্টেম ডেটা রিসেট করুন
+                        <button class="danger-btn" onclick="window.eraseData('transactions_only')">
+                            <i class="fas fa-money-bill-transfer"></i> সকল প্রকার লেনদেন ও হিসাব মুছুন
                         </button>
-                        <button class="danger-btn" onclick="window.eraseData('members')">
-                            <i class="fas fa-users-slash"></i> সকল সদস্য ও তাদের লেনদেন মুছুন
+                        <button class="danger-btn" onclick="window.eraseData('all')">
+                            <i class="fas fa-dumpster-fire"></i> মেম্বারসহ পুরো সিস্টেম রিসেট করুন
                         </button>
                     </div>
                 </div>
@@ -476,7 +476,7 @@
 
         // --- Danger Zone Data Eraser Logic ---
         window.eraseData = async (type) => {
-            let typeName = type === 'all' ? 'পুরো ওয়েবসাইটের সকল ডেটা' : 'সকল সদস্য ও তাদের লেনদেন';
+            let typeName = type === 'all' ? 'মেম্বার তালিকাসহ পুরো সিস্টেমের ডেটা' : 'সকল প্রকার লেনদেন ও হিসাব';
             const user = auth.currentUser;
             
             if (confirm(`সতর্কতা! আপনি কি নিশ্চিত যে ${typeName} মুছে ফেলতে চান? এটি আর পুনরায় ফিরিয়ে আনা যাবে না!`)) {
@@ -502,18 +502,24 @@
                                 'notices': null,
                                 'bank_accounts': null
                             };
-                        } else if (type === 'members') {
-                            // Wipe members and their related transactions
-                            updates['members'] = null;
+                        } else if (type === 'transactions_only') {
+                            // Wipe only transactions and financial history
+                            updates = {
+                                'transactions': null,
+                                'products': null,
+                                'sales': null,
+                                'investments': null,
+                                'profits': null,
+                                'returns': null,
+                                'org_funds': null
+                            };
                             
-                            // Fetch transactions to delete only member-related transactions
-                            const snap = await get(ref(db, 'transactions'));
+                            // Also clear funds and loan from all existing members so their balance becomes 0
+                            const snap = await get(ref(db, 'members'));
                             if(snap.exists()) {
                                 snap.forEach(child => {
-                                    // If the transaction has a memberId, delete it
-                                    if(child.val().memberId) {
-                                        updates[`transactions/${child.key}`] = null;
-                                    }
+                                    updates[`members/${child.key}/funds`] = null;
+                                    updates[`members/${child.key}/loan`] = null;
                                 });
                             }
                         }
