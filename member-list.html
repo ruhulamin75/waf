@@ -199,10 +199,10 @@
             <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
         </div>
 
-        <!-- NEW: Total Monthly Fund Summary Card -->
+        <!-- Total Monthly Fund Summary Card -->
         <div class="summary-grid">
             <div class="summary-card">
-                <i class="fas fa-piggy-bank"></i>
+                <i class="fas fa-sack-dollar"></i> <!-- Modified Icon -->
                 <div class="info">
                     <h4>সকল সদস্যের সর্বমোট মাসিক জমা</h4>
                     <h2 id="totalGlobalMonthlyFund">৳ 0.00</h2>
@@ -390,7 +390,6 @@
 
         function saveCroppedImage() {
             if (!cropper) return;
-            // Magic Fix: Fill white color to avoid transparent dark bg
             editFinalBase64 = cropper.getCroppedCanvas({ width: 250, height: 250, fillColor: '#fff' }).toDataURL('image/jpeg', 0.8);
             
             document.getElementById('ePicPreview').src = editFinalBase64;
@@ -431,22 +430,28 @@
             const tbody = document.getElementById('memberTableBody');
             tbody.innerHTML = '';
             allMembers = [];
+            
             let count = 0;
-            let globalTotalMonthlyFund = 0; // New Variable for Grand Total
+            let globalTotalMonthlyFund = 0;
 
             if (snapshot.exists()) {
                 snapshot.forEach(childSnapshot => {
                     let m = childSnapshot.val();
                     m.keyId = childSnapshot.key;
-                    if(!m.orderIndex) m.orderIndex = count; // Default index if not set
+                    // Bug Fix: Prevent undefined orderIndex from breaking sorting
+                    if(m.orderIndex === undefined || m.orderIndex === null) m.orderIndex = count; 
                     allMembers.push(m);
+                    count++;
                 });
 
+                // Reset visual count
+                let visualCount = 0;
+                
                 // Sort by Order Index
                 allMembers.sort((a,b) => a.orderIndex - b.orderIndex).forEach((m, index) => {
-                    count++;
+                    visualCount++;
                     let monthly = m.funds && m.funds.monthly ? parseFloat(m.funds.monthly) : 0;
-                    globalTotalMonthlyFund += monthly; // Accumulate grand total
+                    globalTotalMonthlyFund += monthly;
                     
                     let photoHtml = m.photo ? `<img src="${m.photo}" alt="${m.name}">` : `<i class="fas fa-user"></i>`;
                     
@@ -481,29 +486,35 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো সদস্য পাওয়া যায়নি।</td></tr>';
             }
             
-            document.getElementById('totalMembers').innerText = count;
-            
-            // Set the Grand Total Monthly Fund UI
+            document.getElementById('totalMembers').innerText = allMembers.length;
             document.getElementById('totalGlobalMonthlyFund').innerText = `৳ ${globalTotalMonthlyFund.toFixed(2)}`;
             
             setTimeout(() => { document.getElementById('pageLoader').classList.add('hide-loader'); }, 500);
         });
 
-        // 1. Move Member (Re-order Logic)
+        // 1. Move Member (Bug-Free Re-order Logic via Bulk Update)
         window.moveMember = async function(keyId, direction) {
             let currentIndex = allMembers.findIndex(m => m.keyId === keyId);
             let swapIndex = currentIndex + direction;
+            
             if(swapIndex >= 0 && swapIndex < allMembers.length) {
-                let currentMember = allMembers[currentIndex];
-                let swapMember = allMembers[swapIndex];
+                // Swap in the local array mathematically
+                let temp = allMembers[currentIndex];
+                allMembers[currentIndex] = allMembers[swapIndex];
+                allMembers[swapIndex] = temp;
                 
-                // Swap their orderIndex
-                let tempIdx = currentMember.orderIndex;
+                // Bulk update ALL members' orderIndexes to match new strict visual order
+                // This guarantees zero duplicate bugs and perfect sorting
                 let updates = {};
-                updates[`members/${currentMember.keyId}/orderIndex`] = swapMember.orderIndex;
-                updates[`members/${swapMember.keyId}/orderIndex`] = tempIdx;
+                allMembers.forEach((m, idx) => {
+                    updates[`members/${m.keyId}/orderIndex`] = idx;
+                });
                 
-                await update(ref(db), updates);
+                try {
+                    await update(ref(db), updates);
+                } catch(e) {
+                    console.error("Order update failed", e);
+                }
             }
         }
 
@@ -583,12 +594,10 @@
                     orderIndex: parseInt(document.getElementById('eOrderIndex').value)
                 };
 
-                // If Admin changes the Member ID itself, we need to create a new node and copy existing funds/loan
                 if(originalKey !== newId) {
                     const snap = await get(ref(db, `members/${originalKey}`));
                     let oldData = snap.val();
                     
-                    // Retain old funds and loan inside the new data
                     updateData.funds = oldData.funds || {};
                     updateData.loan = oldData.loan || {};
                     updateData.joinDate = oldData.joinDate || Date.now();
@@ -596,11 +605,10 @@
 
                     let updates = {};
                     updates[`members/${newId}`] = updateData;
-                    updates[`members/${originalKey}`] = null; // delete old node
+                    updates[`members/${originalKey}`] = null;
                     
                     await update(ref(db), updates);
                 } else {
-                    // Just update specific fields in existing node
                     await update(ref(db, `members/${originalKey}`), updateData);
                 }
 
