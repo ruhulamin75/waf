@@ -102,6 +102,9 @@
         .btn-action { width: 30px; height: 30px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: 0.3s; color: #fff; }
         .btn-edit { background: var(--primary-blue); } .btn-edit:hover { background: #06236b; }
         .btn-delete { background: var(--primary-red); } .btn-delete:hover { background: #c0392b; }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; display: inline-block; }
+        .badge.withdraw { background: rgba(255, 71, 87, 0.15); color: var(--primary-red); }
 
         /* Danger Zone */
         .danger-zone { grid-column: 1 / -1; }
@@ -252,17 +255,37 @@
             <!-- 4. Danger Zone (Data Reset) -->
             <div class="danger-zone">
                 <div class="form-container box-red">
-                    <h3><i class="fas fa-triangle-exclamation"></i> ডেঞ্জার জোন (ডেটা রিসেট)</h3>
+                    <h3><i class="fas fa-triangle-exclamation"></i> ডেঞ্জার জোন (ডেটা রিসেট ও রিকভারি)</h3>
                     <p style="color: #666; font-size: 15px; margin-bottom: 20px;">
-                        <strong>সতর্কতা:</strong> নিচের বাটনগুলোতে ক্লিক করে ডেটা মুছে ফেললে তা আর পুনরায় ফিরিয়ে আনা সম্ভব নয়। 
+                        <strong>সতর্কতা:</strong> নিচের বাটনগুলোতে ক্লিক করে ডেটা মুছে ফেললে তা সরাসরি "রিসাইকেল বিন"-এ চলে যাবে। ৭ দিন পর তা অটোমেটিক চিরতরে মুছে যাবে। 
                     </p>
-                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
                         <button class="danger-btn" onclick="window.eraseData('transactions_only')">
                             <i class="fas fa-money-bill-transfer"></i> সকল প্রকার লেনদেন ও হিসাব মুছুন
                         </button>
                         <button class="danger-btn" onclick="window.eraseData('all')">
                             <i class="fas fa-dumpster-fire"></i> মেম্বারসহ পুরো সিস্টেম রিসেট করুন
                         </button>
+                    </div>
+
+                    <!-- Recycle Bin Display -->
+                    <h4 style="color: var(--primary-red); margin-bottom: 15px; border-bottom: 1px dashed #ccc; padding-bottom: 5px;">
+                        <i class="fas fa-trash-restore"></i> রিসাইকেল বিন (মুছে ফেলা ডেটা)
+                    </h4>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>রিসেটের ধরণ</th>
+                                    <th>ডিলিট করার সময়</th>
+                                    <th>স্থায়ীভাবে মুছে যাবে</th>
+                                    <th style="text-align: right;">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recycleBinTable">
+                                <tr><td colspan="4" style="text-align:center;">লোড হচ্ছে...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -327,7 +350,7 @@
             if (!user) window.location.href = 'login.html';
         });
 
-        // --- Logout (Optimized) ---
+        // --- Logout ---
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             if(confirm("লগআউট করতে চান?")) {
@@ -474,58 +497,149 @@
             window.closeFormPanel('bankForm', 'toggleBankBtn', 'নতুন ব্যাংক যুক্ত করুন');
         };
 
-        // --- Danger Zone Data Eraser Logic ---
+        // --- Recycle Bin Logic & Listeners ---
+        onValue(ref(db, 'recycle_bin'), (snapshot) => {
+            const tbody = document.getElementById('recycleBinTable');
+            tbody.innerHTML = '';
+            const now = Date.now();
+            let hasItems = false;
+
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    let item = child.val();
+                    item.id = child.key;
+                    
+                    if(now > item.expiresAt) {
+                        // Auto Permanent Delete after 7 Days
+                        remove(ref(db, 'recycle_bin/' + item.id));
+                    } else {
+                        hasItems = true;
+                        let typeName = item.type === 'all' ? 'সম্পূর্ণ সিস্টেম' : 'সকল লেনদেন';
+                        let delDate = new Date(item.timestamp).toLocaleString('en-GB');
+                        let daysLeft = Math.ceil((item.expiresAt - now) / (1000 * 60 * 60 * 24));
+                        
+                        tbody.innerHTML += `<tr>
+                            <td><span class="badge withdraw">${typeName}</span></td>
+                            <td style="font-size: 13px;">${delDate}</td>
+                            <td><span style="color: var(--primary-orange); font-weight: bold;">${daysLeft} দিন পর</span></td>
+                            <td style="text-align: right;">
+                                <div class="actions-group">
+                                    <button class="btn-action" style="background: var(--primary-green);" onclick="window.restoreData('${item.id}')" title="রিস্টোর করুন"><i class="fas fa-undo"></i></button>
+                                    <button class="btn-action btn-delete" onclick="window.permanentDelete('${item.id}')" title="স্থায়ীভাবে মুছুন"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }
+                });
+            }
+            
+            if(!hasItems) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: #999;">রিসাইকেল বিনে কোনো ডেটা নেই</td></tr>';
+            }
+        });
+
+        // Restore Data
+        window.restoreData = async (binId) => {
+            if(confirm("আপনি কি এই মুছে ফেলা ডেটাগুলো পুনরায় রিস্টোর করতে চান?")) {
+                try {
+                    const snap = await get(ref(db, `recycle_bin/${binId}`));
+                    if(snap.exists()) {
+                        let item = snap.val();
+                        let restoreUpdates = {};
+                        
+                        if(item.data) {
+                            for(let key in item.data) {
+                                if(key === 'members' && item.type === 'transactions_only') {
+                                    // Restore only funds and loan logic for members
+                                    for(let mId in item.data.members) {
+                                        if(item.data.members[mId].funds) restoreUpdates[`members/${mId}/funds`] = item.data.members[mId].funds;
+                                        if(item.data.members[mId].loan) restoreUpdates[`members/${mId}/loan`] = item.data.members[mId].loan;
+                                    }
+                                } else {
+                                    restoreUpdates[key] = item.data[key];
+                                }
+                            }
+                        }
+                        
+                        // Remove from bin
+                        restoreUpdates[`recycle_bin/${binId}`] = null;
+                        await update(ref(db), restoreUpdates);
+                        alert("ডেটা সফলভাবে রিস্টোর করা হয়েছে!");
+                    }
+                } catch(e) {
+                    alert("রিস্টোর করতে সমস্যা হয়েছে!");
+                    console.error(e);
+                }
+            }
+        }
+
+        // Permanent Delete
+        window.permanentDelete = async (binId) => {
+            if(confirm("সতর্কতা! আপনি কি এটি চিরতরে মুছে ফেলতে চান? এটি আর রিস্টোর করা যাবে না!")) {
+                try {
+                    await remove(ref(db, `recycle_bin/${binId}`));
+                    alert("ডেটা চিরতরে মুছে ফেলা হয়েছে!");
+                } catch(e) {
+                    alert("ডিলিট করতে সমস্যা হয়েছে!");
+                }
+            }
+        }
+
+        // --- Danger Zone Data Eraser Logic (Move to Bin) ---
         window.eraseData = async (type) => {
             let typeName = type === 'all' ? 'মেম্বার তালিকাসহ পুরো সিস্টেমের ডেটা' : 'সকল প্রকার লেনদেন ও হিসাব';
             const user = auth.currentUser;
             
-            if (confirm(`সতর্কতা! আপনি কি নিশ্চিত যে ${typeName} মুছে ফেলতে চান? এটি আর পুনরায় ফিরিয়ে আনা যাবে না!`)) {
+            if (confirm(`সতর্কতা! আপনি কি নিশ্চিত যে ${typeName} মুছে ফেলতে চান?\n\n(ডেটাগুলো রিসাইকেল বিনে জমা হবে এবং ৭ দিন পর চিরতরে মুছে যাবে)`)) {
                 let adminPass = prompt("নিশ্চিত করতে আপনার বর্তমান অ্যাডমিন পাসওয়ার্ড দিন:");
                 if (adminPass && user) {
                     try {
                         const credential = EmailAuthProvider.credential(user.email, adminPass);
                         await reauthenticateWithCredential(user, credential);
                         
+                        // Fetch all current data to backup
+                        const snap = await get(ref(db));
+                        const currentData = snap.exists() ? snap.val() : {};
+                        
                         let updates = {};
+                        let backupData = {};
                         
                         if (type === 'all') {
-                            // Wipe everything
-                            updates = {
-                                'members': null,
-                                'transactions': null,
-                                'products': null,
-                                'sales': null,
-                                'investments': null,
-                                'profits': null,
-                                'returns': null,
-                                'org_funds': null,
-                                'notices': null,
-                                'bank_accounts': null
-                            };
-                        } else if (type === 'transactions_only') {
-                            // Wipe only transactions and financial history
-                            updates = {
-                                'transactions': null,
-                                'products': null,
-                                'sales': null,
-                                'investments': null,
-                                'profits': null,
-                                'returns': null,
-                                'org_funds': null
-                            };
+                            backupData = {...currentData};
+                            delete backupData.recycle_bin; // Don't backup the recycle bin itself
                             
-                            // Also clear funds and loan from all existing members so their balance becomes 0
-                            const snap = await get(ref(db, 'members'));
-                            if(snap.exists()) {
-                                snap.forEach(child => {
-                                    updates[`members/${child.key}/funds`] = null;
-                                    updates[`members/${child.key}/loan`] = null;
-                                });
+                            ['members', 'transactions', 'products', 'sales', 'investments', 'profits', 'returns', 'org_funds', 'notices', 'bank_accounts'].forEach(k => updates[k] = null);
+                            
+                        } else if (type === 'transactions_only') {
+                            ['transactions', 'products', 'sales', 'investments', 'profits', 'returns', 'org_funds'].forEach(k => {
+                                if(currentData[k]) backupData[k] = currentData[k];
+                                updates[k] = null;
+                            });
+                            
+                            if(currentData.members) {
+                                backupData.members = {};
+                                for(let mId in currentData.members) {
+                                    let m = currentData.members[mId];
+                                    if(m.funds || m.loan) {
+                                        backupData.members[mId] = { funds: m.funds || null, loan: m.loan || null };
+                                        updates[`members/${mId}/funds`] = null;
+                                        updates[`members/${mId}/loan`] = null;
+                                    }
+                                }
                             }
                         }
                         
+                        // Push backup to recycle_bin
+                        const binKey = push(ref(db, 'recycle_bin')).key;
+                        updates[`recycle_bin/${binKey}`] = {
+                            type: type,
+                            timestamp: Date.now(),
+                            expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 Days logic
+                            data: backupData
+                        };
+                        
                         await update(ref(db), updates);
-                        alert(`সফলভাবে ${typeName} মুছে ফেলা হয়েছে!`);
+                        alert(`সফলভাবে ${typeName} মুছে রিসাইকেল বিনে পাঠানো হয়েছে!`);
                         
                     } catch (error) {
                         alert("পাসওয়ার্ড ভুল হয়েছে অথবা ডেটা মুছতে সমস্যা হয়েছে!");
