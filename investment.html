@@ -2,7 +2,8 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- মোবাইল ভিউ ফিক্স: যেন ডেক্সটপের মত জুম আউট না হয় -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>বিনিয়োগ ও মুনাফা - বন্ধু কল্যাণ সংস্থা</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,7 +24,9 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; }
+        
+        /* ম্যাজিক ফিক্স ১: body তে width: 100vw যুক্ত করা হয়েছে */
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw;}
 
         /* --- Loader --- */
         #pageLoader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s ease; }
@@ -44,7 +47,8 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content --- */
-        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; animation: fadeInUp 0.6s ease-out; }
+        /* ম্যাজিক ফিক্স ২: min-width: 0 যুক্ত করা হয়েছে */
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; animation: fadeInUp 0.6s ease-out; }
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
         .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
@@ -78,9 +82,12 @@
 
         /* --- Tables --- */
         .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: var(--text-dark); margin-top: 30px; display: flex; align-items: center; gap: 10px; }
-        .table-responsive { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; }
+        
+        /* ম্যাজিক ফিক্স ৩: টেবিল রেসপন্সিভনেস */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; background: #fff; border-radius: 10px; box-shadow: var(--card-shadow); margin-bottom: 30px; display: block;}
+        
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; white-space: nowrap; font-size: 15px;}
         
         /* Table Theme Colors */
         .tbl-inv th { background: rgba(10,54,157,0.05); color: var(--primary-blue); }
@@ -141,10 +148,17 @@
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- Mobile Responsive Fixes --- */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px; } .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 15px; max-width: 100vw;} .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
+            
+            .table-responsive::before {
+                content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
+                font-size: 12px; color: #999; padding: 8px 0; background: #fafafa; border-bottom: 1px solid #eee;
+                position: sticky; left: 0;
+            }
         }
 
         /* --- Print CSS --- */
@@ -163,31 +177,31 @@
 <body>
 
     <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
-    <div class="overlay" id="sidebarOverlay"></div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
-        <nav class="nav-menu">
-            <a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
-            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
-            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
-            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
-            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
-            <a href="investment.html" class="nav-item active"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
-            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
-            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
-            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
-        </nav>
-        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
+        <ul class="nav-menu" style="list-style: none;">
+            <li><a href="dashboard.html" class="nav-item"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a></li>
+            <li><a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a></li>
+            <li><a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a></li>
+            <li><a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a></li>
+            <li><a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a></li>
+            <li><a href="investment.html" class="nav-item active"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a></li>
+            <li><a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a></li>
+            <li><a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a></li>
+            <li><a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a></li>
+        </ul>
+        <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট</button>
     </aside>
 
     <main class="main-content">
-        <div class="top-header">
-            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <header class="top-header">
+            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
             <h2>বিনিয়োগ ও মুনাফা</h2>
             <div class="user-profile"><i class="fas fa-user-shield"></i> <span>অ্যাডমিন</span></div>
-        </div>
+        </header>
 
         <!-- Summary Cards -->
         <div class="summary-grid">
@@ -344,8 +358,10 @@
             document.getElementById('entryDate').value = new Date().toLocaleDateString('en-CA');
         });
         
-        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
-        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
 
         // Bangla Word Converter
         const bWords = ["শূন্য", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোলো", "সতেরো", "আঠারো", "উনিশ", "বিশ", "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আঠাশ", "উনত্রিশ", "ত্রিশ", "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "উনচল্লিশ", "চল্লিশ", "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "উনপঞ্চাশ", "পঞ্চাশ", "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "উনষাট", "ষাট", "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "উনসত্তর", "সত্তর", "একাতর", "বাহাত্তর", "তিয়াত্তর", "চুয়াত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "উনআশি", "আশি", "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটশি", "উননব্বই", "নব্বই", "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"];
@@ -431,7 +447,7 @@
                     investments.sort((a,b) => b.timestamp - a.timestamp).forEach(inv => {
                         html += `<tr>
                             <td>${new Date(inv.date).toLocaleDateString('en-GB')}</td>
-                            <td><strong>${inv.name}</strong></td>
+                            <td style="font-weight: 600;">${inv.name}</td>
                             <td>${inv.address || '-'}</td>
                             <td style="font-weight:700;">${inv.amount.toFixed(2)}</td>
                             <td>
@@ -457,7 +473,7 @@
                     profits.sort((a,b) => b.timestamp - a.timestamp).forEach(prof => {
                         html += `<tr>
                             <td>${new Date(prof.date).toLocaleDateString('en-GB')}</td>
-                            <td style="color:var(--primary-green);"><strong>${prof.sourceName}</strong></td>
+                            <td style="color:var(--primary-green); font-weight: 600;">${prof.sourceName}</td>
                             <td>${prof.details || '-'}</td>
                             <td style="font-weight:700;">${prof.amount.toFixed(2)}</td>
                             <td>
@@ -483,7 +499,7 @@
                     returns.sort((a,b) => b.timestamp - a.timestamp).forEach(ret => {
                         html += `<tr>
                             <td>${new Date(ret.date).toLocaleDateString('en-GB')}</td>
-                            <td style="color:var(--primary-orange);"><strong>${ret.sourceName}</strong></td>
+                            <td style="color:var(--primary-orange); font-weight: 600;">${ret.sourceName}</td>
                             <td style="font-weight:700;">${ret.amount.toFixed(2)}</td>
                             <td>
                                 <div class="actions-group">
@@ -647,7 +663,7 @@
             document.getElementById('rId').innerText = "#" + (dataObj.timestamp.toString().slice(-6));
             document.getElementById('rDate').innerText = new Date(dataObj.date).toLocaleDateString('en-GB');
             document.getElementById('rTotalAmt').innerText = dataObj.amount.toFixed(2);
-            document.getElementById('rWords').innerText = "কথায়: " + numberToBanglaWords(dataObj.amount) + " মাত্র";
+            document.getElementById('rWords').innerText = "কথায়: " + numberToBanglaWords(dataObj.amount);
             document.getElementById('sigLeft').innerText = sigL;
             document.getElementById('sigRight').innerText = sigR;
 
