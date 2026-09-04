@@ -20,6 +20,7 @@
             --primary-green: #7CD03A;
             --bg-light: #F4F7F6;
             --text-dark: #333;
+            --glass-bg: rgba(255, 255, 255, 0.85);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,12 +34,58 @@
             flex-direction: column;
         }
 
+        /* --- Navbar / Header --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 100;
+            position: sticky;
+            top: 0;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* লোগো ইমেজের স্টাইল */
+        .logo-img { 
+            height: 40px; 
+            width: auto; 
+            object-fit: contain;
+        } 
+        
+        .brand-logo h1 { font-size: 22px; color: var(--primary-blue); font-weight: 700; margin: 0; }
+
+        .btn-install {
+            display: none; /* JavaScript দিয়ে শো করানো হবে PWA সাপোর্ট করলে */
+            background: var(--primary-blue);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Hind Siliguri', sans-serif;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(10, 54, 157, 0.2);
+        }
+        .btn-install:hover { background: #082d85; transform: translateY(-2px); }
+        .btn-install i { margin-right: 6px; }
+
+        /* --- Hero Section --- */
         .hero-section {
             flex: 1;
             display: flex;
             align-items: center;
             background: linear-gradient(135deg, rgba(10,54,157,0.05) 0%, rgba(124,208,58,0.1) 100%);
-            padding: 60px 20px;
+            padding: 50px 5%;
             position: relative;
             overflow: hidden;
         }
@@ -47,126 +94,62 @@
         .shape-2 { position: absolute; bottom: -50px; right: -50px; width: 400px; height: 400px; background: var(--primary-blue); border-radius: 50%; opacity: 0.1; filter: blur(60px); z-index: 0; }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 50px;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
             align-items: center;
             z-index: 10;
             width: 100%;
         }
 
-        .hero-content {
-            padding-right: 30px;
-            animation: slideUp 0.8s ease-out;
-        }
+        .hero-content { animation: slideUp 0.8s ease-out; }
 
-        .brand-logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        /* Logo styling for fallback */
-        .brand-logo i { font-size: 50px; color: var(--primary-blue); } 
-        .brand-logo h1 { font-size: 28px; color: var(--primary-blue); font-weight: 700; line-height: 1.2; }
-
-        .hero-content h2 {
-            font-size: 40px;
-            color: var(--text-dark);
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 20px;
-        }
-
+        .hero-content h2 { font-size: 38px; color: var(--text-dark); font-weight: 700; line-height: 1.3; margin-bottom: 15px; }
         .hero-content h2 span { color: var(--primary-green); }
+        .hero-content p { font-size: 18px; color: #555; line-height: 1.6; margin-bottom: 25px; }
 
-        .hero-content p {
-            font-size: 18px;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        .feature-list { list-style: none; margin-bottom: 25px; }
+        .feature-list { list-style: none; margin-bottom: 30px; }
         .feature-list li {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
             font-size: 17px;
             color: #444;
-            margin-bottom: 18px;
+            margin-bottom: 15px;
             font-weight: 600;
         }
-
         .feature-icon {
-            flex-shrink: 0;
-            width: 28px;
-            height: 28px;
-            background: var(--primary-green);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-size: 12px;
-            margin-top: 3px;
+            width: 28px; height: 28px; background: var(--primary-green); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; font-size: 12px;
         }
 
-        /* --- Date Widget CSS --- */
-        .date-section {
-            margin-top: 10px;
-            margin-bottom: 25px;
-            text-align: left;
+        /* --- Date Widget --- */
+        .date-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--primary-blue);
+            display: inline-block;
         }
-
-        .date-title {
-            color: var(--primary-blue);
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .date-widget {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        .date-widget-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .date-widget-item i {
-            color: var(--primary-green);
-            font-size: 14px;
-            width: 20px;
-            text-align: center;
-        }
-
+        .date-title { color: var(--primary-blue); font-size: 16px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .date-widget { display: flex; flex-direction: column; gap: 8px; font-size: 15px; font-weight: 600; color: var(--text-dark); }
+        .date-widget-item { display: flex; align-items: center; gap: 10px; }
+        .date-widget-item i { color: var(--primary-green); font-size: 14px; width: 20px; text-align: center; }
         #date-ar { color: #e67e22; }
 
-        .login-card-wrapper {
-            animation: slideLeft 0.8s ease-out;
-        }
-
+        /* --- Login Card --- */
+        .login-card-wrapper { animation: slideLeft 0.8s ease-out; }
         .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            border: 1px solid #fff;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.6);
             text-align: center;
         }
 
@@ -174,51 +157,28 @@
         .login-card p { color: #666; margin-bottom: 30px; font-size: 15px; }
 
         .btn-portal {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 17px;
-            font-weight: 600;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.3s;
-            margin-bottom: 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 16px 20px; font-size: 17px; font-weight: 600; color: #fff;
+            border: none; border-radius: 12px; cursor: pointer; text-decoration: none;
+            transition: 0.3s; margin-bottom: 15px;
         }
-
         .btn-portal:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
         .btn-admin { background: linear-gradient(135deg, var(--primary-blue), #082d85); }
         .btn-member { background: linear-gradient(135deg, var(--primary-green), #68b32e); }
 
-        footer {
-            background-color: #fff;
-            padding: 20px;
-            text-align: center;
-            color: #777;
-            font-size: 14px;
-            border-top: 1px solid #eee;
-            width: 100%;
-            margin-top: auto;
-        }
+        footer { background-color: #fff; padding: 20px; text-align: center; color: #777; font-size: 14px; border-top: 1px solid #eee; width: 100%; margin-top: auto; }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideLeft { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
         /* Responsive Design */
         @media (max-width: 992px) {
-            .hero-section { padding: 40px 15px; }
-            .container { grid-template-columns: 1fr; text-align: center; gap: 40px; }
-            .hero-content { padding-right: 0; order: 1; }
+            .container { grid-template-columns: 1fr; gap: 40px; text-align: center; }
+            .hero-content { order: 1; }
             .login-card-wrapper { order: 2; }
-            .brand-logo { justify-content: center; }
-            .hero-content h2 { font-size: 30px; }
-            .feature-list { display: inline-block; text-align: left; }
-            .login-card { padding: 30px 20px; }
-            .date-section { display: inline-block; text-align: left; margin-top: 20px; }
+            .feature-list, .date-card { display: inline-block; text-align: left; }
+            .navbar { padding: 15px 20px; }
+            .brand-logo h1 { font-size: 18px; }
         }
     </style>
 
@@ -226,34 +186,40 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0A369D">
     <link rel="apple-touch-icon" href="icon-192.png">
-
 </head>
 <body>
 
+    <!-- Navbar Section -->
+    <nav class="navbar">
+        <div class="brand-logo">
+            <!-- লোগো ইমেজ যুক্ত করা হয়েছে -->
+            <img src="logo.png" alt="বন্ধু কল্যাণ সংস্থা লোগো" class="logo-img">
+            <h1>বন্ধু কল্যাণ সংস্থা</h1>
+        </div>
+        <!-- PWA Install Button -->
+        <button id="install-btn" class="btn-install">
+            <i class="fas fa-download"></i> অ্যাপ ইনস্টল
+        </button>
+    </nav>
+
     <div class="hero-section">
-        <!-- Background Shapes -->
         <div class="shape-1"></div>
         <div class="shape-2"></div>
 
         <div class="container">
             <!-- Left Side: Content -->
             <div class="hero-content">
-                <div class="brand-logo">
-                    <!-- Icon used as fallback if logo.png is missing -->
-                    <i class="fas fa-handshake"></i>
-                    <h1>বন্ধু কল্যাণ সংস্থা</h1>
-                </div>
-                <h2>আমাদের সংস্থার হিসাব এখন <span>ডিজিটাল!</span></h2>
-                <p>নিরাপদ ও স্বচ্ছ হিসাব ব্যবস্থাপনায় আমাদের পথচলা হোক আরও সুন্দর।</p>
+                <h2>আমাদের হিসাব এখন সম্পূর্ণ <span>ডিজিটাল!</span></h2>
+                <p>নিরাপদ ও স্বচ্ছ হিসাব ব্যবস্থাপনায় আমাদের পথচলা হোক আরও সুন্দর এবং নির্ভরযোগ্য।</p>
 
                 <ul class="feature-list">
-                    <li><div class="feature-icon"><i class="fas fa-check"></i></div> ১০০% নিরাপদ ডাটাবেস</li>
-                    <li><div class="feature-icon"><i class="fas fa-check"></i></div> ডিজিটাল মানি রিসিট</li>
-                    <li><div class="feature-icon"><i class="fas fa-check"></i></div> অনলাইন প্রোফাইল</li>
+                    <li><div class="feature-icon"><i class="fas fa-check"></i></div> ১০০% নিরাপদ ক্লাউড ডাটাবেস</li>
+                    <li><div class="feature-icon"><i class="fas fa-check"></i></div> অটোমেটেড ডিজিটাল মানি রিসিট</li>
+                    <li><div class="feature-icon"><i class="fas fa-check"></i></div> ব্যক্তিগত অনলাইন প্রোফাইল</li>
                 </ul>
 
-                <div class="date-section">
-                    <h4 class="date-title"><i class="far fa-clock"></i> আজকের তারিখ:</h4>
+                <div class="date-card">
+                    <h4 class="date-title"><i class="far fa-clock"></i> আজকের তারিখ</h4>
                     <div class="date-widget">
                         <div class="date-widget-item" title="English Date">
                             <i class="far fa-calendar-alt"></i> <span id="date-en">Loading...</span>
@@ -272,9 +238,8 @@
             <div class="login-card-wrapper">
                 <div class="login-card">
                     <h3>পোর্টালে প্রবেশ</h3>
-                    <p>লগইন করতে নিচের বাটন চাপুন</p>
+                    <p>লগইন করতে আপনার প্যানেল নির্বাচন করুন</p>
 
-                    <!-- Clean URL Routing in mind, keep extensions or remove them based on your GitHub Pages setup -->
                     <a href="login.html" class="btn-portal btn-admin">
                         <span><i class="fas fa-user-shield"></i> অ্যাডমিন প্যানেল</span>
                         <i class="fas fa-arrow-right"></i>
@@ -293,18 +258,40 @@
         &copy; 2026 বন্ধু কল্যাণ সংস্থা | সর্বস্বত্ব সংরক্ষিত
     </footer>
 
-    <!-- Service Worker Script -->
+    <!-- Service Worker & PWA Install Logic -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker ঠিকঠাক কানেক্ট হয়েছে!'))
-                    .catch(err => console.error('Service Worker কানেক্ট হতে সমস্যা হয়েছে:', err));
+                    .then(reg => console.log('Service Worker Connected!'))
+                    .catch(err => console.error('Service Worker Error:', err));
             });
         }
+
+        // PWA Install Button Logic
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
     </script>
 
-    <!-- Date Widget Script -->
+    <!-- Date Widget Script (ডিভাইসের লোকাল সময় অনুযায়ী) -->
     <script>
         const getBanglaDate = (date) => {
             const day = date.getDate();
@@ -361,7 +348,7 @@
         };
 
         const setTodayDates = async () => {
-            const now = new Date();
+            const now = new Date(); // ইউজারের ডিভাইসের লোকাল সময়
 
             const enOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
             document.getElementById('date-en').innerText = now.toLocaleDateString('en-US', enOptions);
@@ -384,16 +371,12 @@
         setTodayDates();
     </script>
 
-    <!-- Firebase SDK (Module Type) -->
+    <!-- Firebase SDK -->
     <script type="module">
-      // Core Firebase App
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-      // Firebase Authentication
       import { getAuth } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-      // Firebase Realtime Database
       import { getDatabase } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
-      // Your web app's Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
         authDomain: "waf-database-8df19.firebaseapp.com",
@@ -404,10 +387,7 @@
         appId: "1:660108849951:web:c57927e6c6b4372f12762a"
       };
 
-      // Initialize Firebase
       const app = initializeApp(firebaseConfig);
-      
-      // Initialize Auth and Database to use in this or other pages
       const auth = getAuth(app);
       const database = getDatabase(app);
 
