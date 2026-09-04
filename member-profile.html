@@ -145,7 +145,6 @@
         .receipt-print-area { padding: 40px; position: relative; z-index: 1; background: #fff; }
         
         .r-header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 20px; margin-bottom: 25px; }
-        .r-header i { font-size: 40px; color: var(--primary-blue); margin-bottom: 10px; }
         .r-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 5px; color: var(--primary-blue);}
         .r-title { display: inline-block; padding: 6px 20px; border-radius: 20px; font-size: 16px; font-weight: 700; margin-top: 10px; color: #fff; background: var(--primary-green); }
         
@@ -197,7 +196,7 @@
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <!-- Added Logo -->
+            <!-- Logo in Sidebar -->
             <img src="logo.png" alt="Logo" class="sidebar-logo" onerror="this.src='https://via.placeholder.com/60x60/0A369D/ffffff?text=Logo'">
             <h2>বন্ধু কল্যাণ সংস্থা</h2>
         </div>
@@ -345,7 +344,8 @@
             
             <div class="receipt-print-area">
                 <div class="r-header">
-                    <i class="fas fa-handshake"></i>
+                    <!-- Added Logo for Receipt -->
+                    <img src="logo.png" alt="Logo" style="width: 60px; height: auto; margin-bottom: 10px; border-radius: 50%;" onerror="this.src='https://via.placeholder.com/60x60/0A369D/ffffff?text=Logo'">
                     <h2>বন্ধু কল্যাণ সংস্থা</h2>
                     <p>ব্রাহ্মণপাড়া, কুমিল্লা</p>
                     <div class="r-title">লেনদেন রিসিট</div>
@@ -643,7 +643,6 @@
                     let isDep = t.type.includes('deposit');
                     let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">খরচ / গ্রহণ</span>`;
                     
-                    // Added Receipt View Button
                     tbody.innerHTML += `
                         <tr>
                             <td>${d}</td>
