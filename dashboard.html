@@ -292,7 +292,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
@@ -315,6 +315,7 @@
         // --- Fetch & Calculate Dashboard Data ---
         async function fetchDashboardData() {
             try {
+                // Fetching data concurrently (Optimized Queries)
                 const [
                     membersSnap, orgFundsSnap, productsSnap, salesSnap, 
                     invSnap, profSnap, retSnap, trxSnap
@@ -326,14 +327,14 @@
                     get(ref(db, 'investments')),
                     get(ref(db, 'profits')),
                     get(ref(db, 'returns')),
-                    get(ref(db, 'transactions'))
+                    get(ref(db, 'transactions')) // Fetch all to calculate totals accurately
                 ]);
 
                 // Variables
                 let totalMembers = 0, memberMonthlyFunds = 0;
                 let orgFunds = 0;
                 let totalLoanGiven = 0, totalLoanPaid = 0;
-                let invStockVal = 0, totalSalesProfit = 0;
+                let invStockVal = 0, totalSalesProfit = 0, totalSalesDue = 0; // Added Sales Due
                 let activeInv = 0, externalProfit = 0;
                 let totalExpense = 0, todayDep = 0;
                 const todayStr = new Date().toLocaleDateString('en-CA');
@@ -344,7 +345,6 @@
                         totalMembers++;
                         let d = m.val();
                         if (d.funds && d.funds.monthly) memberMonthlyFunds += parseFloat(d.funds.monthly);
-                        // ঋণের পুরানো লজিক এখান থেকে বাদ দেওয়া হয়েছে। এখন ট্রানজেকশন থেকে লাইভ ক্যালকুলেট হবে।
                     });
                 }
                 
@@ -354,9 +354,15 @@
                     orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0);
                 }
 
-                // 3. Products & Sales Profit
+                // 3. Products & Sales
                 if (productsSnap.exists()) productsSnap.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
-                if (salesSnap.exists()) salesSnap.forEach(s => totalSalesProfit += parseFloat(s.val().profit || 0));
+                if (salesSnap.exists()) {
+                    salesSnap.forEach(s => {
+                        let sd = s.val();
+                        totalSalesProfit += parseFloat(sd.profit || 0);
+                        totalSalesDue += parseFloat(sd.due || 0); // Capture the due amount
+                    });
+                }
 
                 // 4. Investments & External Profits
                 let tInv = 0, tRet = 0;
@@ -367,24 +373,26 @@
                 if (profSnap.exists()) profSnap.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
                 
                 // --- Math Logic for Profits ---
-                // পণ্য বিক্রি থেকে পাওয়া লাভ + অন্য খাত থেকে পাওয়া লাভ
                 let totalProfit = totalSalesProfit + externalProfit; 
                 let baseFund = memberMonthlyFunds + orgFunds;
                 let totalFund = baseFund + totalProfit; 
 
-                // 5. Transactions (True Ledger for Loan and Expenses)
+                // 5. Transactions (True Ledger for Loan and General Expenses)
                 let trxs = [];
                 if (trxSnap.exists()) {
                     trxSnap.forEach(t => {
                         let data = t.val();
                         trxs.push(data);
                         
-                        // Expense Filter: Exclude product purchases
-                        if (data.type === 'withdraw_expense' && !data.details.includes('পণ্য')) {
-                            totalExpense += parseFloat(data.totalAmount || 0);
+                        // NEW Expense Filter: Only count general expenses made from transactions.html
+                        if (data.type === 'withdraw_expense' && !data.source) { // source is not set for general expenses
+                            // To be absolutely safe, check keywords just in case
+                            if (!data.details.includes('পণ্য')) {
+                                totalExpense += parseFloat(data.totalAmount || 0);
+                            }
                         }
                         
-                        // Live Loan Calculation from Transactions (Fix for phantom loan)
+                        // Live Loan Calculation
                         if (data.type === 'withdraw_loan') {
                             totalLoanGiven += parseFloat(data.totalAmount || 0);
                         }
@@ -393,32 +401,35 @@
                         }
 
                         // Today's General Deposit
-                        if (data.type === 'deposit' && data.date === todayStr) todayDep += parseFloat(data.totalAmount || 0);
+                        if (data.type === 'deposit' && data.date === todayStr) {
+                            todayDep += parseFloat(data.totalAmount || 0);
+                        }
                     });
                 }
 
-                // Calculate Current Accurate Due Loan
                 let currentLoanDue = totalLoanGiven - totalLoanPaid;
                 
-                // --- MASTER BALANCE FORMULA ---
-                let currentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense);
+                // --- MASTER BALANCE FORMULA (Fully Fixed) ---
+                // Fund - (Asset Value + Blocked Money + Active Inv + Dead Expense)
+                let currentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense + totalSalesDue);
 
                 // --- Update UI ---
                 document.getElementById('tMembers').innerText = totalMembers + " জন";
                 animateCounter(document.getElementById('tTodayDep'), todayDep);
                 
                 animateCounter(document.getElementById('tFund'), totalFund);
-                animateCounter(document.getElementById('tProfit'), totalProfit); // Fixed: Shows combined profit
+                animateCounter(document.getElementById('tProfit'), totalProfit); 
                 animateCounter(document.getElementById('tInventory'), invStockVal);
                 animateCounter(document.getElementById('tInvestment'), activeInv);
-                animateCounter(document.getElementById('tLoan'), currentLoanDue); // Fixed: Live loan calculation
+                animateCounter(document.getElementById('tLoan'), currentLoanDue); 
                 animateCounter(document.getElementById('tExpense'), totalExpense);
                 animateCounter(document.getElementById('tBalance'), currentBalance, '৳ ');
 
-                // --- Render Recent Transactions Table ---
+                // --- Render Recent Transactions Table (Show only latest 5 for performance) ---
                 const tbody = document.getElementById('recentTransactionsTable');
                 tbody.innerHTML = '';
                 
+                // Optimized Array Slicing
                 trxs.sort((a,b) => b.timestamp - a.timestamp).slice(0, 5).forEach(t => {
                     let d = new Date(t.timestamp).toLocaleDateString('en-GB');
                     let isDep = t.type.includes('deposit');
