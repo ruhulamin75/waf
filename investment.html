@@ -235,7 +235,7 @@
                         <input type="text" id="invAddress" placeholder="প্রতিষ্ঠানের ঠিকানা">
                     </div>
 
-                    <!-- Profit/Return Source Field (Correctly updated classes) -->
+                    <!-- Profit/Return Source Field -->
                     <div class="input-group sec-source" style="display: none;">
                         <label>উৎস (কোথা থেকে এসেছে)</label>
                         <select id="sourceSelect" onchange="checkOtherSource()">
@@ -422,8 +422,25 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
-        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+        // Security Check & Auth state (UPDATED)
+        onAuthStateChanged(auth, (user) => { 
+            if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+                window.location.href = 'login.html'; 
+            }
+        });
+        
+        // Logout Logic (UPDATED)
+        document.getElementById('logoutBtn').addEventListener('click', () => { 
+            if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem("isAdminLoggedIn");
+                localStorage.removeItem("isAdminLoggedIn");
+                signOut(auth).then(() => {
+                    window.location.href = 'login.html';
+                }).catch((error) => {
+                    window.location.href = 'login.html';
+                });
+            }
+        });
 
 
         let investments = [], profits = [], returns = [];
