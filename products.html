@@ -239,7 +239,7 @@
             <h3 style="color: var(--primary-green);"><i class="fas fa-shopping-cart"></i> পণ্য বিক্রি করুন</h3>
             <form id="sellProductForm">
                 <div class="form-grid">
-                    <!-- NEW: Dropdown for Customer -->
+                    <!-- Dropdown for Customer -->
                     <div class="input-group">
                         <label>ক্রেতার নাম / সদস্য</label>
                         <select id="sellCustomerSelect" required onchange="checkCustomerOther()">
@@ -368,7 +368,6 @@
             inputField.required = selectObj.value === 'Other';
         }
 
-        // NEW: Check Customer Dropdown
         function checkCustomerOther() {
             const sel = document.getElementById('sellCustomerSelect').value;
             const otherInput = document.getElementById('sellCustomerOther');
@@ -405,8 +404,28 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
-        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+        // --- Security & Auto-Login Check ---
+        onAuthStateChanged(auth, (user) => { 
+            if (user) {
+                localStorage.setItem('isAdminLoggedIn', 'true');
+            } else {
+                localStorage.removeItem('isAdminLoggedIn');
+                if (localStorage.getItem("isMemberLoggedIn") === "true" && localStorage.getItem("loggedInMemberId")) {
+                    window.location.href = "member-profile.html"; 
+                } else {
+                    window.location.href = 'login.html'; 
+                }
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => { 
+            if(confirm("লগআউট করতে চান?")) {
+                signOut(auth).then(() => {
+                    localStorage.removeItem('isAdminLoggedIn');
+                    window.location.href = 'login.html';
+                });
+            }
+        });
 
         let allProducts = [];
         let allSales = [];
@@ -443,9 +462,15 @@
                 let orgFunds = 0;
                 if (orgFundsSnap.exists()) { let o = orgFundsSnap.val(); orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0); }
 
-                let invStockVal = 0, totalSalesProfit = 0;
+                let invStockVal = 0, totalSalesProfit = 0, totalSalesDue = 0;
                 if (productsSnap.exists()) productsSnap.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
-                if (salesSnap.exists()) salesSnap.forEach(s => totalSalesProfit += parseFloat(s.val().profit || 0));
+                
+                if (salesSnap.exists()) {
+                    salesSnap.forEach(s => {
+                        totalSalesProfit += parseFloat(s.val().profit || 0);
+                        totalSalesDue += parseFloat(s.val().due || 0); // Sales Due calculation added
+                    });
+                }
 
                 let tInv = 0, tRet = 0, externalProfit = 0;
                 if (invSnap.exists()) invSnap.forEach(i => tInv += parseFloat(i.val().amount || 0));
@@ -465,7 +490,8 @@
                 let activeInv = tInv - tRet;
                 let currentLoanDue = totalLoanGiven - totalLoanPaid;
 
-                globalCurrentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense);
+                // Fixed formula matching Dashboard
+                globalCurrentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense + totalSalesDue);
                 
                 let balEl = document.getElementById('availableBalanceDisplay');
                 if(balEl) {
@@ -746,8 +772,16 @@
 
             // Handle Customer Name (Dropdown or Custom)
             let customerName = document.getElementById('sellCustomerSelect').value;
+            let memberIdForTrx = null;
+            
             if (customerName === 'Other') {
                 customerName = document.getElementById('sellCustomerOther').value.trim();
+            } else if (customerName !== "") {
+                // Extracting Member Name and ID from dropdown value (e.g. "Name (ID)")
+                let match = customerName.match(/(.+)\s\((.+)\)/);
+                if (match) {
+                    memberIdForTrx = match[2];
+                }
             }
 
             let salesData = {
@@ -772,11 +806,20 @@
                 
                 if(paid > 0) {
                     const trxKey = push(ref(db, 'transactions')).key;
-                    await set(ref(db, `transactions/${trxKey}`), {
+                    
+                    let trxData = {
                         id: trxKey, date: new Date().toLocaleDateString('en-CA'),
                         timestamp: Date.now(), type: 'deposit', 
                         details: `পণ্য বিক্রয় (নগদ): ${selectedProduct.name}`, totalAmount: paid
-                    });
+                    };
+                    
+                    // Add memberId and memberName so it shows in member-profile
+                    if (memberIdForTrx) {
+                        trxData.memberId = memberIdForTrx;
+                        trxData.memberName = customerName.split(' (')[0];
+                    }
+                    
+                    await set(ref(db, `transactions/${trxKey}`), trxData);
                 }
 
                 alert("পণ্য বিক্রয় সফলভাবে সম্পন্ন হয়েছে!");
@@ -813,7 +856,7 @@
             const amount = parseFloat(document.getElementById('payAmountInput').value);
             
             let sale = allSales.find(s => s.id === saleId);
-            if(amount > sale.due) return alert("বকেয়ার চেয়ে বেশি টাকা জমা নেয়া যাবে না!");
+            if(amount > sale.due) return alert("বকেয়ার চেয়ে বেশি টাকা জমা নেয়া যাবে মহাশয়!");
 
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> প্রসেসিং...'; btn.disabled = true;
 
@@ -821,11 +864,21 @@
                 await update(ref(db, `sales/${saleId}`), { due: sale.due - amount });
                 
                 const trxKey = push(ref(db, 'transactions')).key;
-                await set(ref(db, `transactions/${trxKey}`), {
+                
+                let trxData = {
                     id: trxKey, date: new Date().toLocaleDateString('en-CA'),
                     timestamp: Date.now(), type: 'deposit', 
                     details: `বকেয়া আদায়: ${sale.productName}`, totalAmount: amount
-                });
+                };
+                
+                // Extract memberId if customer name was selected from dropdown
+                let match = sale.customer.match(/(.+)\s\((.+)\)/);
+                if (match) {
+                    trxData.memberId = match[2];
+                    trxData.memberName = match[1];
+                }
+
+                await set(ref(db, `transactions/${trxKey}`), trxData);
 
                 alert("পেমেন্ট সফলভাবে গ্রহণ করা হয়েছে!");
                 document.getElementById('paymentModal').classList.remove('active');
