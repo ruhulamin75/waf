@@ -190,7 +190,6 @@
                         <label for="memberPhoto" class="pic-upload-btn">
                             <i class="fas fa-camera"></i>
                         </label>
-                        <!-- FIXED: accept attribute changed to "image/*" -->
                         <input type="file" id="memberPhoto" accept="image/*">
                     </div>
                 </div>
@@ -272,7 +271,7 @@
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     imageToCrop.src = event.target.result;
-                    cropperModal.classList.add('active'); // Changed from display:flex to classList.add
+                    cropperModal.classList.add('active');
                     
                     if (cropper) cropper.destroy();
                     
@@ -287,7 +286,7 @@
         });
 
         function closeCropper() {
-            cropperModal.classList.remove('active'); // Changed to classList.remove
+            cropperModal.classList.remove('active');
             if (cropper) cropper.destroy();
             photoInput.value = ""; 
         }
@@ -295,7 +294,6 @@
         function saveCroppedImage() {
             if (!cropper) return;
             
-            // FIXED: Added fillColor: '#fff' to prevent black background on transparent images
             finalCroppedBase64 = cropper.getCroppedCanvas({
                 width: 250,
                 height: 250,
@@ -330,25 +328,21 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Security Check
+        // Security Check (Updated to sessionStorage)
         onAuthStateChanged(auth, (user) => { 
-            if (user) {
-                localStorage.setItem('isAdminLoggedIn', 'true');
-            } else {
-                localStorage.removeItem('isAdminLoggedIn');
-                if (localStorage.getItem("isMemberLoggedIn") === "true" && localStorage.getItem("loggedInMemberId")) {
-                    window.location.href = "member-profile.html"; 
-                } else {
-                    window.location.href = 'login.html'; 
-                }
+            if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+                window.location.href = 'login.html'; 
             }
         });
 
-        // Logout
+        // Logout (Updated to clean sessionStorage)
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem('isAdminLoggedIn');
+                localStorage.removeItem('isAdminLoggedIn');
                 signOut(auth).then(() => {
-                    localStorage.removeItem('isAdminLoggedIn');
+                    window.location.href = 'login.html';
+                }).catch(() => {
                     window.location.href = 'login.html';
                 });
             }
