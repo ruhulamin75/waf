@@ -345,16 +345,24 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // Security Check
+        // Security Check (Updated to check sessionStorage)
         onAuthStateChanged(auth, (user) => {
-            if (!user) window.location.href = 'login.html';
+            if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+                window.location.href = 'login.html';
+            }
         });
 
-        // --- Logout ---
+        // --- Logout Logic (Updated to clear storage before sign out) ---
         document.getElementById('logoutBtn').addEventListener('click', async (e) => {
             e.preventDefault();
             if(confirm("লগআউট করতে চান?")) {
-                await signOut(auth);
+                sessionStorage.removeItem("isAdminLoggedIn");
+                localStorage.removeItem("isAdminLoggedIn");
+                try {
+                    await signOut(auth);
+                } catch(error) {
+                    console.error(error);
+                }
                 window.location.href = "login.html";
             }
         });
