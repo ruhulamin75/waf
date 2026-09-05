@@ -190,7 +190,8 @@
                         <label for="memberPhoto" class="pic-upload-btn">
                             <i class="fas fa-camera"></i>
                         </label>
-                        <input type="file" id="memberPhoto" accept="image/png, image/jpeg">
+                        <!-- FIXED: accept attribute changed to "image/*" -->
+                        <input type="file" id="memberPhoto" accept="image/*">
                     </div>
                 </div>
 
@@ -294,9 +295,11 @@
         function saveCroppedImage() {
             if (!cropper) return;
             
+            // FIXED: Added fillColor: '#fff' to prevent black background on transparent images
             finalCroppedBase64 = cropper.getCroppedCanvas({
                 width: 250,
-                height: 250
+                height: 250,
+                fillColor: '#fff' 
             }).toDataURL('image/jpeg', 0.8);
 
             picPreview.src = finalCroppedBase64;
@@ -327,11 +330,25 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
+        // Security Check
+        onAuthStateChanged(auth, (user) => { 
+            if (user) {
+                localStorage.setItem('isAdminLoggedIn', 'true');
+            } else {
+                localStorage.removeItem('isAdminLoggedIn');
+                if (localStorage.getItem("isMemberLoggedIn") === "true" && localStorage.getItem("loggedInMemberId")) {
+                    window.location.href = "member-profile.html"; 
+                } else {
+                    window.location.href = 'login.html'; 
+                }
+            }
+        });
+
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("লগআউট করতে চান?")) {
                 signOut(auth).then(() => {
-                    localStorage.removeItem("userRole");
+                    localStorage.removeItem('isAdminLoggedIn');
                     window.location.href = 'login.html';
                 });
             }
