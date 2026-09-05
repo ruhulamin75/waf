@@ -404,24 +404,21 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- Security & Auto-Login Check ---
+        // --- Security & Auto-Login Check (Updated for sessionStorage) ---
         onAuthStateChanged(auth, (user) => { 
-            if (user) {
-                localStorage.setItem('isAdminLoggedIn', 'true');
-            } else {
-                localStorage.removeItem('isAdminLoggedIn');
-                if (localStorage.getItem("isMemberLoggedIn") === "true" && localStorage.getItem("loggedInMemberId")) {
-                    window.location.href = "member-profile.html"; 
-                } else {
-                    window.location.href = 'login.html'; 
-                }
+            if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+                window.location.href = 'login.html'; 
             }
         });
 
+        // --- Logout Logic (Updated to clear storage first) ---
         document.getElementById('logoutBtn').addEventListener('click', () => { 
             if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem("isAdminLoggedIn");
+                localStorage.removeItem("isAdminLoggedIn");
                 signOut(auth).then(() => {
-                    localStorage.removeItem('isAdminLoggedIn');
+                    window.location.href = 'login.html';
+                }).catch((error) => {
                     window.location.href = 'login.html';
                 });
             }
