@@ -327,22 +327,28 @@
         let transactionsToShow = 5;
         window.allTransactions = [];
 
-        // Auth Check & Initiating Data Fetching (অ্যাডমিনের সঠিক ম্যানুয়াল লগইন চেক)
+        // Auth Check & Initiating Data Fetching
         onAuthStateChanged(auth, (user) => { 
-            // যদি ফায়ারবেসে সেশন না থাকে অথবা sessionStorage এ লগইন স্ট্যাটাস না থাকে
             if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
                 window.location.href = 'login.html'; 
             } else {
-                // User verified! Now load the database data
                 startDatabaseListeners();
             }
         });
 
+        // 로그아উট লজিক (ফিক্সড)
         document.getElementById('logoutBtn').addEventListener('click', () => { 
             if(confirm("লগআউট করতে চান?")) {
+                
+                // সবার আগে সেশন ক্লিয়ার করতে হবে (রিডাইরেক্ট লুপ বন্ধ করার জন্য)
+                sessionStorage.removeItem("isAdminLoggedIn");
+                localStorage.removeItem("isAdminLoggedIn");
+                
+                // এরপর ফায়ারবেস থেকে সাইন-আউট করে পেজ রিডাইরেক্ট করা হবে
                 signOut(auth).then(() => {
-                    sessionStorage.removeItem("isAdminLoggedIn");
-                    localStorage.removeItem("isAdminLoggedIn");
+                    window.location.href = 'login.html';
+                }).catch((error) => {
+                    console.error("লগআউট এরর:", error);
                     window.location.href = 'login.html';
                 });
             }
