@@ -288,9 +288,25 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Security Check
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
-        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+        // --- Security Check & Auto-Login Check (Updated for sessionStorage) ---
+        onAuthStateChanged(auth, (user) => { 
+            if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+                window.location.href = 'login.html'; 
+            }
+        });
+
+        // --- Logout Logic (Updated to clear storage first) ---
+        document.getElementById('logoutBtn').addEventListener('click', () => { 
+            if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem("isAdminLoggedIn");
+                localStorage.removeItem("isAdminLoggedIn");
+                signOut(auth).then(() => {
+                    window.location.href = 'login.html';
+                }).catch((error) => {
+                    window.location.href = 'login.html';
+                });
+            }
+        });
 
         // Load Members Data
         async function loadMembersForDropdown() {
