@@ -174,16 +174,17 @@
 </head>
 <body>
 
-    <!-- Auto-Login Check BEFORE Page Renders -->
+    <!-- অটো-লগইন বন্ধ করা হলো: localStorage-এর পরিবর্তে sessionStorage ব্যবহার করা হয়েছে -->
     <script>
-        // যদি অ্যাডমিন আগে থেকেই লগইন থাকে, তবে সাথে সাথে ড্যাশবোর্ডে পাঠিয়ে দেবে
-        if (localStorage.getItem("isAdminLoggedIn") === "true") {
+        if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
             window.location.href = "dashboard.html";
         }
+        
+        // আগের কোনো ক্যাশ সেভ থাকলে তা মুছে ফেলার জন্য
+        localStorage.removeItem("isAdminLoggedIn");
     </script>
 
     <header>
-        <!-- লোগো যুক্ত করা হলো -->
         <img src="logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/40x40/0A369D/ffffff?text=Logo'"> 
         <span>বন্ধু কল্যাণ সংস্থা</span>
     </header>
@@ -199,7 +200,6 @@
             <form id="adminLoginForm">
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
-                    <!-- id 'adminId' পরিবর্তন করে 'adminEmail' এবং type 'text' থেকে 'email' করা হয়েছে -->
                     <input type="email" id="adminEmail" placeholder="অ্যাডমিন ইমেইল" required>
                 </div>
                 
@@ -216,10 +216,10 @@
         </div>
     </main>
 
-    <!-- Firebase SDK (Module Type) -->
+    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
         // ফায়ারবেজ কনফিগারেশন
         const firebaseConfig = {
@@ -232,7 +232,6 @@
             appId: "1:660108849951:web:c57927e6c6b4372f12762a"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
@@ -246,26 +245,24 @@
             const errorMsg = document.getElementById('error-msg');
             const loginBtn = document.getElementById('loginBtn');
 
-            // লোডিং এনিমেশন ও বাটন ডিজেবল
             loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> লগইন হচ্ছে...';
             loginBtn.disabled = true;
             errorMsg.style.display = 'none';
 
-            // ফায়ারবেজ অথেনটিকেশন চেক
-            signInWithEmailAndPassword(auth, email, pass)
+            // Firebase সেশনকে টেম্পোরারি (browserSessionPersistence) করা হচ্ছে
+            setPersistence(auth, browserSessionPersistence)
+                .then(() => {
+                    return signInWithEmailAndPassword(auth, email, pass);
+                })
                 .then((userCredential) => {
-                    // লগইন সফল হলে ড্যাশবোর্ডে রিডিরেক্ট হবে
-                    // ফায়ারবেজ নিজ থেকেই সেশন ধরে রাখে, তাই localStorage এর প্রয়োজন নেই। 
-                    // তবুও আপনার আগের সুবিধার জন্য রেখে দিলাম
-                    localStorage.setItem('isAdminLoggedIn', 'true'); // Flag updated to match auto-login logic
+                    // লগইন সফল হলে sessionStorage-এ ডাটা সেভ করে ড্যাশবোর্ডে পাঠাবে
+                    sessionStorage.setItem('isAdminLoggedIn', 'true'); 
                     window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
-                    // লগইন ফেইল করলে
                     loginBtn.innerHTML = 'লগইন করুন';
                     loginBtn.disabled = false;
                     
-                    // ফায়ারবেজ থেকে আসা এরর অনুযায়ী মেসেজ পরিবর্তন করতে পারেন, আপাতত সাধারণ মেসেজ রাখা হলো
                     errorMsg.innerHTML = '<i class="fas fa-exclamation-circle"></i> ইমেইল বা পাসওয়ার্ড ভুল হয়েছে!';
                     errorMsg.style.display = 'block';
                     console.error("লগইন এরর:", error.message);
