@@ -586,7 +586,7 @@
             }
         });
 
-        // --- 5. Fetch and Render Transactions ---
+        // --- 5. Fetch and Render Transactions (Updated for Product Payments) ---
         async function loadTransactions() {
             try {
                 const [trxSnap, salesSnap] = await Promise.all([
@@ -595,22 +595,16 @@
                 ]);
 
                 allMyTransactions = [];
+                let myPurchasedProducts = [];
 
-                // General Transactions & Loans
-                if (trxSnap.exists()) {
-                    trxSnap.forEach(t => {
-                        let data = t.val();
-                        if (data.memberId === loggedInMemberId) {
-                            allMyTransactions.push(data);
-                        }
-                    });
-                }
-
-                // Product Purchases (Matched by ID or Name)
+                // Process Sales First to track purchased products
                 if (salesSnap.exists()) {
                     salesSnap.forEach(s => {
                         let data = s.val();
-                        if (data.customer === loggedInMemberId || (currentMemberName && data.customer === currentMemberName) || data.customer.includes(loggedInMemberId)) {
+                        if (data.customer === loggedInMemberId || (currentMemberName && data.customer === currentMemberName) || (data.customer && data.customer.includes(loggedInMemberId))) {
+                            
+                            if (data.productName) myPurchasedProducts.push(data.productName);
+
                             allMyTransactions.push({
                                 timestamp: data.timestamp,
                                 date: new Date(data.timestamp).toLocaleDateString('en-CA'),
@@ -622,7 +616,33 @@
                     });
                 }
 
-                // Sort Descending
+                // Process General Transactions & Product Due Payments
+                if (trxSnap.exists()) {
+                    trxSnap.forEach(t => {
+                        let data = t.val();
+                        let isMyTrx = false;
+
+                        // Directly matching Member ID
+                        if (data.memberId === loggedInMemberId) {
+                            isMyTrx = true;
+                        } 
+                        // Heuristic match for Product Cash / Due Payments (since they lack Member ID in DB)
+                        else if (data.details && data.type === 'deposit') {
+                            for (let pName of myPurchasedProducts) {
+                                if (data.details.includes(`বকেয়া আদায়: ${pName}`) || data.details.includes(`পণ্য বিক্রয় (নগদ): ${pName}`)) {
+                                    isMyTrx = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isMyTrx) {
+                            allMyTransactions.push(data);
+                        }
+                    });
+                }
+
+                // Sort Descending by Time
                 allMyTransactions.sort((a,b) => b.timestamp - a.timestamp);
                 renderTransactions();
 
@@ -673,13 +693,15 @@
             renderTransactions();
         }
 
-        // View Receipt Function
+        // View Receipt Function (Fixed innerHTML for line breaks)
         window.viewReceipt = function(index) {
             const trx = allMyTransactions[index];
             if(trx) {
                 document.getElementById('rDate').innerText = new Date(trx.timestamp).toLocaleDateString('en-GB');
                 document.getElementById('rMemberName').innerText = currentMemberName;
-                document.getElementById('rDetails').innerText = trx.details;
+                
+                // FIX: innerHTML makes <br> render as line breaks instead of raw text
+                document.getElementById('rDetails').innerHTML = trx.details;
                 
                 let amountStr = parseFloat(trx.totalAmount).toFixed(2);
                 document.getElementById('rAmount').innerText = amountStr;
