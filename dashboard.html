@@ -59,7 +59,6 @@
         .nav-menu::-webkit-scrollbar { width: 5px; }
         .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
 
-        /* Font size increased to 17px */
         .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 17px; font-weight: 600; transition: var(--transition); }
         .nav-item i { width: 20px; text-align: center; font-size: 18px; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
@@ -82,13 +81,13 @@
 
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
-        .top-header h2 { color: var(--primary-blue); font-size: 26px; font-weight: 700; } /* Increased */
+        .top-header h2 { color: var(--primary-blue); font-size: 26px; font-weight: 700; }
         .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 18px; border-radius: 20px; box-shadow: var(--card-shadow); }
         .user-profile i { color: var(--primary-green); font-size: 20px; }
         .user-profile span { font-weight: 600; color: #555; font-size: 16px;}
 
         /* --- Compact Dashboard Grid Cards --- */
-        .section-title { font-size: 20px; color: #444; margin-bottom: 15px; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 5px; display: inline-block; } /* Increased */
+        .section-title { font-size: 20px; color: #444; margin-bottom: 15px; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 5px; display: inline-block; }
         
         .dashboard-grid {
             display: grid;
@@ -114,7 +113,6 @@
         
         .card-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(10, 54, 157, 0.1); color: var(--primary-blue); flex-shrink: 0; }
         .card-info { flex: 1; }
-        /* Fonts increased for better visibility */
         .card-info p { color: #777; font-size: 15px; font-weight: 600; margin-bottom: 2px; line-height: 1.3;} 
         .card-info h3 { color: var(--primary-blue); font-size: 22px; font-weight: 700; font-family: sans-serif; word-wrap: break-word;} 
 
@@ -125,8 +123,8 @@
         
         /* Highlight Balance Card */
         .balance-container { background: linear-gradient(135deg, var(--primary-blue), #06236b); border-radius: 15px; padding: 25px; color: #fff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 20px rgba(10,54,157,0.3); margin-bottom: 30px; animation: fadeInUp 0.8s ease-out; }
-        .balance-info h2 { font-size: 36px; font-weight: 700; margin-top: 5px; font-family: sans-serif;} /* Increased */
-        .balance-info p { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.8); } /* Increased */
+        .balance-info h2 { font-size: 36px; font-weight: 700; margin-top: 5px; font-family: sans-serif;}
+        .balance-info p { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.8); }
         .balance-icon { font-size: 50px; color: rgba(255,255,255,0.2); }
 
         /* --- Recent Transactions Table --- */
@@ -134,7 +132,6 @@
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block;}
         
         table { width: 100%; border-collapse: collapse; min-width: 550px; }
-        /* Font size increased for table text */
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 16px; white-space: nowrap; } 
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
         tr:hover { background: rgba(0,0,0,0.01); }
@@ -319,42 +316,60 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Auth Check
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
-        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
-
         // Storage for Real-time DB State
         let dbData = {
             members: null, org_funds: null, products: null, sales: null,
             investments: null, profits: null, returns: null, transactions: null
         };
 
-        let initialLoadCount = 0;
         const requiredNodes = Object.keys(dbData);
+        let loadedNodes = new Set();
         
-        // Limit logic
         let transactionsToShow = 5;
         window.allTransactions = [];
 
-        // Setup real-time listeners for all nodes
-        requiredNodes.forEach(node => {
-            onValue(ref(db, node), (snapshot) => {
-                dbData[node] = snapshot;
-                
-                // Ensure all nodes load at least once before calculating
-                if (initialLoadCount < requiredNodes.length) {
-                    initialLoadCount++;
-                    if (initialLoadCount === requiredNodes.length) {
+        // Auth Check & Initiating Data Fetching
+        onAuthStateChanged(auth, (user) => { 
+            if (!user) {
+                window.location.href = 'login.html'; 
+            } else {
+                // User verified! Now load the database data
+                startDatabaseListeners();
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => { 
+            if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); 
+        });
+
+        // Fetch Function wrapped securely
+        function startDatabaseListeners() {
+            requiredNodes.forEach(node => {
+                onValue(ref(db, node), (snapshot) => {
+                    dbData[node] = snapshot;
+                    
+                    if (!loadedNodes.has(node)) {
+                        loadedNodes.add(node);
+                        // Hide loader only when all nodes have loaded at least once
+                        if (loadedNodes.size === requiredNodes.length) {
+                            processDashboardData();
+                            isFirstLoad = false;
+                            document.getElementById('pageLoader').classList.add('hide-loader');
+                        }
+                    } else if (loadedNodes.size === requiredNodes.length) {
+                        // This runs whenever ANY data changes dynamically
                         processDashboardData();
-                        isFirstLoad = false; // Turn off animation for subsequent instant updates
+                    }
+                }, (error) => {
+                    console.error(`Error loading ${node}:`, error);
+                    // Prevent infinite loading screen if one node fails to fetch
+                    loadedNodes.add(node);
+                    if (loadedNodes.size === requiredNodes.length) {
                         document.getElementById('pageLoader').classList.add('hide-loader');
                     }
-                } else {
-                    // This runs whenever ANY data changes on other pages (Live Sync)
-                    processDashboardData();
-                }
+                });
             });
-        });
+        }
 
         // Main Calculation Engine
         function processDashboardData() {
@@ -375,10 +390,10 @@
                 });
             }
             
-            // 2. Organization Funds
+            // 2. Organization Funds (Fixed parsing issue)
             if (dbData.org_funds && dbData.org_funds.exists()) {
                 let o = dbData.org_funds.val();
-                orgFunds = (o.admission || 0) + (o.fine || 0) + (o.donation || 0) + (o.others || 0);
+                orgFunds = parseFloat(o.admission || 0) + parseFloat(o.fine || 0) + parseFloat(o.donation || 0) + parseFloat(o.others || 0);
             }
 
             // 3. Products & Sales
@@ -406,21 +421,19 @@
             let baseFund = memberMonthlyFunds + orgFunds;
             let totalFund = baseFund + totalProfit; 
 
-            // 5. Transactions (True Ledger for Loan and General Expenses)
+            // 5. Transactions
             let trxs = [];
             if (dbData.transactions && dbData.transactions.exists()) {
                 dbData.transactions.forEach(t => {
                     let data = t.val();
-                    trxs.push(data); // If a transaction is deleted, it won't be pushed here!
+                    trxs.push(data);
                     
-                    // Expense Filter
                     if (data.type === 'withdraw_expense' && !data.source) { 
                         if (!data.details.includes('পণ্য')) {
                             totalExpense += parseFloat(data.totalAmount || 0);
                         }
                     }
                     
-                    // Live Loan Calculation
                     if (data.type === 'withdraw_loan') {
                         totalLoanGiven += parseFloat(data.totalAmount || 0);
                     }
@@ -428,7 +441,6 @@
                         totalLoanPaid += parseFloat(data.totalAmount || 0);
                     }
 
-                    // Today's General Deposit (If transaction is deleted, this naturally won't count it)
                     if (data.type === 'deposit' && data.date === todayStr) {
                         todayDep += parseFloat(data.totalAmount || 0);
                     }
@@ -450,7 +462,7 @@
             updateCounterUI('tExpense', totalExpense);
             updateCounterUI('tBalance', currentBalance, '৳ ');
 
-            // Prepare transactions globally for show more
+            // Prepare transactions globally
             window.allTransactions = trxs.sort((a,b) => b.timestamp - a.timestamp);
             window.renderTransactionsTable();
         }
@@ -481,7 +493,6 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো লেনদেন নেই</td></tr>';
             }
 
-            // Show More Button Logic
             const btn = document.getElementById('showMoreBtn');
             if (window.allTransactions.length > transactionsToShow) {
                 btn.style.display = 'flex';
