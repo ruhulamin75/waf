@@ -165,12 +165,17 @@
 </head>
 <body>
 
-    <!-- Auto-Login Check BEFORE Page Renders Completely -->
+    <!-- অটো-লগইন বন্ধ করা হলো: localStorage-এর পরিবর্তে sessionStorage ব্যবহার করা হয়েছে -->
     <script>
         // যদি মেম্বার আগে থেকেই লগইন থাকে, তবে সাথে সাথে তাকে প্রোফাইল পেজে পাঠিয়ে দেবে
-        if (localStorage.getItem("isMemberLoggedIn") === "true" && localStorage.getItem("loggedInMemberId")) {
+        if (sessionStorage.getItem("isMemberLoggedIn") === "true" && sessionStorage.getItem("loggedInMemberId")) {
             window.location.href = "member-profile.html";
         }
+        
+        // আগের কোনো স্থায়ী ক্যাশ (localStorage) সেভ থাকলে তা মুছে ফেলার জন্য
+        localStorage.removeItem("loggedInMemberId");
+        localStorage.removeItem("userRole");
+        localStorage.removeItem("isMemberLoggedIn");
     </script>
 
     <header>
@@ -270,8 +275,7 @@
                     snapshot.forEach(childSnapshot => {
                         let member = childSnapshot.val();
                         if (member.phone === phone && member.password === pass) {
-                            userFound = member; // matched
-                            // adding the ID key inside the object
+                            userFound = member; 
                             userFound.id = childSnapshot.key;
                         }
                     });
@@ -286,10 +290,10 @@
                             return;
                         }
 
-                        // Success: Save Member Data to localStorage for persistent login
-                        localStorage.setItem('loggedInMemberId', userFound.id);
-                        localStorage.setItem('userRole', 'member'); 
-                        localStorage.setItem('isMemberLoggedIn', 'true'); // Flag for check
+                        // Success: Save Member Data to sessionStorage for session-only login
+                        sessionStorage.setItem('loggedInMemberId', userFound.id);
+                        sessionStorage.setItem('userRole', 'member'); 
+                        sessionStorage.setItem('isMemberLoggedIn', 'true'); // Flag for check
 
                         // Redirect to profile
                         window.location.href = 'member-profile.html';
