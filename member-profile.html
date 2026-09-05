@@ -576,7 +576,13 @@
                         <div class="info-card bank-card">
                             <h3><i class="fas fa-university"></i> ${b.bankName}</h3>
                             <p><strong>A/C Name:</strong> ${b.accName}</p>
-                            <p><strong>A/C No:</strong> <span style="font-family: monospace; font-size:16px;">${b.accNo}</span></p>
+                            <p>
+                                <strong>A/C No:</strong> 
+                                <span style="font-family: monospace; font-size:16px;">${b.accNo}</span>
+                                <button onclick="copyBankAcc('${b.accNo}')" style="cursor: pointer; border: none; background: none; color: var(--primary-blue); font-size: 16px; margin-left: 8px;" title="কপি করুন">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </p>
                             <p><strong>Branch:</strong> ${b.branch || 'N/A'}</p>
                         </div>
                     `;
@@ -585,6 +591,15 @@
                 container.innerHTML = '<div class="info-card bank-card"><p style="text-align:center; color:#999;">কোনো ব্যাংক একাউন্ট যুক্ত করা হয়নি</p></div>';
             }
         });
+
+        // --- গ্লোবাল কপি ফাংশন যুক্ত করা হলো ---
+        window.copyBankAcc = function(accNo) {
+            navigator.clipboard.writeText(accNo).then(() => {
+                alert("একাউন্ট নম্বর: " + accNo + " কপি করা হয়েছে!");
+            }).catch(err => {
+                console.error("কপি করতে সমস্যা হয়েছে: ", err);
+            });
+        };
 
         // --- 5. Fetch and Render Transactions (Updated for Product Payments) ---
         async function loadTransactions() {
