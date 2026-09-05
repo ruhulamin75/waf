@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ড্যাশবোর্ড - বন্ধু কল্যাণ সংস্থা</title>
+    <title>সদস্য ড্যাশবোর্ড - বন্ধু কল্যাণ সংস্থা</title>
     
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Cropper.js CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -26,7 +26,6 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-
         body { background-color: var(--bg-light); color: var(--text-dark); display: flex; overflow-x: hidden; width: 100vw; }
 
         /* --- Loader --- */
@@ -36,272 +35,427 @@
         .hide-loader { opacity: 0; pointer-events: none; }
 
         /* --- Sidebar Styles --- */
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%);
-            color: #fff;
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            display: flex;
-            flex-direction: column;
-            transition: var(--transition);
-            z-index: 1000;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-
+        .sidebar { width: 260px; background: linear-gradient(180deg, var(--primary-blue) 0%, #06236b 100%); color: #fff; height: 100vh; position: fixed; top: 0; left: 0; display: flex; flex-direction: column; transition: var(--transition); z-index: 1000; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center;}
-        .sidebar-header i { font-size: 35px; color: var(--primary-green); margin-bottom: 10px; }
+        
+        /* Updated Logo Style */
+        .sidebar-logo { width: 60px; height: auto; margin-bottom: 10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); }
         .sidebar-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
 
-        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
-        .nav-menu::-webkit-scrollbar { width: 5px; }
-        .nav-menu::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 5px; }
-
-        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 17px; font-weight: 600; transition: var(--transition); }
+        .nav-menu { flex: 1; overflow-y: auto; padding: 15px 0; list-style: none;}
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.8); text-decoration: none; font-size: 16px; font-weight: 600; transition: var(--transition); cursor: pointer; }
         .nav-item i { width: 20px; text-align: center; font-size: 18px; }
         .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: #fff; border-left: 4px solid var(--primary-green); }
 
-        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; text-decoration: none; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); transition: var(--transition); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 17px; }
-        .logout-btn:hover { background: #ff4757; color: #fff; }
+        .logout-btn { background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 15px 25px; display: flex; align-items: center; gap: 15px; font-weight: 700; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; border: none; width: 100%; text-align: left; font-size: 16px; }
 
-        /* --- Overlay for Mobile --- */
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; opacity: 0; transition: var(--transition); }
 
         /* --- Main Content --- */
-        .main-content { 
-            flex: 1; 
-            margin-left: 260px; 
-            padding: 20px 30px; 
-            transition: var(--transition); 
-            min-height: 100vh;
-            min-width: 0; 
-        }
-
+        .main-content { flex: 1; margin-left: 260px; padding: 20px 30px; transition: var(--transition); min-height: 100vh; min-width: 0; animation: fadeInUp 0.6s ease-out;}
         .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .menu-toggle { font-size: 24px; color: var(--primary-blue); background: none; border: none; cursor: pointer; display: none; }
-        .top-header h2 { color: var(--primary-blue); font-size: 26px; font-weight: 700; }
-        .user-profile { display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 18px; border-radius: 20px; box-shadow: var(--card-shadow); }
-        .user-profile i { color: var(--primary-green); font-size: 20px; }
-        .user-profile span { font-weight: 600; color: #555; font-size: 16px;}
-
-        /* --- Compact Dashboard Grid Cards --- */
-        .section-title { font-size: 20px; color: #444; margin-bottom: 15px; font-weight: 700; border-bottom: 2px solid #ddd; padding-bottom: 5px; display: inline-block; }
+        .top-header h2 { color: var(--primary-blue); font-size: 24px; font-weight: 700; }
         
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
-            animation: fadeInUp 0.6s ease-out;
-        }
+        .user-profile-badge { display: flex; align-items: center; gap: 10px; background: #fff; padding: 5px 15px; border-radius: 20px; box-shadow: var(--card-shadow); font-weight: 600; color: #555; }
+        .user-profile-badge i { color: var(--primary-green); font-size: 18px; }
 
-        .dash-card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: var(--card-shadow);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: var(--transition);
-            border-bottom: 4px solid var(--primary-blue);
-        }
+        /* --- Summary Cards --- */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .summary-card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 15px; transition: 0.3s; }
+        .summary-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .summary-card i { font-size: 35px; opacity: 0.9; }
+        .summary-card .info h4 { font-size: 14px; color: #777; margin-bottom: 5px; }
+        .summary-card .info h2 { font-size: 24px; color: var(--text-dark); font-weight: 700; }
 
-        .dash-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); }
-        
-        .card-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; background: rgba(10, 54, 157, 0.1); color: var(--primary-blue); flex-shrink: 0; }
-        .card-info { flex: 1; }
-        .card-info p { color: #777; font-size: 15px; font-weight: 600; margin-bottom: 2px; line-height: 1.3;} 
-        .card-info h3 { color: var(--primary-blue); font-size: 22px; font-weight: 700; font-family: sans-serif; word-wrap: break-word;} 
+        .card-blue { border-left: 4px solid var(--primary-blue); } .card-blue i { color: var(--primary-blue); }
+        .card-red { border-left: 4px solid var(--primary-red); } .card-red i { color: var(--primary-red); }
+        .card-orange { border-left: 4px solid var(--primary-orange); } .card-orange i { color: var(--primary-orange); }
 
-        /* Themes */
-        .green-theme { border-bottom-color: var(--primary-green); } .green-theme .card-icon { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); } .green-theme h3 { color: var(--primary-green); }
-        .red-theme { border-bottom-color: var(--primary-red); } .red-theme .card-icon { background: rgba(231, 76, 60, 0.15); color: var(--primary-red); } .red-theme h3 { color: var(--primary-red); }
-        .orange-theme { border-bottom-color: var(--primary-orange); } .orange-theme .card-icon { background: rgba(243, 156, 18, 0.15); color: var(--primary-orange); } .orange-theme h3 { color: var(--primary-orange); }
-        
-        /* Highlight Balance Card */
-        .balance-container { background: linear-gradient(135deg, var(--primary-blue), #06236b); border-radius: 15px; padding: 25px; color: #fff; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 20px rgba(10,54,157,0.3); margin-bottom: 30px; animation: fadeInUp 0.8s ease-out; }
-        .balance-info h2 { font-size: 36px; font-weight: 700; margin-top: 5px; font-family: sans-serif;}
-        .balance-info p { font-size: 16px; font-weight: 600; color: rgba(255,255,255,0.8); }
-        .balance-icon { font-size: 50px; color: rgba(255,255,255,0.2); }
+        /* --- Section Titles --- */
+        .section-title { font-size: 18px; font-weight: 700; color: var(--primary-blue); margin-bottom: 15px; margin-top: 30px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #ddd; padding-bottom: 8px;}
 
-        /* --- Recent Transactions Table --- */
-        .table-container { width: 100%; background: #fff; padding: 15px; border-radius: 15px; box-shadow: var(--card-shadow); margin-bottom: 30px; overflow: hidden; }
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block;}
-        
-        table { width: 100%; border-collapse: collapse; min-width: 550px; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 16px; white-space: nowrap; } 
+        /* --- Notice & Bank Cards --- */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .info-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: var(--card-shadow); border-left: 4px solid var(--primary-green); }
+        .info-card h3 { font-size: 16px; color: var(--text-dark); margin-bottom: 8px; font-weight: 700; display: flex; justify-content: space-between;}
+        .info-card h3 span { font-size: 12px; color: #999; font-weight: normal; }
+        .info-card p { font-size: 14px; color: #555; line-height: 1.6; }
+        .info-card.bank-card { border-left-color: var(--primary-blue); background: linear-gradient(145deg, #ffffff, #f8faff); }
+        .info-card.bank-card h3 { color: var(--primary-blue); margin-bottom: 12px;}
+
+        /* --- Transactions Table --- */
+        .table-container { background: #fff; padding: 15px; border-radius: 15px; box-shadow: var(--card-shadow); overflow: hidden; margin-bottom: 30px;}
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; white-space: nowrap; font-size: 14px;}
         th { background: rgba(10,54,157,0.05); color: var(--primary-blue); font-weight: 700; }
-        tr:hover { background: rgba(0,0,0,0.01); }
+        tbody tr:hover { background: #fafafa; }
         
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
         .badge.deposit { background: rgba(124, 208, 58, 0.15); color: var(--primary-green); }
         .badge.withdraw { background: rgba(255, 71, 87, 0.15); color: var(--primary-red); }
 
-        .btn-show-more { background: rgba(10,54,157,0.1); color: var(--primary-blue); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 15px auto 5px auto; transition: 0.3s; font-size: 15px; }
+        .btn-view-receipt { background: #3498db; color: #fff; border: none; width: 30px; height: 30px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: 0.3s;}
+        .btn-view-receipt:hover { background: #2980b9; transform: translateY(-2px);}
+
+        .btn-show-more { background: rgba(10,54,157,0.1); color: var(--primary-blue); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 15px auto 5px auto; transition: 0.3s; font-size: 15px; }
         .btn-show-more:hover { background: var(--primary-blue); color: #fff; }
+
+        /* --- Modals --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: var(--transition); padding: 15px; overflow-y: auto;}
+        .modal.active { display: flex; opacity: 1; }
+        .modal-content { background: #fff; width: 100%; max-width: 500px; border-radius: 15px; padding: 25px; position: relative; transform: scale(0.9); transition: var(--transition); margin: auto;}
+        .modal.active .modal-content { transform: scale(1); }
+        .close-modal { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.05); border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 18px; color: #555; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; z-index: 10;}
+        .close-modal:hover { background: #e74c3c; color: #fff; }
+
+        /* Profile Edit Form */
+        .form-header { text-align: center; margin-bottom: 25px; }
+        .form-header h3 { font-size: 22px; color: var(--primary-blue); font-weight: 700; margin-bottom: 5px; }
+
+        .profile-pic-wrapper { display: flex; justify-content: center; margin-bottom: 20px; }
+        .pic-upload-container { position: relative; width: 110px; height: 110px; }
+        .profile-pic-preview { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-green); background: #f1f1f1; display: flex; align-items: center; justify-content: center; }
+        .profile-pic-preview i { font-size: 40px; color: #ccc; }
+        .pic-upload-btn { position: absolute; bottom: 0; right: 0; background: var(--primary-blue); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; border: 2px solid #fff; transition: var(--transition); }
+        .pic-upload-btn:hover { transform: scale(1.1); }
+        #memberPhoto { display: none; }
+
+        .input-group { display: flex; flex-direction: column; gap: 5px; text-align: left; margin-bottom: 15px;}
+        .input-group label { font-size: 13px; font-weight: 600; color: #555; }
+        .input-group input, .input-group textarea { padding: 12px 15px; font-size: 14px; border: 1px solid #ddd; border-radius: 8px; outline: none; transition: var(--transition); background: #fafafa; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary-green); background: #fff; box-shadow: 0 0 0 3px rgba(124,208,58,0.1); }
+        .input-group textarea { resize: vertical; min-height: 80px; }
+        .input-group input[readonly] { background: #e9ecef !important; color: #777 !important; cursor: not-allowed; border-color: #ddd !important; }
+
+        .btn-submit { background: linear-gradient(135deg, var(--primary-green), #68b32e); color: #fff; border: none; padding: 15px; width: 100%; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 10px; transition: var(--transition); }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(124,208,58,0.3); }
+
+        /* Cropper Modal */
+        .cropper-area { width: 100%; height: 300px; background: #eee; margin: 15px 0; border-radius: 8px; overflow: hidden; border: 1px solid #ddd; }
+        .cropper-area img { max-width: 100%; display: block; }
+        .cropper-btns { display: flex; gap: 10px; justify-content: center;}
+        .btn-crop-cancel { flex: 1; background: #ffeaea; color: #e74c3c; border: none; padding: 12px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px;}
+        .btn-crop-save { flex: 1; background: var(--primary-green); color: #fff; border: none; padding: 12px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 15px;}
+
+        /* --- Receipt Modal Styling --- */
+        .receipt-wrapper { background: #fff; width: 100%; max-width: 600px; border-radius: 15px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; transform: scale(0.9); transition: var(--transition); margin: auto; }
+        .modal.active .receipt-wrapper { transform: scale(1); }
+        .receipt-print-area { padding: 40px; position: relative; z-index: 1; background: #fff; }
+        
+        .r-header { text-align: center; border-bottom: 2px dashed #ddd; padding-bottom: 20px; margin-bottom: 25px; }
+        .r-header h2 { font-size: 24px; font-weight: 700; margin-bottom: 5px; color: var(--primary-blue);}
+        .r-title { display: inline-block; padding: 6px 20px; border-radius: 20px; font-size: 16px; font-weight: 700; margin-top: 10px; color: #fff; background: var(--primary-green); }
+        
+        .r-info { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; font-weight: 600; color: #555; }
+        .r-details p { margin-bottom: 8px; font-size: 15px; }
+        .r-details strong { display: inline-block; width: 130px; color: #555; }
+
+        .r-table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; min-width: 400px; }
+        .r-table th, .r-table td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        .r-table th { background: #fafafa; color: #333; }
+        
+        .r-total { display: flex; justify-content: flex-end; align-items: center; gap: 20px; font-size: 18px; font-weight: 700; padding-top: 15px; border-top: 2px solid #ddd; }
+        
+        .print-btn-wrap { background: #f9f9f9; padding: 20px; text-align: center; border-top: 1px solid #eee; }
+        .btn-print { background: var(--text-dark); color: #fff; border: none; padding: 12px 30px; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-print:hover { background: #000; transform: translateY(-2px); }
 
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- Mobile Responsive Fixes --- */
+        /* --- Responsive --- */
         @media (max-width: 992px) {
             .sidebar { transform: translateX(-100%); } .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 20px 15px; max-width: 100vw;} .menu-toggle { display: block; }
+            .main-content { margin-left: 0; padding: 20px 15px;} .menu-toggle { display: block; }
             .overlay.active { display: block; opacity: 1; }
-            
-            .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;}
-            .dash-card { padding: 15px 10px; flex-direction: column; text-align: center; gap: 8px; border-bottom-width: 3px;}
-            .card-icon { width: 40px; height: 40px; font-size: 18px; margin: 0 auto; }
-            .card-info h3 { font-size: 18px; }
-            .card-info p { font-size: 13px; }
-            
-            .balance-container { flex-direction: column; text-align: center; gap: 15px; padding: 20px; margin-bottom: 20px;}
-            .balance-icon { display: none; }
-            .balance-info h2 { font-size: 30px; }
-            
-            .table-container::before {
+            .table-responsive::before {
                 content: "← ডানে-বামে স্লাইড করুন →"; display: block; text-align: center;
-                font-size: 12px; color: #999; padding-bottom: 10px; background: #fff;
+                font-size: 12px; color: #999; padding-bottom: 10px; background: #fff; position: sticky; left: 0;
             }
+        }
+        
+        /* Print CSS for Receipt */
+        @media print {
+            body * { visibility: hidden; }
+            #receiptModal, #receiptModal * { visibility: visible; }
+            #receiptModal { position: absolute; left: 0; top: 0; width: 100%; background: #fff; padding: 0; display: block; }
+            .receipt-wrapper { box-shadow: none; max-width: 100%; border-radius: 0; transform: none !important; margin: 0; }
+            .receipt-print-area { padding: 0; }
+            .close-modal, .print-btn-wrap { display: none !important; }
+            .r-table th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; }
+            .r-title { color: #fff !important; -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
 <body>
 
     <div id="pageLoader"><div class="spinner"></div><h3 style="color: var(--primary-blue);">লোড হচ্ছে...</h3></div>
-    <div class="overlay" id="sidebarOverlay"></div>
+    <div class="overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><i class="fas fa-handshake"></i><h2>বন্ধু কল্যাণ সংস্থা</h2></div>
-        <nav class="nav-menu">
-            <a href="dashboard.html" class="nav-item active"><i class="fas fa-tachometer-alt"></i> ড্যাশবোর্ড</a>
-            <a href="add-member.html" class="nav-item"><i class="fas fa-user-plus"></i> নতুন সদস্য</a>
-            <a href="member-list.html" class="nav-item"><i class="fas fa-users"></i> সদস্য তালিকা</a>
-            <a href="products.html" class="nav-item"><i class="fas fa-box-open"></i> পণ্য তালিকা</a>
-            <a href="transactions.html" class="nav-item"><i class="fas fa-exchange-alt"></i> জমা/উত্তোলন</a>
-            <a href="investment.html" class="nav-item"><i class="fas fa-chart-line"></i> বিনিয়োগ/মুনাফা</a>
-            <a href="loan.html" class="nav-item"><i class="fas fa-hand-holding-usd"></i> বর্তমান ঋণ</a>
-            <a href="reports.html" class="nav-item"><i class="fas fa-file-invoice-dollar"></i> রিপোর্টস</a>
-            <a href="settings.html" class="nav-item"><i class="fas fa-cog"></i> সেটিংস</a>
-        </nav>
+        <div class="sidebar-header">
+            <!-- Logo in Sidebar -->
+            <img src="logo.png" alt="Logo" class="sidebar-logo" onerror="this.src='https://via.placeholder.com/60x60/0A369D/ffffff?text=Logo'">
+            <h2>বন্ধু কল্যাণ সংস্থা</h2>
+        </div>
+        
+        <ul class="nav-menu">
+            <li><a href="member-profile.html" class="nav-item active"><i class="fas fa-home"></i> ড্যাশবোর্ড</a></li>
+            <li><a class="nav-item" onclick="openProfileModal()"><i class="fas fa-user-edit"></i> প্রোফাইল এডিট</a></li>
+        </ul>
+
         <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> লগআউট করুন</button>
     </aside>
 
+    <!-- Main Content -->
     <main class="main-content">
         <div class="top-header">
-            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
-            <h2>ওভারভিউ</h2>
-            <div class="user-profile"><i class="fas fa-user-circle"></i> <span>অ্যাডমিন</span></div>
-        </div>
-
-        <h3 class="section-title"><i class="fas fa-calculator"></i> হিসাবের বিবরণ</h3>
-        
-        <div class="dashboard-grid">
-            <div class="dash-card">
-                <div class="card-icon"><i class="fas fa-wallet"></i></div>
-                <div class="card-info"><p>সর্বমোট ফান্ড (জমা)</p><h3 id="tFund">0.00</h3></div>
-            </div>
-            <div class="dash-card green-theme">
-                <div class="card-icon"><i class="fas fa-hand-holding-heart"></i></div>
-                <div class="card-info"><p>সর্বমোট অর্জিত মুনাফা</p><h3 id="tProfit">0.00</h3></div>
-            </div>
-            <div class="dash-card orange-theme">
-                <div class="card-icon"><i class="fas fa-boxes"></i></div>
-                <div class="card-info"><p>পণ্য মজুদ (বর্তমান মূল্য)</p><h3 id="tInventory">0.00</h3></div>
-            </div>
-            <div class="dash-card orange-theme">
-                <div class="card-icon"><i class="fas fa-chart-pie"></i></div>
-                <div class="card-info"><p>বর্তমান বিনিয়োগ</p><h3 id="tInvestment">0.00</h3></div>
-            </div>
-            <div class="dash-card red-theme">
-                <div class="card-icon"><i class="fas fa-money-check-alt"></i></div>
-                <div class="card-info"><p>বর্তমান বকেয়া ঋণ</p><h3 id="tLoan">0.00</h3></div>
-            </div>
-            <div class="dash-card red-theme">
-                <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                <div class="card-info"><p>সর্বমোট খরচ</p><h3 id="tExpense">0.00</h3></div>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+            <h2>সদস্য ড্যাশবোর্ড</h2>
+            <div class="user-profile-badge">
+                <i class="fas fa-user-check"></i>
+                <span id="topMemberName">সদস্য</span>
             </div>
         </div>
 
-        <!-- Master Balance Card -->
-        <div class="balance-container">
-            <div class="balance-info">
-                <p>সংস্থার ক্যাশ / বর্তমান ব্যালেন্স</p>
-                <h2 id="tBalance">৳ 0.00</h2>
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card card-blue">
+                <i class="fas fa-sack-dollar"></i>
+                <div class="info">
+                    <h4>মোট মাসিক জমা</h4>
+                    <h2 id="cMonthlyDeposit">৳ 0.00</h2>
+                </div>
             </div>
-            <i class="fas fa-scale-balanced balance-icon"></i>
+            <div class="summary-card card-red">
+                <i class="fas fa-money-check-alt"></i>
+                <div class="info">
+                    <h4>বর্তমান ঋণের বকেয়া</h4>
+                    <h2 id="cLoanDue">৳ 0.00</h2>
+                </div>
+            </div>
+            <div class="summary-card card-orange">
+                <i class="fas fa-shopping-basket"></i>
+                <div class="info">
+                    <h4>পণ্য ক্রয়ের বকেয়া</h4>
+                    <h2 id="cProductDue">৳ 0.00</h2>
+                </div>
+            </div>
         </div>
 
-        <h3 class="section-title"><i class="fas fa-chart-line"></i> অন্যান্য আপডেট</h3>
-        <div class="dashboard-grid">
-            <div class="dash-card">
-                <div class="card-icon"><i class="fas fa-users"></i></div>
-                <div class="card-info"><p>মোট সদস্য</p><h3 id="tMembers">০ জন</h3></div>
-            </div>
-            <div class="dash-card green-theme">
-                <div class="card-icon"><i class="fas fa-donate"></i></div>
-                <div class="card-info"><p>আজকের নতুন জমা</p><h3 id="tTodayDep">0.00</h3></div>
-            </div>
+        <!-- Notice Board -->
+        <h3 class="section-title"><i class="fas fa-bullhorn"></i> নোটিশ বোর্ড</h3>
+        <div class="info-grid" id="noticeContainer">
+            <div class="info-card"><p style="text-align:center; color:#999;">লোড হচ্ছে...</p></div>
         </div>
 
-        <h3 class="section-title" style="margin-top: 10px;"><i class="fas fa-history"></i> সাম্প্রতিক লেনদেন</h3>
+        <!-- Bank Accounts -->
+        <h3 class="section-title"><i class="fas fa-building-columns"></i> আমাদের ব্যাংক একাউন্টসমূহ</h3>
+        <div class="info-grid" id="bankContainer">
+            <div class="info-card bank-card"><p style="text-align:center; color:#999;">লোড হচ্ছে...</p></div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <h3 class="section-title"><i class="fas fa-history"></i> আপনার সাম্প্রতিক লেনদেন</h3>
         <div class="table-container">
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr><th>তারিখ</th><th>সদস্য/খাত</th><th>বিবরণ</th><th>পরিমাণ (৳)</th><th>ধরন</th></tr>
+                        <tr><th>তারিখ</th><th>বিবরণ / খাত</th><th>পরিমাণ (৳)</th><th>ধরন</th><th style="text-align: right;">অ্যাকশন</th></tr>
                     </thead>
-                    <tbody id="recentTransactionsTable">
-                        <tr><td colspan="5" style="text-align:center;">ডাটাবেস থেকে লোড হচ্ছে...</td></tr>
+                    <tbody id="transactionTableBody">
+                        <tr><td colspan="5" style="text-align:center;">লোড হচ্ছে...</td></tr>
                     </tbody>
                 </table>
             </div>
-            
             <button id="showMoreBtn" class="btn-show-more" style="display: none;" onclick="showMoreTransactions()">
                 আরও দেখুন <i class="fas fa-chevron-down"></i>
             </button>
         </div>
+
     </main>
 
-    <!-- UI Scripts -->
+    <!-- Profile Edit Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal('editProfileModal')"><i class="fas fa-times"></i></button>
+            
+            <div class="form-header">
+                <h3><i class="fas fa-user-edit"></i> প্রোফাইল আপডেট</h3>
+                <p style="font-size: 13px; color: #666;">মোবাইল নম্বর ব্যতীত সকল তথ্য পরিবর্তনযোগ্য।</p>
+            </div>
+
+            <form id="editProfileForm">
+                <div class="profile-pic-wrapper">
+                    <div class="pic-upload-container">
+                        <img src="" alt="" class="profile-pic-preview" id="picPreview" style="display: none;">
+                        <div class="profile-pic-preview" id="picPlaceholder"><i class="fas fa-user"></i></div>
+                        <label for="memberPhoto" class="pic-upload-btn" title="ছবি পরিবর্তন করুন"><i class="fas fa-camera"></i></label>
+                        <input type="file" id="memberPhoto" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>সদস্য আইডি</label>
+                    <input type="text" id="mId" readonly>
+                </div>
+                <div class="input-group">
+                    <label>পূর্ণ নাম</label>
+                    <input type="text" id="mName" required>
+                </div>
+                <div class="input-group">
+                    <label>মোবাইল নম্বর (লকড)</label>
+                    <input type="tel" id="mPhone" readonly title="মোবাইল নম্বর পরিবর্তন করতে অ্যাডমিনের সাথে যোগাযোগ করুন">
+                </div>
+                <div class="input-group">
+                    <label>লগইন পাসওয়ার্ড</label>
+                    <input type="text" id="mPassword" required>
+                </div>
+                <div class="input-group">
+                    <label>বর্তমান ঠিকানা</label>
+                    <textarea id="mAddress" placeholder="আপনার বিস্তারিত ঠিকানা লিখুন"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn"><i class="fas fa-save"></i> প্রোফাইল সেভ করুন</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Cropper Modal -->
+    <div class="modal" id="cropperModal" style="z-index: 100000;">
+        <div class="modal-content" style="max-width: 400px; padding: 15px;">
+            <h3 style="margin-bottom: 10px; color: var(--primary-blue); text-align: center;">ছবি ক্রপ করুন</h3>
+            
+            <div class="cropper-area"><img id="imageToCrop" src=""></div>
+            
+            <div class="cropper-btns">
+                <button type="button" class="btn-crop-cancel" onclick="closeCropper()"><i class="fas fa-times"></i> বাতিল</button>
+                <button type="button" class="btn-crop-save" onclick="saveCroppedImage()"><i class="fas fa-check"></i> ক্রপ করুন</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Receipt Modal -->
+    <div class="modal" id="receiptModal">
+        <div class="receipt-wrapper">
+            <button class="close-modal" onclick="closeModal('receiptModal')"><i class="fas fa-times"></i></button>
+            
+            <div class="receipt-print-area">
+                <div class="r-header">
+                    <img src="logo.png" alt="Logo" style="width: 60px; height: auto; margin-bottom: 10px; border-radius: 50%;" onerror="this.src='https://via.placeholder.com/60x60/0A369D/ffffff?text=Logo'">
+                    <h2>বন্ধু কল্যাণ সংস্থা</h2>
+                    <p>ঢাকা বিশ্ববিদ্যালয়, ঢাকা।</p>
+                    <div class="r-title">লেনদেন রিসিট</div>
+                </div>
+                
+                <div class="r-info">
+                    <span>তারিখ: <strong id="rDate">DD/MM/YYYY</strong></span>
+                    <span>সদস্য: <strong id="rMemberName">Name</strong></span>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="r-table">
+                        <thead><tr><th style="width:10%; text-align:center;">ক্রঃ</th><th>বিবরণ</th><th style="text-align:right;">পরিমাণ (৳)</th></tr></thead>
+                        <tbody>
+                            <tr>
+                                <td style="text-align:center;">১</td>
+                                <td id="rDetails">বিবরণ এখানে</td>
+                                <td id="rAmount" style="text-align:right;">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="r-total">
+                    <span>সর্বমোট:</span>
+                    <span id="rTotalAmt" style="font-size: 20px;">0.00</span>
+                </div>
+            </div>
+            
+            <div class="print-btn-wrap">
+                <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> রিসিট প্রিন্ট করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    
     <script>
-        document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
-        document.getElementById('sidebarOverlay').addEventListener('click', () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
-        
-        // Counter Animation Setup
-        let isFirstLoad = true;
-        function updateCounterUI(elementId, targetValue, prefix = '') {
-            const el = document.getElementById(elementId);
-            if(isFirstLoad) {
-                let startValue = 0; let startTimestamp = null;
-                const duration = 1500;
-                const step = (timestamp) => {
-                    if (!startTimestamp) startTimestamp = timestamp;
-                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                    const easeProgress = 1 - Math.pow(1 - progress, 4); 
-                    let currentVal = easeProgress * (targetValue - startValue) + startValue;
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+
+        function openProfileModal() {
+            document.getElementById('editProfileModal').classList.add('active');
+            toggleSidebar(); // Close sidebar if opened on mobile
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // --- Image Cropping Logic ---
+        let cropper;
+        let finalCroppedBase64 = "";
+
+        const photoInput = document.getElementById('memberPhoto');
+        const cropperModal = document.getElementById('cropperModal');
+        const imageToCrop = document.getElementById('imageToCrop');
+        const picPreview = document.getElementById('picPreview');
+        const picPlaceholder = document.getElementById('picPlaceholder');
+
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imageToCrop.src = event.target.result;
+                    cropperModal.classList.add('active');
                     
-                    el.innerText = prefix + currentVal.toFixed(2);
-                    if (progress < 1) window.requestAnimationFrame(step);
-                    else el.innerText = prefix + targetValue.toFixed(2);
+                    if (cropper) cropper.destroy();
+                    
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        background: false
+                    });
                 };
-                window.requestAnimationFrame(step);
-            } else {
-                // If it's a live update (after first load), update instantly without animation to avoid jitter
-                el.innerText = prefix + targetValue.toFixed(2);
+                reader.readAsDataURL(file);
             }
+        });
+
+        function closeCropper() {
+            cropperModal.classList.remove('active');
+            if (cropper) cropper.destroy();
+            photoInput.value = ""; 
+        }
+
+        function saveCroppedImage() {
+            if (!cropper) return;
+            
+            finalCroppedBase64 = cropper.getCroppedCanvas({
+                width: 250,
+                height: 250,
+                fillColor: '#fff' 
+            }).toDataURL('image/jpeg', 0.8);
+
+            picPreview.src = finalCroppedBase64;
+            picPreview.style.display = 'block';
+            picPlaceholder.style.display = 'none';
+            
+            closeCropper();
         }
     </script>
 
-    <!-- Fully Reactive Real-Time Firebase Logic -->
+    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
-
+        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        
         const firebaseConfig = {
             apiKey: "AIzaSyCA-r0w4FJ1ATXxiHOJCOwcCZwZXusYZes",
             authDomain: "waf-database-8df19.firebaseapp.com",
@@ -313,188 +467,246 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Storage for Real-time DB State
-        let dbData = {
-            members: null, org_funds: null, products: null, sales: null,
-            investments: null, profits: null, returns: null, transactions: null
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // অটো-লগইন বন্ধ করতে localStorage-এর বদলে sessionStorage ব্যবহার করা হয়েছে
+        let loggedInMemberId = urlParams.get('id') || sessionStorage.getItem("loggedInMemberId") || sessionStorage.getItem("memberPhone");
+
+        if (!loggedInMemberId) {
+            alert("অনুগ্রহ করে লগইন করুন।");
+            window.location.href = "index.html"; 
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem("loggedInMemberId");
+                sessionStorage.removeItem("memberPhone");
+                
+                // আগের কোনো ক্যাশ সেভ থাকলে তা মুছে ফেলার জন্য
+                localStorage.removeItem("loggedInMemberId");
+                localStorage.removeItem("memberPhone");
+                
+                window.location.href = 'index.html'; 
+            }
+        });
+
+        let currentMemberName = "";
+        let allMyTransactions = [];
+        let transactionsToShow = 5;
+
+        // --- 1. Fetch Member Profile Data ---
+        onValue(ref(db, 'members/' + loggedInMemberId), async (snapshot) => {
+            if (snapshot.exists()) {
+                let m = snapshot.val();
+                currentMemberName = m.name;
+                
+                document.getElementById('topMemberName').innerText = m.name;
+                
+                // Form Populate
+                document.getElementById('mId').value = m.id;
+                document.getElementById('mName').value = m.name;
+                document.getElementById('mPhone').value = m.phone;
+                document.getElementById('mPassword').value = m.password;
+                document.getElementById('mAddress').value = m.address || "";
+                
+                if (m.photo && m.photo !== "") {
+                    document.getElementById('picPreview').src = m.photo;
+                    document.getElementById('picPreview').style.display = 'block';
+                    document.getElementById('picPlaceholder').style.display = 'none';
+                    finalCroppedBase64 = m.photo;
+                }
+
+                // Summary Cards
+                let monthly = m.funds && m.funds.monthly ? parseFloat(m.funds.monthly) : 0;
+                document.getElementById('cMonthlyDeposit').innerText = "৳ " + monthly.toFixed(2);
+                
+                let loanDue = 0;
+                if (m.loan && m.loan.totalAmount) {
+                    loanDue = parseFloat(m.loan.totalAmount) - parseFloat(m.loan.paidAmount || 0);
+                }
+                document.getElementById('cLoanDue').innerText = "৳ " + loanDue.toFixed(2);
+                
+                await loadTransactions(); 
+                document.getElementById('pageLoader').classList.add('hide-loader');
+            } else {
+                alert("সদস্যের ডাটা ডাটাবেসে পাওয়া যায়নি!");
+                window.location.href = "index.html"; 
+            }
+        }, (error) => {
+            console.error("Firebase Error:", error);
+            alert("ডাটাবেস কানেকশন এরর! পারমিশন সমস্যা হতে পারে: " + error.message);
+            document.getElementById('pageLoader').classList.add('hide-loader');
+        });
+
+        // --- 2. Fetch Product Due (Sales) ---
+        onValue(ref(db, 'sales'), (snapshot) => {
+            let pDue = 0;
+            if(snapshot.exists()) {
+                snapshot.forEach(child => {
+                    let sale = child.val();
+                    if (sale.customer === loggedInMemberId || (currentMemberName && sale.customer === currentMemberName) || sale.customer.includes(loggedInMemberId)) {
+                        pDue += parseFloat(sale.due || 0);
+                    }
+                });
+            }
+            document.getElementById('cProductDue').innerText = "৳ " + pDue.toFixed(2);
+        }, (error) => console.error("Sales Error:", error));
+
+        // --- 3. Fetch Notices ---
+        onValue(ref(db, 'notices'), (snapshot) => {
+            const container = document.getElementById('noticeContainer');
+            container.innerHTML = '';
+            if (snapshot.exists()) {
+                let notices = [];
+                snapshot.forEach(c => notices.push(c.val()));
+                notices.sort((a,b) => b.timestamp - a.timestamp).forEach(n => {
+                    let d = new Date(n.timestamp).toLocaleDateString('en-GB');
+                    container.innerHTML += `
+                        <div class="info-card">
+                            <h3>${n.title} <span>${d}</span></h3>
+                            <div style="font-size:14px; color:#555;">${n.description}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = '<div class="info-card"><p style="text-align:center; color:#999;">কোনো নোটিশ নেই</p></div>';
+            }
+        }, (error) => {
+            document.getElementById('noticeContainer').innerHTML = `<div class="info-card"><p style="text-align:center; color:red;">নোটিশ লোড করতে সমস্যা হয়েছে</p></div>`;
+            console.error("Notices Error:", error);
+        });
+
+        // --- 4. Fetch Bank Accounts ---
+        onValue(ref(db, 'bank_accounts'), (snapshot) => {
+            const container = document.getElementById('bankContainer');
+            container.innerHTML = '';
+            if (snapshot.exists()) {
+                snapshot.forEach(c => {
+                    let b = c.val();
+                    container.innerHTML += `
+                        <div class="info-card bank-card">
+                            <h3><i class="fas fa-university"></i> ${b.bankName}</h3>
+                            <p><strong>A/C Name:</strong> ${b.accName}</p>
+                            <p>
+                                <strong>A/C No:</strong> 
+                                <span style="font-family: monospace; font-size:16px;">${b.accNo}</span>
+                                <button onclick="copyBankAcc('${b.accNo}')" style="cursor: pointer; border: none; background: none; color: var(--primary-blue); font-size: 16px; margin-left: 8px;" title="কপি করুন">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </p>
+                            <p><strong>Branch:</strong> ${b.branch || 'N/A'}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = '<div class="info-card bank-card"><p style="text-align:center; color:#999;">কোনো ব্যাংক একাউন্ট যুক্ত করা হয়নি</p></div>';
+            }
+        }, (error) => {
+            document.getElementById('bankContainer').innerHTML = `<div class="info-card bank-card"><p style="text-align:center; color:red;">ব্যাংকের তথ্য লোড করতে সমস্যা হয়েছে</p></div>`;
+            console.error("Bank Error:", error);
+        });
+
+        window.copyBankAcc = function(accNo) {
+            navigator.clipboard.writeText(accNo).then(() => {
+                alert("একাউন্ট নম্বর: " + accNo + " কপি করা হয়েছে!");
+            }).catch(err => {
+                console.error("কপি করতে সমস্যা হয়েছে: ", err);
+            });
         };
 
-        const requiredNodes = Object.keys(dbData);
-        let loadedNodes = new Set();
-        
-        let transactionsToShow = 5;
-        window.allTransactions = [];
+        // --- 5. Fetch and Render Transactions ---
+        async function loadTransactions() {
+            try {
+                const [trxSnap, salesSnap] = await Promise.all([
+                    get(ref(db, 'transactions')),
+                    get(ref(db, 'sales'))
+                ]);
 
-        // Auth Check & Initiating Data Fetching
-        onAuthStateChanged(auth, (user) => { 
-            if (!user) {
-                window.location.href = 'login.html'; 
-            } else {
-                // User verified! Now load the database data
-                startDatabaseListeners();
-            }
-        });
+                allMyTransactions = [];
+                let myPurchasedProducts = [];
 
-        document.getElementById('logoutBtn').addEventListener('click', () => { 
-            if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); 
-        });
+                if (salesSnap.exists()) {
+                    salesSnap.forEach(s => {
+                        let data = s.val();
+                        if (data.customer === loggedInMemberId || (currentMemberName && data.customer === currentMemberName) || (data.customer && data.customer.includes(loggedInMemberId))) {
+                            
+                            if (data.productName) myPurchasedProducts.push(data.productName);
 
-        // Fetch Function wrapped securely
-        function startDatabaseListeners() {
-            requiredNodes.forEach(node => {
-                onValue(ref(db, node), (snapshot) => {
-                    dbData[node] = snapshot;
-                    
-                    if (!loadedNodes.has(node)) {
-                        loadedNodes.add(node);
-                        // Hide loader only when all nodes have loaded at least once
-                        if (loadedNodes.size === requiredNodes.length) {
-                            processDashboardData();
-                            isFirstLoad = false;
-                            document.getElementById('pageLoader').classList.add('hide-loader');
+                            allMyTransactions.push({
+                                timestamp: data.timestamp,
+                                date: new Date(data.timestamp).toLocaleDateString('en-CA'),
+                                details: `পণ্য ক্রয়: ${data.productName} (${data.qty})`,
+                                totalAmount: parseFloat(data.price || 0), 
+                                type: 'withdraw_expense' 
+                            });
                         }
-                    } else if (loadedNodes.size === requiredNodes.length) {
-                        // This runs whenever ANY data changes dynamically
-                        processDashboardData();
-                    }
-                }, (error) => {
-                    console.error(`Error loading ${node}:`, error);
-                    // Prevent infinite loading screen if one node fails to fetch
-                    loadedNodes.add(node);
-                    if (loadedNodes.size === requiredNodes.length) {
-                        document.getElementById('pageLoader').classList.add('hide-loader');
-                    }
-                });
-            });
+                    });
+                }
+
+                if (trxSnap.exists()) {
+                    trxSnap.forEach(t => {
+                        let data = t.val();
+                        let isMyTrx = false;
+
+                        if (data.memberId === loggedInMemberId) {
+                            isMyTrx = true;
+                        } 
+                        else if (data.details && data.type === 'deposit') {
+                            for (let pName of myPurchasedProducts) {
+                                if (data.details.includes(`বকেয়া আদায়: ${pName}`) || data.details.includes(`পণ্য বিক্রয় (ন নগদ): ${pName}`)) {
+                                    isMyTrx = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (isMyTrx) {
+                            allMyTransactions.push(data);
+                        }
+                    });
+                }
+
+                allMyTransactions.sort((a,b) => b.timestamp - a.timestamp);
+                renderTransactions();
+
+            } catch (error) {
+                console.error("Error loading transactions:", error);
+                document.getElementById('transactionTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">লেনদেন লোড করতে সমস্যা হয়েছে</td></tr>';
+            }
         }
 
-        // Main Calculation Engine
-        function processDashboardData() {
-            let totalMembers = 0, memberMonthlyFunds = 0;
-            let orgFunds = 0;
-            let totalLoanGiven = 0, totalLoanPaid = 0;
-            let invStockVal = 0, totalSalesProfit = 0, totalSalesDue = 0;
-            let activeInv = 0, externalProfit = 0;
-            let totalExpense = 0, todayDep = 0;
-            const todayStr = new Date().toLocaleDateString('en-CA');
-
-            // 1. Members Data
-            if (dbData.members && dbData.members.exists()) {
-                dbData.members.forEach(m => {
-                    totalMembers++;
-                    let d = m.val();
-                    if (d.funds && d.funds.monthly) memberMonthlyFunds += parseFloat(d.funds.monthly);
-                });
-            }
-            
-            // 2. Organization Funds (Fixed parsing issue)
-            if (dbData.org_funds && dbData.org_funds.exists()) {
-                let o = dbData.org_funds.val();
-                orgFunds = parseFloat(o.admission || 0) + parseFloat(o.fine || 0) + parseFloat(o.donation || 0) + parseFloat(o.others || 0);
-            }
-
-            // 3. Products & Sales
-            if (dbData.products && dbData.products.exists()) {
-                dbData.products.forEach(p => invStockVal += parseFloat(p.val().totalCost || 0));
-            }
-            if (dbData.sales && dbData.sales.exists()) {
-                dbData.sales.forEach(s => {
-                    let sd = s.val();
-                    totalSalesProfit += parseFloat(sd.profit || 0);
-                    totalSalesDue += parseFloat(sd.due || 0);
-                });
-            }
-
-            // 4. Investments & External Profits
-            let tInv = 0, tRet = 0;
-            if (dbData.investments && dbData.investments.exists()) dbData.investments.forEach(i => tInv += parseFloat(i.val().amount || 0));
-            if (dbData.returns && dbData.returns.exists()) dbData.returns.forEach(r => tRet += parseFloat(r.val().amount || 0));
-            activeInv = tInv - tRet;
-
-            if (dbData.profits && dbData.profits.exists()) dbData.profits.forEach(p => externalProfit += parseFloat(p.val().amount || 0));
-            
-            // --- Math Logic for Profits ---
-            let totalProfit = totalSalesProfit + externalProfit; 
-            let baseFund = memberMonthlyFunds + orgFunds;
-            let totalFund = baseFund + totalProfit; 
-
-            // 5. Transactions
-            let trxs = [];
-            if (dbData.transactions && dbData.transactions.exists()) {
-                dbData.transactions.forEach(t => {
-                    let data = t.val();
-                    trxs.push(data);
-                    
-                    if (data.type === 'withdraw_expense' && !data.source) { 
-                        if (!data.details.includes('পণ্য')) {
-                            totalExpense += parseFloat(data.totalAmount || 0);
-                        }
-                    }
-                    
-                    if (data.type === 'withdraw_loan') {
-                        totalLoanGiven += parseFloat(data.totalAmount || 0);
-                    }
-                    if (data.type === 'deposit_loan') {
-                        totalLoanPaid += parseFloat(data.totalAmount || 0);
-                    }
-
-                    if (data.type === 'deposit' && data.date === todayStr) {
-                        todayDep += parseFloat(data.totalAmount || 0);
-                    }
-                });
-            }
-
-            let currentLoanDue = totalLoanGiven - totalLoanPaid;
-            let currentBalance = totalFund - (invStockVal + currentLoanDue + activeInv + totalExpense + totalSalesDue);
-
-            // --- Update UI ---
-            document.getElementById('tMembers').innerText = totalMembers + " জন";
-            updateCounterUI('tTodayDep', todayDep);
-            
-            updateCounterUI('tFund', totalFund);
-            updateCounterUI('tProfit', totalProfit); 
-            updateCounterUI('tInventory', invStockVal);
-            updateCounterUI('tInvestment', activeInv);
-            updateCounterUI('tLoan', currentLoanDue); 
-            updateCounterUI('tExpense', totalExpense);
-            updateCounterUI('tBalance', currentBalance, '৳ ');
-
-            // Prepare transactions globally
-            window.allTransactions = trxs.sort((a,b) => b.timestamp - a.timestamp);
-            window.renderTransactionsTable();
-        }
-
-        // --- Render Recent Transactions Table ---
-        window.renderTransactionsTable = function() {
-            const tbody = document.getElementById('recentTransactionsTable');
+        window.renderTransactions = function() {
+            const tbody = document.getElementById('transactionTableBody');
             tbody.innerHTML = '';
             
-            const visibleTrxs = window.allTransactions.slice(0, transactionsToShow);
+            const visibleTrxs = allMyTransactions.slice(0, transactionsToShow);
 
-            if(visibleTrxs.length > 0) {
-                visibleTrxs.forEach(t => {
+            if (visibleTrxs.length > 0) {
+                visibleTrxs.forEach((t, index) => {
                     let d = new Date(t.timestamp).toLocaleDateString('en-GB');
                     let isDep = t.type.includes('deposit');
-                    let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">উত্তোলন</span>`;
-                    let entity = t.memberName ? t.memberName : 'সাধারণ খাত';
+                    let badge = isDep ? `<span class="badge deposit">জমা</span>` : `<span class="badge withdraw">খরচ / গ্রহণ</span>`;
                     
-                    tbody.innerHTML += `<tr>
-                        <td>${d}</td>
-                        <td style="font-weight:600;">${entity}</td>
-                        <td style="font-size:14px; color:#555;">${t.details}</td>
-                        <td style="font-weight:700;">${parseFloat(t.totalAmount).toFixed(2)}</td>
-                        <td>${badge}</td>
-                    </tr>`;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${d}</td>
+                            <td style="font-size:13px; color:#555;">${t.details}</td>
+                            <td style="font-weight:700;">${parseFloat(t.totalAmount).toFixed(2)}</td>
+                            <td>${badge}</td>
+                            <td style="text-align:right;">
+                                <button class="btn-view-receipt" onclick="viewReceipt(${index})" title="রিসিট দেখুন"><i class="fas fa-receipt"></i></button>
+                            </td>
+                        </tr>
+                    `;
                 });
             } else {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো লেনদেন নেই</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো লেনদেনের রেকর্ড নেই</td></tr>';
             }
 
             const btn = document.getElementById('showMoreBtn');
-            if (window.allTransactions.length > transactionsToShow) {
+            if (allMyTransactions.length > transactionsToShow) {
                 btn.style.display = 'flex';
             } else {
                 btn.style.display = 'none';
@@ -503,8 +715,60 @@
 
         window.showMoreTransactions = function() {
             transactionsToShow += 10;
-            window.renderTransactionsTable();
+            renderTransactions();
         }
+
+        window.viewReceipt = function(index) {
+            const trx = allMyTransactions[index];
+            if(trx) {
+                document.getElementById('rDate').innerText = new Date(trx.timestamp).toLocaleDateString('en-GB');
+                document.getElementById('rMemberName').innerText = currentMemberName;
+                document.getElementById('rDetails').innerHTML = trx.details;
+                
+                let amountStr = parseFloat(trx.totalAmount).toFixed(2);
+                document.getElementById('rAmount').innerText = amountStr;
+                document.getElementById('rTotalAmt').innerText = amountStr;
+
+                document.getElementById('receiptModal').classList.add('active');
+            }
+        }
+
+        document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> সেভ হচ্ছে...';
+            btn.disabled = true;
+
+            const newName = document.getElementById('mName').value.trim();
+            const newPassword = document.getElementById('mPassword').value.trim();
+            const newAddress = document.getElementById('mAddress').value.trim();
+
+            if (newPassword.length < 4) {
+                alert("পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে!");
+                btn.innerHTML = '<i class="fas fa-save"></i> প্রোফাইল সেভ করুন';
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                await update(ref(db, 'members/' + loggedInMemberId), {
+                    name: newName,
+                    password: newPassword,
+                    address: newAddress,
+                    photo: finalCroppedBase64
+                });
+
+                alert("আপনার প্রোফাইল সফলভাবে আপডেট হয়েছে!");
+                closeModal('editProfileModal');
+            } catch (error) {
+                console.error(error);
+                alert("প্রোফাইল আপডেট করতে সমস্যা হয়েছে: " + error.message);
+            } finally {
+                btn.innerHTML = '<i class="fas fa-save"></i> প্রোফাইল সেভ করুন';
+                btn.disabled = false;
+            }
+        });
     </script>
 </body>
 </html>
