@@ -46,8 +46,7 @@
             z-index: 1000;
         }
 
-        header img { height: 40px; margin-right: 15px; }
-        /* Fallback icon if logo image is missing */
+        header img { height: 40px; margin-right: 15px; border-radius: 50%; }
         header .fallback-icon { font-size: 30px; color: var(--primary-blue); margin-right: 15px; }
         header span { font-size: 22px; font-weight: 700; color: var(--primary-blue); }
 
@@ -175,9 +174,17 @@
 </head>
 <body>
 
+    <!-- Auto-Login Check BEFORE Page Renders -->
+    <script>
+        // যদি অ্যাডমিন আগে থেকেই লগইন থাকে, তবে সাথে সাথে ড্যাশবোর্ডে পাঠিয়ে দেবে
+        if (localStorage.getItem("isAdminLoggedIn") === "true") {
+            window.location.href = "dashboard.html";
+        }
+    </script>
+
     <header>
-        <!-- লোগো না পেলে যেন আইকন দেখায় তার ব্যবস্থা -->
-        <i class="fas fa-handshake fallback-icon"></i> 
+        <!-- লোগো যুক্ত করা হলো -->
+        <img src="logo.png" alt="Logo" onerror="this.src='https://via.placeholder.com/40x40/0A369D/ffffff?text=Logo'"> 
         <span>বন্ধু কল্যাণ সংস্থা</span>
     </header>
 
@@ -250,7 +257,7 @@
                     // লগইন সফল হলে ড্যাশবোর্ডে রিডিরেক্ট হবে
                     // ফায়ারবেজ নিজ থেকেই সেশন ধরে রাখে, তাই localStorage এর প্রয়োজন নেই। 
                     // তবুও আপনার আগের সুবিধার জন্য রেখে দিলাম
-                    localStorage.setItem('adminLoggedIn', 'true'); 
+                    localStorage.setItem('isAdminLoggedIn', 'true'); // Flag updated to match auto-login logic
                     window.location.href = 'dashboard.html';
                 })
                 .catch((error) => {
