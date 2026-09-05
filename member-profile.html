@@ -470,7 +470,9 @@
         const db = getDatabase(app);
 
         const urlParams = new URLSearchParams(window.location.search);
-        let loggedInMemberId = urlParams.get('id') || localStorage.getItem("loggedInMemberId") || localStorage.getItem("memberPhone");
+        
+        // localStorage পরিবর্তন করে sessionStorage করা হলো
+        let loggedInMemberId = urlParams.get('id') || sessionStorage.getItem("loggedInMemberId") || sessionStorage.getItem("memberPhone");
 
         if (!loggedInMemberId) {
             alert("অনুগ্রহ করে লগইন করুন।");
@@ -479,8 +481,13 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem("loggedInMemberId");
+                sessionStorage.removeItem("memberPhone");
+                
+                // আগের ক্যাশ ডিলিট করার জন্য
                 localStorage.removeItem("loggedInMemberId");
                 localStorage.removeItem("memberPhone");
+                
                 window.location.href = 'index.html'; 
             }
         });
@@ -521,14 +528,13 @@
                 }
                 document.getElementById('cLoanDue').innerText = "৳ " + loanDue.toFixed(2);
                 
-                await loadTransactions(); // Added await to ensure transactions load before hiding loader
+                await loadTransactions(); 
                 document.getElementById('pageLoader').classList.add('hide-loader');
             } else {
                 alert("সদস্যের ডাটা ডাটাবেসে পাওয়া যায়নি!");
                 window.location.href = "index.html"; 
             }
         }, (error) => {
-            // Error handling added to prevent infinite loading
             console.error("Firebase Error:", error);
             alert("ডাটাবেস কানেকশন এরর! পারমিশন সমস্যা হতে পারে: " + error.message);
             document.getElementById('pageLoader').classList.add('hide-loader');
@@ -579,6 +585,7 @@
             if (snapshot.exists()) {
                 snapshot.forEach(c => {
                     let b = c.val();
+                    // পপআপ সরাতে বাটনে 'this' পাস করা হয়েছে যেন বাটনটিকে চেনা যায়
                     container.innerHTML += `
                         <div class="info-card bank-card">
                             <h3><i class="fas fa-university"></i> ${b.bankName}</h3>
@@ -586,7 +593,7 @@
                             <p>
                                 <strong>A/C No:</strong> 
                                 <span style="font-family: monospace; font-size:16px;">${b.accNo}</span>
-                                <button onclick="copyBankAcc('${b.accNo}')" style="cursor: pointer; border: none; background: none; color: var(--primary-blue); font-size: 16px; margin-left: 8px;" title="কপি করুন">
+                                <button onclick="copyBankAcc('${b.accNo}', this)" style="cursor: pointer; border: none; background: none; color: var(--primary-blue); font-size: 16px; margin-left: 8px;" title="কপি করুন">
                                     <i class="far fa-copy"></i>
                                 </button>
                             </p>
@@ -602,9 +609,21 @@
             console.error("Bank Error:", error);
         });
 
-        window.copyBankAcc = function(accNo) {
+        // কপি ফাংশন আপডেট করা হলো (পপআপ রিমুভড, আইকন চেঞ্জ যুক্ত করা হলো)
+        window.copyBankAcc = function(accNo, btnElement) {
             navigator.clipboard.writeText(accNo).then(() => {
-                alert("একাউন্ট নম্বর: " + accNo + " কপি করা হয়েছে!");
+                const icon = btnElement.querySelector('i');
+                if(icon) {
+                    // কপি হওয়ার পর আইকন সবুজ টিক চিহ্ন হয়ে যাবে
+                    icon.className = 'fas fa-check';
+                    icon.style.color = 'var(--primary-green)';
+                    
+                    // ২ সেকেন্ড পর আবার আগের কপি আইকন চলে আসবে
+                    setTimeout(() => {
+                        icon.className = 'far fa-copy';
+                        icon.style.color = 'var(--primary-blue)';
+                    }, 2000);
+                }
             }).catch(err => {
                 console.error("কপি করতে সমস্যা হয়েছে: ", err);
             });
@@ -632,7 +651,7 @@
                                 timestamp: data.timestamp,
                                 date: new Date(data.timestamp).toLocaleDateString('en-CA'),
                                 details: `পণ্য ক্রয়: ${data.productName} (${data.qty})`,
-                                totalAmount: parseFloat(data.price || 0), // Made safer parsing
+                                totalAmount: parseFloat(data.price || 0), 
                                 type: 'withdraw_expense' 
                             });
                         }
