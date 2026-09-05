@@ -165,6 +165,14 @@
 </head>
 <body>
 
+    <!-- NEW: Auto-Login Check BEFORE Page Renders Completely -->
+    <script>
+        // যদি মেম্বার আগে থেকেই লগইন থাকে, তবে সাথে সাথে তাকে প্রোফাইল পেজে পাঠিয়ে দেবে
+        if (localStorage.getItem("isMemberLoggedIn") === "true" && localStorage.getItem("loggedInMemberId")) {
+            window.location.href = "member-profile.html";
+        }
+    </script>
+
     <header>
         <!-- Logo Image or Fallback Icon -->
         <i class="fas fa-handshake fallback-logo"></i>
@@ -278,9 +286,12 @@
                             return;
                         }
 
-                        // Success: Save Member ID to localStorage and Redirect
+                        // Success: Save Member Data to localStorage for persistent login
                         localStorage.setItem('loggedInMemberId', userFound.id);
-                        localStorage.setItem('userRole', 'member'); // <-- নতুন যুক্ত করা হলো
+                        localStorage.setItem('userRole', 'member'); 
+                        localStorage.setItem('isMemberLoggedIn', 'true'); // <-- NEW: Flag for check
+
+                        // Redirect to profile
                         window.location.href = 'member-profile.html';
                         
                     } else {
