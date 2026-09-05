@@ -53,7 +53,6 @@
             gap: 12px;
         }
 
-        /* লোগো ইমেজের স্টাইল */
         .logo-img { 
             height: 40px; 
             width: auto; 
@@ -63,7 +62,7 @@
         .brand-logo h1 { font-size: 22px; color: var(--primary-blue); font-weight: 700; margin: 0; }
 
         .btn-install {
-            display: none; /* JavaScript দিয়ে শো করানো হবে PWA সাপোর্ট করলে */
+            display: none; 
             background: var(--primary-blue);
             color: #fff;
             border: none;
@@ -192,11 +191,9 @@
     <!-- Navbar Section -->
     <nav class="navbar">
         <div class="brand-logo">
-            <!-- লোগো ইমেজ যুক্ত করা হয়েছে -->
-            <img src="logo.png" alt="বন্ধু কল্যাণ সংস্থা লোগো" class="logo-img">
+            <img src="logo.png" alt="বন্ধু কল্যাণ সংস্থা লোগো" class="logo-img" onerror="this.src='https://via.placeholder.com/40x40/0A369D/ffffff?text=Logo'">
             <h1>বন্ধু কল্যাণ সংস্থা</h1>
         </div>
-        <!-- PWA Install Button -->
         <button id="install-btn" class="btn-install">
             <i class="fas fa-download"></i> অ্যাপ ইনস্টল
         </button>
@@ -268,7 +265,6 @@
             });
         }
 
-        // PWA Install Button Logic
         let deferredPrompt;
         const installBtn = document.getElementById('install-btn');
 
@@ -291,7 +287,21 @@
         });
     </script>
 
-    <!-- Date Widget Script (ডিভাইসের লোকাল সময় অনুযায়ী) -->
+    <!-- সেশন ক্লিয়ার করার স্ক্রিপ্ট যুক্ত করা হলো -->
+    <script>
+        // হোম পেজে আসার সাথে সাথেই আগের সব সেশন মুছে দেওয়া হবে
+        // যাতে ম্যানুয়াল লগইন সিস্টেম ঠিকমতো কাজ করে।
+        sessionStorage.removeItem("loggedInMemberId");
+        sessionStorage.removeItem("memberPhone");
+        sessionStorage.removeItem("isAdminLoggedIn");
+        
+        // যদি আগে localStorage ব্যবহার করে থাকেন, সেগুলোও মুছে দিচ্ছি সুরক্ষার জন্য
+        localStorage.removeItem("loggedInMemberId");
+        localStorage.removeItem("memberPhone");
+        localStorage.removeItem("isAdminLoggedIn");
+    </script>
+
+    <!-- Date Widget Script -->
     <script>
         const getBanglaDate = (date) => {
             const day = date.getDate();
@@ -348,7 +358,7 @@
         };
 
         const setTodayDates = async () => {
-            const now = new Date(); // ইউজারের ডিভাইসের লোকাল সময়
+            const now = new Date(); 
 
             const enOptions = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
             document.getElementById('date-en').innerText = now.toLocaleDateString('en-US', enOptions);
