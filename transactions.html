@@ -367,7 +367,7 @@
             document.getElementById('wdLoanDate').value = today;
             document.getElementById('wdExpDate').value = today;
             addExpenseRow();
-            switchWithdrawMode(); // <--- ফিক্স: পেজ লোড হওয়ার সাথে সাথে Required ফিল্ডগুলো ঠিক করে দেওয়া হলো
+            switchWithdrawMode();
         });
 
         document.getElementById('menuToggle').addEventListener('click', () => { document.getElementById('sidebar').classList.add('active'); document.getElementById('sidebarOverlay').classList.add('active'); });
@@ -401,7 +401,6 @@
             document.getElementById('wd-loan-mode').style.display = isLoan ? 'block' : 'none';
             document.getElementById('wd-expense-mode').style.display = isLoan ? 'none' : 'block';
             
-            // ফিক্স: হিডেন ফিল্ডের Required ট্যাগ রিমুভ করা
             document.getElementById('wdLoanMember').required = isLoan;
             document.getElementById('wdLoanAmount').required = isLoan;
             
@@ -425,7 +424,7 @@
                 <button type="button" class="btn-remove-row" onclick="removeExpenseRow('${rowId}')"><i class="fas fa-trash"></i></button>
             </div>`;
             document.getElementById('expenseRowsContainer').insertAdjacentHTML('beforeend', html);
-            switchWithdrawMode(); // Ensure new row gets correct 'required' status
+            switchWithdrawMode();
         }
         function removeExpenseRow(id) { document.getElementById(id).remove(); calcExpenseTotal(); }
         function calcExpenseTotal() {
@@ -472,9 +471,25 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Security Check
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = 'login.html'; });
-        document.getElementById('logoutBtn').addEventListener('click', () => { if(confirm("লগআউট করতে চান?")) signOut(auth).then(() => window.location.href = 'login.html'); });
+        // Security Check & Auto-Login Check (Updated for sessionStorage)
+        onAuthStateChanged(auth, (user) => { 
+            if (!user || sessionStorage.getItem("isAdminLoggedIn") !== "true") {
+                window.location.href = 'login.html'; 
+            }
+        });
+
+        // Logout Logic (Updated to clear storage first)
+        document.getElementById('logoutBtn').addEventListener('click', () => { 
+            if(confirm("লগআউট করতে চান?")) {
+                sessionStorage.removeItem("isAdminLoggedIn");
+                localStorage.removeItem("isAdminLoggedIn");
+                signOut(auth).then(() => {
+                    window.location.href = 'login.html';
+                }).catch((error) => {
+                    window.location.href = 'login.html';
+                });
+            }
+        });
 
         // Load Members for Dropdown
         onValue(ref(db, 'members'), (snapshot) => {
