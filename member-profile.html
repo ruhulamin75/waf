@@ -344,7 +344,6 @@
             
             <div class="receipt-print-area">
                 <div class="r-header">
-                    <!-- Added Logo for Receipt -->
                     <img src="logo.png" alt="Logo" style="width: 60px; height: auto; margin-bottom: 10px; border-radius: 50%;" onerror="this.src='https://via.placeholder.com/60x60/0A369D/ffffff?text=Logo'">
                     <h2>বন্ধু কল্যাণ সংস্থা</h2>
                     <p>ঢাকা বিশ্ববিদ্যালয়, ঢাকা।</p>
@@ -491,7 +490,7 @@
         let transactionsToShow = 5;
 
         // --- 1. Fetch Member Profile Data ---
-        onValue(ref(db, 'members/' + loggedInMemberId), (snapshot) => {
+        onValue(ref(db, 'members/' + loggedInMemberId), async (snapshot) => {
             if (snapshot.exists()) {
                 let m = snapshot.val();
                 currentMemberName = m.name;
@@ -522,12 +521,17 @@
                 }
                 document.getElementById('cLoanDue').innerText = "৳ " + loanDue.toFixed(2);
                 
-                loadTransactions(); // Call after getting name
+                await loadTransactions(); // Added await to ensure transactions load before hiding loader
                 document.getElementById('pageLoader').classList.add('hide-loader');
             } else {
                 alert("সদস্যের ডাটা ডাটাবেসে পাওয়া যায়নি!");
                 window.location.href = "index.html"; 
             }
+        }, (error) => {
+            // Error handling added to prevent infinite loading
+            console.error("Firebase Error:", error);
+            alert("ডাটাবেস কানেকশন এরর! পারমিশন সমস্যা হতে পারে: " + error.message);
+            document.getElementById('pageLoader').classList.add('hide-loader');
         });
 
         // --- 2. Fetch Product Due (Sales) ---
@@ -542,7 +546,7 @@
                 });
             }
             document.getElementById('cProductDue').innerText = "৳ " + pDue.toFixed(2);
-        });
+        }, (error) => console.error("Sales Error:", error));
 
         // --- 3. Fetch Notices ---
         onValue(ref(db, 'notices'), (snapshot) => {
@@ -563,6 +567,9 @@
             } else {
                 container.innerHTML = '<div class="info-card"><p style="text-align:center; color:#999;">কোনো নোটিশ নেই</p></div>';
             }
+        }, (error) => {
+            document.getElementById('noticeContainer').innerHTML = `<div class="info-card"><p style="text-align:center; color:red;">নোটিশ লোড করতে সমস্যা হয়েছে</p></div>`;
+            console.error("Notices Error:", error);
         });
 
         // --- 4. Fetch Bank Accounts ---
@@ -590,9 +597,11 @@
             } else {
                 container.innerHTML = '<div class="info-card bank-card"><p style="text-align:center; color:#999;">কোনো ব্যাংক একাউন্ট যুক্ত করা হয়নি</p></div>';
             }
+        }, (error) => {
+            document.getElementById('bankContainer').innerHTML = `<div class="info-card bank-card"><p style="text-align:center; color:red;">ব্যাংকের তথ্য লোড করতে সমস্যা হয়েছে</p></div>`;
+            console.error("Bank Error:", error);
         });
 
-        // --- গ্লোবাল কপি ফাংশন যুক্ত করা হলো ---
         window.copyBankAcc = function(accNo) {
             navigator.clipboard.writeText(accNo).then(() => {
                 alert("একাউন্ট নম্বর: " + accNo + " কপি করা হয়েছে!");
@@ -601,7 +610,7 @@
             });
         };
 
-        // --- 5. Fetch and Render Transactions (Updated for Product Payments) ---
+        // --- 5. Fetch and Render Transactions ---
         async function loadTransactions() {
             try {
                 const [trxSnap, salesSnap] = await Promise.all([
@@ -612,7 +621,6 @@
                 allMyTransactions = [];
                 let myPurchasedProducts = [];
 
-                // Process Sales First to track purchased products
                 if (salesSnap.exists()) {
                     salesSnap.forEach(s => {
                         let data = s.val();
@@ -624,24 +632,21 @@
                                 timestamp: data.timestamp,
                                 date: new Date(data.timestamp).toLocaleDateString('en-CA'),
                                 details: `পণ্য ক্রয়: ${data.productName} (${data.qty})`,
-                                totalAmount: data.price,
-                                type: 'withdraw_expense' // Acts as expense for member
+                                totalAmount: parseFloat(data.price || 0), // Made safer parsing
+                                type: 'withdraw_expense' 
                             });
                         }
                     });
                 }
 
-                // Process General Transactions & Product Due Payments
                 if (trxSnap.exists()) {
                     trxSnap.forEach(t => {
                         let data = t.val();
                         let isMyTrx = false;
 
-                        // Directly matching Member ID
                         if (data.memberId === loggedInMemberId) {
                             isMyTrx = true;
                         } 
-                        // Heuristic match for Product Cash / Due Payments (since they lack Member ID in DB)
                         else if (data.details && data.type === 'deposit') {
                             for (let pName of myPurchasedProducts) {
                                 if (data.details.includes(`বকেয়া আদায়: ${pName}`) || data.details.includes(`পণ্য বিক্রয় (নগদ): ${pName}`)) {
@@ -657,12 +662,12 @@
                     });
                 }
 
-                // Sort Descending by Time
                 allMyTransactions.sort((a,b) => b.timestamp - a.timestamp);
                 renderTransactions();
 
             } catch (error) {
                 console.error("Error loading transactions:", error);
+                document.getElementById('transactionTableBody').innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">লেনদেন লোড করতে সমস্যা হয়েছে</td></tr>';
             }
         }
 
@@ -694,7 +699,6 @@
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">কোনো লেনদেনের রেকর্ড নেই</td></tr>';
             }
 
-            // Show More Button Logic
             const btn = document.getElementById('showMoreBtn');
             if (allMyTransactions.length > transactionsToShow) {
                 btn.style.display = 'flex';
@@ -708,14 +712,11 @@
             renderTransactions();
         }
 
-        // View Receipt Function (Fixed innerHTML for line breaks)
         window.viewReceipt = function(index) {
             const trx = allMyTransactions[index];
             if(trx) {
                 document.getElementById('rDate').innerText = new Date(trx.timestamp).toLocaleDateString('en-GB');
                 document.getElementById('rMemberName').innerText = currentMemberName;
-                
-                // FIX: innerHTML makes <br> render as line breaks instead of raw text
                 document.getElementById('rDetails').innerHTML = trx.details;
                 
                 let amountStr = parseFloat(trx.totalAmount).toFixed(2);
@@ -726,7 +727,6 @@
             }
         }
 
-        // --- Profile Update Submit ---
         document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
